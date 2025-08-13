@@ -1,0 +1,105 @@
+erDiagram
+
+%% -------------- Tables --------------
+
+customer_types {
+  INT id PK
+  VARCHAR code "company | person" 
+}
+
+customers {
+  INT id PK
+  INT customer_type_id FK "company | person"
+  INT tenant_id FK
+  TIMESTAMP created_at
+  TIMESTAMP updated_at
+}
+
+companies {
+  INT id PK, FK
+  INT tenant_id FK
+  VARCHAR name
+  VARCHAR vat
+  VARCHAR email
+  VARCHAR phone
+  VARCHAR website
+}
+
+persons {
+  INT id PK, FK
+  INT tenant_id FK
+  VARCHAR first_name
+  VARCHAR last_name
+  VARCHAR email
+  VARCHAR phone
+}
+
+company_persons {
+  INT company_id FK
+  INT person_id FK
+  INT tenant_id FK
+  VARCHAR position
+}
+
+
+address_types {
+  INT id PK
+  VARCHAR code "billing | shipping | site | apartment | house" 
+}
+
+
+addresses {
+  INT id PK
+  INT customer_id FK
+  INT address_type_id FK
+  INT tenant_id FK
+  VARCHAR name
+  VARCHAR street
+  VARCHAR zip
+  VARCHAR city
+  VARCHAR country
+}
+
+tenants {
+  INT id PK
+  VARCHAR name
+  TIMESTAMP created_at
+  TIMESTAMP updated_at
+}
+
+users {
+  INT id PK
+  INT tenant_id FK
+  VARCHAR first_name
+  VARCHAR last_name
+  VARCHAR email
+  VARCHAR password
+  TIMESTAMP created_at
+  TIMESTAMP updated_at
+  ENUM status "active | inactive | archived" 
+}
+
+refresh_tokens {
+  INT id PK
+  INT user_id FK
+  INT tenant_id FK
+  VARCHAR refresh_token
+  TIMESTAMP created_at
+  TIMESTAMP expires_at
+}
+
+%% -------------- Relationships --------------
+
+customers }|--|| customer_types : "has"
+customers }|--|| companies : "is"
+customers }|--|| persons : "is"
+customers ||--o{ addresses : "has"
+addresses }|--|| address_types : "is"
+
+companies ||--o{ company_persons : "links to"
+persons   ||--o{ company_persons : "links to"
+
+
+tenants ||--o{ customers : "has"
+tenants ||--|{ users : "has"
+users ||--o{ refresh_tokens : "has"
