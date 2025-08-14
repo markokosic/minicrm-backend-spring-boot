@@ -1,4 +1,4 @@
-package com.markokosic.minicrm.auth.dto;
+package com.markokosic.minicrm.auth.dto.request;
 
 import com.markokosic.minicrm.user.dto.UserDto;
 import lombok.AllArgsConstructor;
@@ -11,5 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterTenantRequestDto extends UserDto {
-    private String name;
+    private String tenantName;
+    private String password;
 }
