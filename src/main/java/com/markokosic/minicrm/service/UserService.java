@@ -1,6 +1,7 @@
 package com.markokosic.minicrm.service;
 
 import com.markokosic.minicrm.dto.UserDto;
+import com.markokosic.minicrm.model.User;
 import com.markokosic.minicrm.mapper.UserMapper;
 import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final UserMapper userMapper;
     private final UserRepository userRepository;
 
     public UserDto register(UserDto userDto) {
@@ -24,11 +26,16 @@ public class UserService {
     }
 
     public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream().map(UserMapper.INSTANCE::userToUserDto)                         .collect(Collectors.toList());
-
+        return userRepository.findAll().stream()
+                .map(userMapper::userToUserDto)
+                .collect(Collectors.toList());
     }
 
     public void deleteUser(Long id) {
 
+    }
+
+    public UserDto convert(User user) {
+        return userMapper.userToUserDto(user);
     }
 }

@@ -1,4 +1,4 @@
-package com.markokosic.minicrm.entity;
+package com.markokosic.minicrm.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;

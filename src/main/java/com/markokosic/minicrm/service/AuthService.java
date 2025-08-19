@@ -1,12 +1,15 @@
 package com.markokosic.minicrm.service;
 
+import com.markokosic.minicrm.dto.RegisterUserDto;
+import com.markokosic.minicrm.dto.UserDto;
 import com.markokosic.minicrm.dto.request.RegisterTenantRequestDto;
 import com.markokosic.minicrm.dto.response.RegisterTenantResponseDto;
-import com.markokosic.minicrm.entity.Tenant;
+import com.markokosic.minicrm.model.Tenant;
 import com.markokosic.minicrm.repository.TenantRepository;
-import com.markokosic.minicrm.entity.User;
+import com.markokosic.minicrm.model.User;
 import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +28,8 @@ public class AuthService {
         Tenant tenant = new Tenant();
         tenant.setName(userAndTenantDto.getTenantName());
         Tenant savedTenant = tenantRepository.save(tenant);
+
+
 
         User user = new User();
         user.setTenant(savedTenant);
@@ -45,6 +50,10 @@ public class AuthService {
 
 
 
+        return null;
+    }
+
+    public UserDto registerUser(RegisterUserDto user) {
         return null;
     }
 }
