@@ -5,6 +5,10 @@ import com.markokosic.minicrm.model.User;
 import com.markokosic.minicrm.mapper.UserMapper;
 import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +20,12 @@ public class UserService {
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
+
+    @Autowired
+    JWTService jwtService;
+
+    @Autowired
+    AuthenticationManager authenticationManager;
 
     public UserDto register(UserDto userDto) {
         return null;
@@ -37,5 +47,15 @@ public class UserService {
 
     public UserDto convert(User user) {
         return userMapper.userToUserDto(user);
+    }
+
+    public String verify(User user) {
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+
+            if(authentication.isAuthenticated()){
+                return jwtService.generateToken(user.getEmail());
+            }
+    return "fail";
     }
 }
