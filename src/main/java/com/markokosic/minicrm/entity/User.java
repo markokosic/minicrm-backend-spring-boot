@@ -1,6 +1,5 @@
-package com.markokosic.minicrm.user.entity;
+package com.markokosic.minicrm.entity;
 
-import com.markokosic.minicrm.auth.entity.Tenant;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;

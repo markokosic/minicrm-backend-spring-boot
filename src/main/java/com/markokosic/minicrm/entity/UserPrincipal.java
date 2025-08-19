@@ -1,4 +1,4 @@
-package com.markokosic.minicrm.user.entity;
+package com.markokosic.minicrm.entity;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

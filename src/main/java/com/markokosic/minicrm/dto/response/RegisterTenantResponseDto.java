@@ -1,4 +1,4 @@
-package com.markokosic.minicrm.auth.dto.response;
+package com.markokosic.minicrm.dto.response;
 
 public class RegisterTenantResponseDto {
     private String message;

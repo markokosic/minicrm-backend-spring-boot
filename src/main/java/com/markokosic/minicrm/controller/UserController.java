@@ -1,7 +1,7 @@
-package com.markokosic.minicrm.user.controller;
+package com.markokosic.minicrm.controller;
 
-import com.markokosic.minicrm.user.dto.UserDto;
-import com.markokosic.minicrm.user.service.UserService;
+import com.markokosic.minicrm.dto.UserDto;
+import com.markokosic.minicrm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

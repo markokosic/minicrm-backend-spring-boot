@@ -1,6 +1,6 @@
-package com.markokosic.minicrm.auth.dto.response;
+package com.markokosic.minicrm.dto.response;
 
-import com.markokosic.minicrm.user.dto.UserDto;
+import com.markokosic.minicrm.dto.UserDto;
 
 public class AuthResponseDto {
     private String accessToken;

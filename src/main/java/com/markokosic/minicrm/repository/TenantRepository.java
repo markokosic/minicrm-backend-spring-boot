@@ -1,6 +1,6 @@
-package com.markokosic.minicrm.auth.repository;
+package com.markokosic.minicrm.repository;
 
-import com.markokosic.minicrm.auth.entity.Tenant;
+import com.markokosic.minicrm.entity.Tenant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

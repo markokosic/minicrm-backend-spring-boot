@@ -1,8 +1,8 @@
-package com.markokosic.minicrm.auth.service;
+package com.markokosic.minicrm.service;
 
-import com.markokosic.minicrm.user.entity.User;
-import com.markokosic.minicrm.user.entity.UserPrincipal;
-import com.markokosic.minicrm.user.repository.UserRepository;
+import com.markokosic.minicrm.entity.User;
+import com.markokosic.minicrm.entity.UserPrincipal;
+import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

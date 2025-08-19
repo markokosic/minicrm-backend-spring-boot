@@ -1,5 +1,5 @@
 
-package com.markokosic.minicrm.user.dto;
+package com.markokosic.minicrm.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

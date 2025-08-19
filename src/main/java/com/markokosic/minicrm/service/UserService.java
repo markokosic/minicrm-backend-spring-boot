@@ -1,8 +1,8 @@
-package com.markokosic.minicrm.user.service;
+package com.markokosic.minicrm.service;
 
-import com.markokosic.minicrm.user.dto.UserDto;
-import com.markokosic.minicrm.user.mapper.UserMapper;
-import com.markokosic.minicrm.user.repository.UserRepository;
+import com.markokosic.minicrm.dto.UserDto;
+import com.markokosic.minicrm.mapper.UserMapper;
+import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,6 @@
-package com.markokosic.minicrm.auth.dto.request;
+package com.markokosic.minicrm.dto.request;
 
-import com.markokosic.minicrm.user.dto.UserDto;
+import com.markokosic.minicrm.dto.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

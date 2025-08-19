@@ -1,10 +1,9 @@
-package com.markokosic.minicrm.auth.controller;
+package com.markokosic.minicrm.controller;
 
-import com.markokosic.minicrm.auth.dto.request.RegisterTenantRequestDto;
-import com.markokosic.minicrm.auth.dto.response.RegisterTenantResponseDto;
-import com.markokosic.minicrm.auth.service.AuthService;
+import com.markokosic.minicrm.dto.request.RegisterTenantRequestDto;
+import com.markokosic.minicrm.dto.response.RegisterTenantResponseDto;
+import com.markokosic.minicrm.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,13 +1,12 @@
-package com.markokosic.minicrm.auth.service;
+package com.markokosic.minicrm.service;
 
-import com.markokosic.minicrm.auth.dto.request.RegisterTenantRequestDto;
-import com.markokosic.minicrm.auth.dto.response.RegisterTenantResponseDto;
-import com.markokosic.minicrm.auth.entity.Tenant;
-import com.markokosic.minicrm.auth.repository.TenantRepository;
-import com.markokosic.minicrm.user.entity.User;
-import com.markokosic.minicrm.user.repository.UserRepository;
+import com.markokosic.minicrm.dto.request.RegisterTenantRequestDto;
+import com.markokosic.minicrm.dto.response.RegisterTenantResponseDto;
+import com.markokosic.minicrm.entity.Tenant;
+import com.markokosic.minicrm.repository.TenantRepository;
+import com.markokosic.minicrm.entity.User;
+import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

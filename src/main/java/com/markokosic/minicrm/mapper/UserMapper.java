@@ -1,7 +1,7 @@
-package com.markokosic.minicrm.user.mapper;
+package com.markokosic.minicrm.mapper;
 
-import com.markokosic.minicrm.user.dto.UserDto;
-import com.markokosic.minicrm.user.entity.User;
+import com.markokosic.minicrm.dto.UserDto;
+import com.markokosic.minicrm.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
