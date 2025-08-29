@@ -26,8 +26,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@RequestBody User user){
-
-
+        System.out.println("LoginRequest empfangen: " + user.getEmail());
 
         return userService.verify(user);
     }

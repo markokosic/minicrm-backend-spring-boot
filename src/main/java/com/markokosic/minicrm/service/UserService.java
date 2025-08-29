@@ -55,7 +55,8 @@ public class UserService {
 
             if(authentication.isAuthenticated()){
                 return jwtService.generateToken(user.getEmail());
+            } else {
+                return "fail";
             }
-    return "fail";
     }
 }
