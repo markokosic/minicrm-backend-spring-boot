@@ -1,9 +1,10 @@
-package com.markokosic.minicrm.user.repository;
+package com.markokosic.minicrm.repository;
 
-import com.markokosic.minicrm.user.entity.User;
+import com.markokosic.minicrm.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+    User findByEmail(String email);
 }

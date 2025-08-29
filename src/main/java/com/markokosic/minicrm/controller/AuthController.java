@@ -1,0 +1,34 @@
+package com.markokosic.minicrm.controller;
+
+import com.markokosic.minicrm.dto.request.RegisterTenantRequestDto;
+import com.markokosic.minicrm.dto.response.RegisterTenantResponseDto;
+import com.markokosic.minicrm.model.User;
+import com.markokosic.minicrm.service.AuthService;
+import com.markokosic.minicrm.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AuthService authService;
+    private final UserService userService;
+
+    @PostMapping("/register")
+    public RegisterTenantResponseDto register (@RequestBody RegisterTenantRequestDto userAndTenantDto){
+        return authService.registerNewTenant(userAndTenantDto);
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestBody User user){
+        System.out.println("LoginRequest empfangen: " + user.getEmail());
+
+        return userService.verify(user);
+    }
+
+}

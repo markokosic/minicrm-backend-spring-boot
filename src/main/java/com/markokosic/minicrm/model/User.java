@@ -1,9 +1,9 @@
-package com.markokosic.minicrm.user.entity;
+package com.markokosic.minicrm.model;
 
-import com.markokosic.minicrm.auth.entity.Tenant;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,7 +11,10 @@ import lombok.Setter;
 
 
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name="users")
 public class User {
 
@@ -20,7 +23,10 @@ public class User {
     @Column(name="id")
     private Long id;
 
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    @NotNull
+    private Tenant tenant;
 
     @Column(name="first_name")
     private String firstName;
@@ -33,17 +39,9 @@ public class User {
     @NotNull
     private String email;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id", nullable = false)
+    @Column(name="password")
     @NotNull
-    private Tenant tenant;
+    private String password;
 
-
-
-    public User(String email, String lastName, String firstName) {
-        this.email = email;
-        this.lastName = lastName;
-        this.firstName = firstName;
-    }
 }
 

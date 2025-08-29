@@ -1,4 +1,4 @@
-package com.markokosic.minicrm.auth.entity;
+package com.markokosic.minicrm.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
