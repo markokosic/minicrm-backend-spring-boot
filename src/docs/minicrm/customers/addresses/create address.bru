@@ -1,0 +1,15 @@
+meta {
+  name: create address
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{API_URL}}/customers/:customerId/addresses
+  body: none
+  auth: none
+}
+
+params:path {
+  customerId: 1
+}

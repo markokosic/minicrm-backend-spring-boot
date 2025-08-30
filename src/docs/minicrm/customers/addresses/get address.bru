@@ -1,0 +1,16 @@
+meta {
+  name: get address
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{API_URL}}/customers/:customerId/addresses/:addressId
+  body: none
+  auth: none
+}
+
+params:path {
+  customerId: 1
+  addressId: 1
+}

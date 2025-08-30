@@ -1,0 +1,16 @@
+meta {
+  name: update address
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{API_URL}}/customers/:customerId/addresses/:addressId
+  body: none
+  auth: none
+}
+
+params:path {
+  customerId: 1
+  addressId: 1
+}

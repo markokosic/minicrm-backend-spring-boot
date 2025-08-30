@@ -1,0 +1,15 @@
+meta {
+  name: get customers
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{API_URL}}/customers?customerTypeId=1
+  body: none
+  auth: none
+}
+
+params:query {
+  customerTypeId: 1
+}

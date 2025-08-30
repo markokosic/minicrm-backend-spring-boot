@@ -1,0 +1,15 @@
+meta {
+  name: get persons from company
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{API_URL}}/companies/:companyId/persons
+  body: none
+  auth: none
+}
+
+params:path {
+  companyId: 1
+}

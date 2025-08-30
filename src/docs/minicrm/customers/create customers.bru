@@ -1,0 +1,75 @@
+meta {
+  name: create customers
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{API_URL}}/customers
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "customerTypeId": 1,
+    "customer": {
+      "name": "ABC GmbH",
+      "vat": "AT12113123",
+      "email": "max1@example.com",
+      "phone": "+43 987 654321",
+      "website": "abc.com"
+    },
+    "addresses": [
+      {
+        "type": 5,
+        "name": "Baustelle ABC",
+        "street": "Beispielweg 2",
+        "zip": "4020",
+        "city": "Linz",
+        "country": "AT"
+      }
+    ]
+  }
+}
+
+body:multipart-form {
+  customer_type_id: number
+  : 
+}
+
+docs {
+  customerTypeIdPOST /customers
+  
+  Payloads:
+  - type: "company"
+    -> requires company object with fields: name, vat, etc.
+  
+  - type: "person"
+    -> requires person object with fields: first_name, last_name, etc.
+  
+  Addresses optional:
+  - type: billing | shipping | etc.
+  
+  
+  {
+    "customerTypeId": "1",
+    "person": {
+      "first_name": "Max",
+      "last_name": "Mustermann",
+      "email": "max@example.com",
+      "phone": "+43 987 654321"
+    },
+    "addresses": [
+      {
+        "type": "shipping",
+        "name": "Max Mustermann",
+        "street": "Beispielweg 2",
+        "zip": "4020",
+        "city": "Linz",
+        "country": "AT"
+      }
+    ]
+  }
+  
+}

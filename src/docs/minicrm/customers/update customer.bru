@@ -1,0 +1,25 @@
+meta {
+  name: update customer
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{API_URL}}/customers/:customerId
+  body: json
+  auth: none
+}
+
+params:path {
+  customerId: 48
+}
+
+body:json {
+  {
+    "firstName": "KekoMeko"
+  }
+}
+
+body:multipart-form {
+  firstName: Marko
+}
