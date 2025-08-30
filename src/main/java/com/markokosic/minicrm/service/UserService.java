@@ -1,6 +1,7 @@
 package com.markokosic.minicrm.service;
 
-import com.markokosic.minicrm.dto.UserDto;
+import com.markokosic.minicrm.dto.response.UserResponse;
+import com.markokosic.minicrm.dto.request.LoginRequest;
 import com.markokosic.minicrm.model.User;
 import com.markokosic.minicrm.mapper.UserMapper;
 import com.markokosic.minicrm.repository.UserRepository;
@@ -27,15 +28,15 @@ public class UserService {
     @Autowired
     AuthenticationManager authenticationManager;
 
-    public UserDto register(UserDto userDto) {
+    public UserResponse register(UserResponse userResponse) {
         return null;
     }
 
-    public UserDto getUserById(Long id) {
+    public UserResponse getUserById(Long id) {
         return null;
     }
 
-    public List<UserDto> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(userMapper::userToUserDto)
                 .collect(Collectors.toList());
@@ -45,11 +46,11 @@ public class UserService {
 
     }
 
-    public UserDto convert(User user) {
+    public UserResponse convert(User user) {
         return userMapper.userToUserDto(user);
     }
 
-    public String verify(User user) {
+    public String verify(LoginRequest user) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 

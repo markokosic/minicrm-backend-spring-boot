@@ -1,9 +1,7 @@
 package com.markokosic.minicrm.dto.response;
 
-import com.markokosic.minicrm.dto.UserDto;
-
-public class AuthResponseDto {
+public class AuthResponse {
     private String accessToken;
     private String refreshToken;
-    private UserDto user;
+    private UserResponse user;
 }

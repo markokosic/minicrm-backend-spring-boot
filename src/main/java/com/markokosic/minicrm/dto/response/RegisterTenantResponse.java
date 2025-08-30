@@ -1,11 +1,11 @@
 package com.markokosic.minicrm.dto.response;
 
-public class RegisterTenantResponseDto {
+public class RegisterTenantResponse {
     private String message;
 
-    public RegisterTenantResponseDto() {}
+    public RegisterTenantResponse() {}
 
-    public RegisterTenantResponseDto(String message) {
+    public RegisterTenantResponse(String message) {
         this.message = message;
     }
 
