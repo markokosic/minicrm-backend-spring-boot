@@ -1,7 +1,15 @@
 package com.markokosic.minicrm.dto.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AuthResponse {
     private String accessToken;
-    private String refreshToken;
+//    private String refreshToken;
     private UserResponse user;
 }

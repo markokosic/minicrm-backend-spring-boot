@@ -1,5 +1,6 @@
 package com.markokosic.minicrm.service;
 
+import com.markokosic.minicrm.dto.response.AuthResponse;
 import com.markokosic.minicrm.dto.response.UserResponse;
 import com.markokosic.minicrm.dto.request.LoginRequest;
 import com.markokosic.minicrm.model.User;
@@ -8,6 +9,7 @@ import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -28,9 +30,9 @@ public class UserService {
     @Autowired
     AuthenticationManager authenticationManager;
 
-    public UserResponse register(UserResponse userResponse) {
-        return null;
-    }
+//    public UserResponse register(UserResponse userResponse) {
+//        return null;
+//    }
 
     public UserResponse getUserById(Long id) {
         return null;
@@ -38,7 +40,7 @@ public class UserService {
 
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(userMapper::userToUserDto)
+                .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -46,18 +48,25 @@ public class UserService {
 
     }
 
-    public UserResponse convert(User user) {
-        return userMapper.userToUserDto(user);
+    public UserResponse convertToResponseDto(User user) {
+        return userMapper.userToUserResponse(user);
     }
 
-    public String verify(LoginRequest user) {
+    public AuthResponse verify(LoginRequest user) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 
             if(authentication.isAuthenticated()){
-                return jwtService.generateToken(user.getEmail());
-            } else {
-                return "fail";
+                User userData = userRepository.findByEmail(user.getEmail());
+                System.out.println(userData);
+                String accessToken = jwtService.generateToken(user.getEmail());
+                System.out.println(accessToken);
+                UserResponse userResponse = new UserResponse(userData.getFirstName(), userData.getLastName(), userData.getEmail());
+				return new AuthResponse(accessToken, userResponse);
+            }
+            else {
+               return new AuthResponse("ABCABC", null);
+//              throw new BadCredentialsException("Bad credentials");
             }
     }
 }
