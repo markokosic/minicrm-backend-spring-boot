@@ -5,8 +5,8 @@ import com.markokosic.minicrm.dto.request.RegisterTenantRequest;
 import com.markokosic.minicrm.dto.response.ApiResponse;
 import com.markokosic.minicrm.dto.response.AuthResponse;
 import com.markokosic.minicrm.dto.response.RegisterTenantResponse;
+import com.markokosic.minicrm.exception.BadCredentialsException;
 import com.markokosic.minicrm.service.AuthService;
-import com.markokosic.minicrm.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
-    private final UserService userService;
 
     @PostMapping("/register")
     public RegisterTenantResponse register (@Valid @RequestBody RegisterTenantRequest userAndTenantDto){
@@ -29,8 +28,8 @@ public class AuthController {
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest user){
-       AuthResponse authResponse = userService.verify(user);
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest user)  {
+       AuthResponse authResponse = authService.login(user);
         return ResponseEntity.ok(new ApiResponse<>(true, authResponse, "Successfully logged in."));
     }
 

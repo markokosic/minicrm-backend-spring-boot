@@ -10,6 +10,10 @@ post {
   auth: none
 }
 
+headers {
+  ~Accept: application/json
+}
+
 body:json {
   {
     "email": "john@doe191.com",

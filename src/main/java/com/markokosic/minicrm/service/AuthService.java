@@ -1,13 +1,23 @@
 package com.markokosic.minicrm.service;
 
 
+import com.markokosic.minicrm.dto.request.LoginRequest;
 import com.markokosic.minicrm.dto.request.RegisterTenantRequest;
+import com.markokosic.minicrm.dto.response.AuthResponse;
 import com.markokosic.minicrm.dto.response.RegisterTenantResponse;
+import com.markokosic.minicrm.dto.response.UserResponse;
+import com.markokosic.minicrm.exception.BadCredentialsException;
+import com.markokosic.minicrm.mapper.UserMapper;
 import com.markokosic.minicrm.model.Tenant;
 import com.markokosic.minicrm.repository.TenantRepository;
 import com.markokosic.minicrm.model.User;
 import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +29,16 @@ public class AuthService {
     private final TenantRepository tenantRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+
+    @Autowired
+    JWTService jwtService;
+
+    @Autowired
+    AuthenticationManager authenticationManager;
 
     @Transactional
     public RegisterTenantResponse registerNewTenant(RegisterTenantRequest userAndTenantDto) {
-        System.out.println(userAndTenantDto);
         Tenant tenant = new Tenant();
         tenant.setName(userAndTenantDto.getTenantName());
         Tenant savedTenant = tenantRepository.save(tenant);
@@ -51,4 +67,22 @@ public class AuthService {
         return null;
     }
 
+
+    public AuthResponse login(LoginRequest loginRequest) {
+        try {
+
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+            );
+
+            User userData = userRepository.findByEmail(loginRequest.getEmail());
+
+            String accessToken = jwtService.generateToken(loginRequest.getEmail());
+            UserResponse userResponse = new UserResponse(userData.getFirstName(), userData.getLastName(), userData.getEmail());
+            return new AuthResponse(accessToken, userResponse);
+
+        } catch (AuthenticationException ex) {
+            throw new BadCredentialsException();
+        }
+    }
 }
