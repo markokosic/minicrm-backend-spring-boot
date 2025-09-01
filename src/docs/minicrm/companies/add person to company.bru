@@ -1,0 +1,15 @@
+meta {
+  name: add person to company
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{API_URL}}/companies/:companyId/persons
+  body: none
+  auth: none
+}
+
+params:path {
+  companyId: 1
+}

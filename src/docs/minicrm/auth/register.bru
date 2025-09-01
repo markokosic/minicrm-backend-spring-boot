@@ -1,0 +1,21 @@
+meta {
+  name: /register
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{API_URL}}/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "tenantName": "ABC Company",
+    "firstName": "John",
+    "lastName": "Doe1122",
+    "email": "john@doe191.com",
+    "password": "abc123"
+  }
+}

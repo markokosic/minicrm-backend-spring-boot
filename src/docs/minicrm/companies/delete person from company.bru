@@ -1,0 +1,16 @@
+meta {
+  name: delete person from company
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{API_URL}}/companies/:companyId/persons/:personId
+  body: none
+  auth: none
+}
+
+params:path {
+  personId: 1
+  companyId: 1
+}
