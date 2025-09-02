@@ -32,7 +32,7 @@ public class JWTService {
 
     }
 
-    public String generateToken(String email, Long tenantId) {
+    public String generateToken(String email, String tenantId) {
 
         Map<String, Object> claims = new HashMap<>();
             claims.put("tenantId", tenantId);

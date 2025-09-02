@@ -55,7 +55,7 @@ class AuthServiceTest {
 		user.setEmail("test@example.com");
 		when(userRepository.findByEmail("test@example.com")).thenReturn(user);
 
-		when(jwtService.generateToken("test@example.com")).thenReturn("fake-jwt-token");
+		when(jwtService.generateToken("test@example.com", "3")).thenReturn("fake-jwt-token");
 
 		AuthResponseDTO response = authService.login(request);
 

@@ -49,7 +49,7 @@ public class AuthService {
 
 
         User user = new User();
-        user.setTenant(savedTenant);
+        user.setTenantId(savedTenant.getId());
         user.setPassword(userAndTenantDto.getPassword());
         user.setEmail(userAndTenantDto.getEmail());
         user.setFirstName(userAndTenantDto.getFirstName());
@@ -75,7 +75,7 @@ public class AuthService {
 
             User userData = userRepository.findByEmail(loginRequest.getEmail());
 
-            String accessToken = jwtService.generateToken(loginRequest.getEmail(), userData.getTenantId());
+            String accessToken = jwtService.generateToken(loginRequest.getEmail(), String.valueOf(userData.getTenantId()));
             UserResponseDTO userResponseDTO = new UserResponseDTO(userData.getFirstName(), userData.getLastName(), userData.getEmail());
             return new AuthResponseDTO(accessToken, userResponseDTO);
 

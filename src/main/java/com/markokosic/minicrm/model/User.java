@@ -23,10 +23,9 @@ public class User {
     @Column(name="id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id", nullable = false)
+    @Column(name = "tenant_id", nullable = false)
     @NotNull
-    private Tenant tenantId;
+    private Long tenantId;
 
     @Column(name="first_name")
     private String firstName;
