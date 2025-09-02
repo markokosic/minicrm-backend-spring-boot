@@ -5,7 +5,17 @@ meta {
 }
 
 post {
-  url: {{API_URL}}/customers
-  body: none
+  url: {{API_URL}}/companies
+  body: json
   auth: none
+}
+
+body:json {
+  {
+      "name": "ABC GmbH",
+      "vat": "AT12113123",
+      "email": "max1@example.com",
+      "phone": "+43 987 654321",
+      "website": "abc.com"  
+  }
 }
