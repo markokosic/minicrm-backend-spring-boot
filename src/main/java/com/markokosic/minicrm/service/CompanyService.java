@@ -14,7 +14,7 @@ public class CompanyService {
 	@Transactional
 	public void createCompany(CreateCompanyRequestDTO request){
 		try{
-			public void result = customerService.
+//			public void result = customerService.
 		} catch(Exception error){
 
 		}

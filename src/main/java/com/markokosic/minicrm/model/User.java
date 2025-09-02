@@ -1,5 +1,6 @@
 package com.markokosic.minicrm.model;
 
+import com.markokosic.minicrm.config.TenantIdentifierResolver;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import org.hibernate.annotations.TenantId;
+import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 @Entity
@@ -18,14 +21,16 @@ import lombok.Setter;
 @Table(name="users")
 public class User {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
     private Long id;
 
+   @TenantId
     @Column(name = "tenant_id", nullable = false)
     @NotNull
-    private Long tenantId;
+    private String tenantId;
 
     @Column(name="first_name")
     private String firstName;

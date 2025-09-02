@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class RegisterTenantResponseDTO {
-    private Long tenantId;
+    private String tenantId;
     private String tenantName;
 }

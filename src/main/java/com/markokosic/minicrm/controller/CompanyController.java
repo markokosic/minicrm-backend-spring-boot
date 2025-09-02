@@ -18,7 +18,7 @@ public class CompanyController {
 
 	@PostMapping("/")
 	public void createCompany(@Valid @RequestBody CreateCompanyRequestDTO createCompanyRequest){
-		companyService.createCompany();
+//		companyService.createCompany();
 	}
 
 }

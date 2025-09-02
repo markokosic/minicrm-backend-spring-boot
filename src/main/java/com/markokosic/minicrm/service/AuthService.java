@@ -75,7 +75,7 @@ public class AuthService {
 
             User userData = userRepository.findByEmail(loginRequest.getEmail());
 
-            String accessToken = jwtService.generateToken(loginRequest.getEmail(), String.valueOf(userData.getTenantId()));
+            String accessToken = jwtService.generateToken(loginRequest.getEmail(), userData.getTenantId());
             UserResponseDTO userResponseDTO = new UserResponseDTO(userData.getFirstName(), userData.getLastName(), userData.getEmail());
             return new AuthResponseDTO(accessToken, userResponseDTO);
 

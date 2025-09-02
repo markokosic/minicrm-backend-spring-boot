@@ -20,9 +20,9 @@ public class Company {
 	@Column(name="id")
 	private Long id;
 
-	@TenantId
+//	@TenantId
 	@Column(name="tenant_id")
-	private Long tenant_id;
+	private String tenantId;
 
 	@Column(name="name")
 	private String name;

@@ -63,13 +63,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ErrorResponseDTO> handleOtherExceptions(Exception ex) {
-		ErrorResponseDTO error = new ErrorResponseDTO();
-		error.setSuccess(false);
-		error.setMessage("Internal Server Error" + ex.getMessage());
-		error.setCode(500);
-		error.setErrors(Map.of());
-		return ResponseEntity.status(500).body(error);
-	}
+//	@ExceptionHandler(Exception.class)
+//	public ResponseEntity<ErrorResponseDTO> handleOtherExceptions(Exception ex) {
+//		ErrorResponseDTO error = new ErrorResponseDTO();
+//		error.setSuccess(false);
+//		error.setMessage("Internal Server Error" + " "  + ex.getMessage());
+//		error.setCode(500);
+//		error.setErrors(Map.of());
+//		return ResponseEntity.status(500).body(error);
+//	}
 }
