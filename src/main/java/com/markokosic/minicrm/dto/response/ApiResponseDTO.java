@@ -4,15 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.Map;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ErrorResponse {
-	private boolean success = false;
+public class ApiResponseDTO<T> {
+
+	private boolean success;
+	private T data;
 	private String message;
-	private Integer code;
-	private Map<String, List<String>> errors;
+
 }

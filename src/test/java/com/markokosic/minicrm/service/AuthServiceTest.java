@@ -1,7 +1,7 @@
 package com.markokosic.minicrm.service;
 
-import com.markokosic.minicrm.dto.request.LoginRequest;
-import com.markokosic.minicrm.dto.response.AuthResponse;
+import com.markokosic.minicrm.dto.request.LoginRequestDTO;
+import com.markokosic.minicrm.dto.response.AuthResponseDTO;
 import com.markokosic.minicrm.exception.BadCredentialsException;
 import com.markokosic.minicrm.model.User;
 import com.markokosic.minicrm.repository.UserRepository;
@@ -41,7 +41,7 @@ class AuthServiceTest {
 
 	@Test
 	void login_withValidCredentials_shouldReturnAuthResponse() {
-		LoginRequest request = new LoginRequest();
+		LoginRequestDTO request = new LoginRequestDTO();
 		request.setEmail("test@example.com");
 		request.setPassword("password");
 
@@ -57,7 +57,7 @@ class AuthServiceTest {
 
 		when(jwtService.generateToken("test@example.com")).thenReturn("fake-jwt-token");
 
-		AuthResponse response = authService.login(request);
+		AuthResponseDTO response = authService.login(request);
 
 		assertNotNull(response);
 		assertEquals("fake-jwt-token", response.getAccessToken());
@@ -68,7 +68,7 @@ class AuthServiceTest {
 
 	@Test
 	void login_withInvalidCredentials_shouldThrowBadCredentialsException() {
-		LoginRequest request = new LoginRequest();
+		LoginRequestDTO request = new LoginRequestDTO();
 		request.setEmail("wrong@example.com");
 		request.setPassword("wrongpass");
 
@@ -80,7 +80,7 @@ class AuthServiceTest {
 
 	@Test
 	void login_userNotFound_shouldThrowNullPointer() {
-		LoginRequest request = new LoginRequest();
+		LoginRequestDTO request = new LoginRequestDTO();
 		request.setEmail("notfound@example.com");
 		request.setPassword("password");
 

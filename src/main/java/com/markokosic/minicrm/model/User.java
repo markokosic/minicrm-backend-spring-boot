@@ -26,7 +26,7 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_id", nullable = false)
     @NotNull
-    private Tenant tenant;
+    private Tenant tenantId;
 
     @Column(name="first_name")
     private String firstName;

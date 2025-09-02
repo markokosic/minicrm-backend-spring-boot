@@ -1,11 +1,11 @@
 package com.markokosic.minicrm.service;
 
 
-import com.markokosic.minicrm.dto.request.LoginRequest;
-import com.markokosic.minicrm.dto.request.RegisterTenantRequest;
-import com.markokosic.minicrm.dto.response.AuthResponse;
-import com.markokosic.minicrm.dto.response.RegisterTenantResponse;
-import com.markokosic.minicrm.dto.response.UserResponse;
+import com.markokosic.minicrm.dto.request.LoginRequestDTO;
+import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
+import com.markokosic.minicrm.dto.response.AuthResponseDTO;
+import com.markokosic.minicrm.dto.response.RegisterTenantResponseDTO;
+import com.markokosic.minicrm.dto.response.UserResponseDTO;
 import com.markokosic.minicrm.exception.BadCredentialsException;
 import com.markokosic.minicrm.mapper.UserMapper;
 import com.markokosic.minicrm.model.Tenant;
@@ -38,7 +38,10 @@ public class AuthService {
     AuthenticationManager authenticationManager;
 
     @Transactional
-    public RegisterTenantResponse registerNewTenant(RegisterTenantRequest userAndTenantDto) {
+    public RegisterTenantResponseDTO registerNewTenant(RegisterTenantRequestDTO userAndTenantDto) {
+       try{
+
+
         Tenant tenant = new Tenant();
         tenant.setName(userAndTenantDto.getTenantName());
         Tenant savedTenant = tenantRepository.save(tenant);
@@ -55,20 +58,15 @@ public class AuthService {
         User savedUser = userRepository.save(user);
 
 
+        return new RegisterTenantResponseDTO(savedTenant.getId(), savedTenant.getName());
 
-
-
-        //JWT erstellen
-
-        //User Klasse mappen auf RegisterTenantDtoResponse und returnen
-
-
-
-        return null;
+       } catch (AuthenticationException ex){
+           throw new BadCredentialsException();
+       }
     }
 
 
-    public AuthResponse login(LoginRequest loginRequest) {
+    public AuthResponseDTO login(LoginRequestDTO loginRequest) {
         try {
 
             Authentication authentication = authenticationManager.authenticate(
@@ -77,9 +75,9 @@ public class AuthService {
 
             User userData = userRepository.findByEmail(loginRequest.getEmail());
 
-            String accessToken = jwtService.generateToken(loginRequest.getEmail());
-            UserResponse userResponse = new UserResponse(userData.getFirstName(), userData.getLastName(), userData.getEmail());
-            return new AuthResponse(accessToken, userResponse);
+            String accessToken = jwtService.generateToken(loginRequest.getEmail(), userData.getTenantId());
+            UserResponseDTO userResponseDTO = new UserResponseDTO(userData.getFirstName(), userData.getLastName(), userData.getEmail());
+            return new AuthResponseDTO(accessToken, userResponseDTO);
 
         } catch (AuthenticationException ex) {
             throw new BadCredentialsException();
