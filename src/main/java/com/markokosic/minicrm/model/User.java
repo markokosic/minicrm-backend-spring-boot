@@ -30,7 +30,7 @@ public class User {
    @TenantId
     @Column(name = "tenant_id", nullable = false)
     @NotNull
-    private String tenantId;
+    private Long tenantId;
 
     @Column(name="first_name")
     private String firstName;

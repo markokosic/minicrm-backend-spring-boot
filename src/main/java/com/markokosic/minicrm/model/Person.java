@@ -13,7 +13,7 @@ public class Person {
 	private Long id;
 
 	@Column(name="tenant_id")
-	private String tenantId;
+	private Long tenantId;
 
 	@Column(name="first_name")
 	private String firstName;

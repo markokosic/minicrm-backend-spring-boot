@@ -22,7 +22,7 @@ public class Company {
 
 //	@TenantId
 	@Column(name="tenant_id")
-	private String tenantId;
+	private Long tenantId;
 
 	@Column(name="name")
 	private String name;

@@ -37,7 +37,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
-        String tenantId = null;
+        Long tenantId = null;
 
 
         try {
@@ -54,12 +54,12 @@ public class JwtFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource()
                             .buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    tenantResolver.setCurrentTenant(tenantId);
+                    TenantContext.setCurrentTenant(tenantId);
 
                 }
             }
         } finally{
-            tenantResolver.clearCurrentTenant();
+            TenantContext.clearCurrentTenant();
         }
         filterChain.doFilter(request, response);
     }

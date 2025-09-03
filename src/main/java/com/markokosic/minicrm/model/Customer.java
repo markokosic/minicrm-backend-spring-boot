@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Table(name="customers")
 public class Customer {
 	@Column(name="tenant_id")
-	private String tenantId;
+	private Long tenantId;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
