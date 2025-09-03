@@ -21,6 +21,7 @@ import java.util.Map;
 		System.out.println(tenantId + "BLABLABLABLA");
 
 		return tenantId;
+
 	}
 
 
@@ -31,7 +32,7 @@ import java.util.Map;
 
 	@Override
 	public boolean validateExistingCurrentSessions() {
-		return false;
+		return true;
 	}
 
 }

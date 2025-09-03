@@ -27,7 +27,7 @@ public class User {
     @Column(name="id")
     private Long id;
 
-   @TenantId
+    @TenantId
     @Column(name = "tenant_id", nullable = false)
     @NotNull
     private Long tenantId;

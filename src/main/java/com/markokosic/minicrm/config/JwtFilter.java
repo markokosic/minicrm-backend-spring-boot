@@ -40,27 +40,26 @@ public class JwtFilter extends OncePerRequestFilter {
         Long tenantId = null;
 
 
-        try {
+//        try {
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7);
                 username = jwtService.extractEmail(token);
                 tenantId = jwtService.extractTenantId(token);
+                TenantContext.setCurrentTenant(tenantId);
+                System.out.println(TenantContext.getCurrentTenant());
             }
 
-            if (username != null && tenantId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (username != null && tenantId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = context.getBean(MyUserDetailsService.class).loadUserByUsername(username);
                 if (jwtService.validateToken(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource()
                             .buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    TenantContext.setCurrentTenant(tenantId);
 
                 }
             }
-        } finally{
-            TenantContext.clearCurrentTenant();
-        }
+//        }
         filterChain.doFilter(request, response);
     }
 }
