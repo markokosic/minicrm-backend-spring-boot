@@ -28,8 +28,8 @@ public class AuthController {
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity<ApiResponseDTO<AuthResponseDTO>> login(@Valid @RequestBody LoginRequestDTO user)  {
-       AuthResponseDTO authResponse = authService.login(user);
+    public ResponseEntity<ApiResponseDTO<AuthResponseDTO>> login(@Valid @RequestBody LoginRequestDTO loginRequest)  {
+       AuthResponseDTO authResponse = authService.login(loginRequest);
         return ResponseEntity.ok(new ApiResponseDTO<>(true, authResponse, "Successfully logged in."));
     }
 

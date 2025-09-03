@@ -31,10 +31,6 @@ public class AuthUser {
 	@NotNull
 	private String email;
 
-	@Column(name="password")
-	@NotNull
-	private String password;
-
 }
 
 

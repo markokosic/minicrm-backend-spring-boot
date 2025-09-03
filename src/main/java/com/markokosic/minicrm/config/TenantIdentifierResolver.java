@@ -18,6 +18,8 @@ import java.util.Map;
 		if (tenantId == null) {
 			return TenantContext.DEFAULT_TENANT;
 		}
+		System.out.println(tenantId + "BLABLABLABLA");
+
 		return tenantId;
 	}
 
