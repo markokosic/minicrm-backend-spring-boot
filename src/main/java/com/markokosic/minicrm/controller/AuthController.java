@@ -27,7 +27,7 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponseDTO<>(true, registrationResponse, "Successfully registered new tenant."));
     }
 
-    @PostMapping(value = "/login")
+    @PostMapping("/login")
     public ResponseEntity<ApiResponseDTO<AuthResponseDTO>> login(@Valid @RequestBody LoginRequestDTO loginRequest)  {
        AuthResponseDTO authResponse = authService.login(loginRequest);
         return ResponseEntity.ok(new ApiResponseDTO<>(true, authResponse, "Successfully logged in."));

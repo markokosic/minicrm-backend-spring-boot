@@ -1,6 +1,7 @@
 package com.markokosic.minicrm.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,7 +20,8 @@ public class Tenant {
     @Column(name="id")
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(name="name", nullable = false, length = 255, unique = true)
+    @NotNull
     private String name;
 
     @Column(name = "created_at", nullable = false, updatable = false)

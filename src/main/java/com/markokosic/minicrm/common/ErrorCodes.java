@@ -34,5 +34,4 @@ public class ErrorCodes {
 
 	public static final String TENANTNAME_INVALID = "tenantname-invalid";
 	public static final String TENANTNAME_INVALID_MESSAGE = "Tenant name is invalid";
-
 }

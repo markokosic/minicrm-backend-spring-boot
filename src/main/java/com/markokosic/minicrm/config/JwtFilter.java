@@ -27,8 +27,6 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     ApplicationContext context;
 
-    @Autowired
-    private TenantIdentifierResolver tenantResolver;
 
 
     @Override
@@ -45,8 +43,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 token = authHeader.substring(7);
                 username = jwtService.extractEmail(token);
                 tenantId = jwtService.extractTenantId(token);
-                TenantContext.setCurrentTenant(tenantId);
-                System.out.println(TenantContext.getCurrentTenant());
             }
 
         if (username != null && tenantId != null && SecurityContextHolder.getContext().getAuthentication() == null) {

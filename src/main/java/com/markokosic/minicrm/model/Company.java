@@ -20,7 +20,6 @@ public class Company {
 	@Column(name="id")
 	private Long id;
 
-//	@TenantId
 	@Column(name="tenant_id")
 	private Long tenantId;
 

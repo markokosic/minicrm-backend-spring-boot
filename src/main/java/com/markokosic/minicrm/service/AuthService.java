@@ -1,23 +1,19 @@
 package com.markokosic.minicrm.service;
 
 
-import com.markokosic.minicrm.config.TenantContext;
+import com.markokosic.minicrm.common.Error;
+import com.markokosic.minicrm.exception.TenantAlreadyExistsException;
 import com.markokosic.minicrm.dto.request.LoginRequestDTO;
 import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
 import com.markokosic.minicrm.dto.response.AuthResponseDTO;
 import com.markokosic.minicrm.dto.response.RegisterTenantResponseDTO;
 import com.markokosic.minicrm.dto.response.UserResponseDTO;
 import com.markokosic.minicrm.exception.BadCredentialsException;
-import com.markokosic.minicrm.mapper.UserMapper;
-import com.markokosic.minicrm.model.AuthUser;
 import com.markokosic.minicrm.model.Tenant;
-import com.markokosic.minicrm.repository.AuthUserRepository;
-import com.markokosic.minicrm.repository.TenantRepository;
 import com.markokosic.minicrm.model.User;
+import com.markokosic.minicrm.repository.TenantRepository;
 import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -33,71 +31,72 @@ public class AuthService {
     private final TenantRepository tenantRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserMapper userMapper;
+//    private final UserMapper userMapper;
+    private final JWTService jwtService;
+    private final    AuthenticationManager authenticationManager;
 
-    @Autowired
-    JWTService jwtService;
-
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    private AuthUserRepository authUserRepository;
-
-//    @Transactional
+    @Transactional
     public RegisterTenantResponseDTO registerNewTenant(RegisterTenantRequestDTO userAndTenantDto) {
-        // Erstelle Tenant
-        Tenant tenant = new Tenant();
-        tenant.setName(userAndTenantDto.getTenantName());
-        Tenant savedTenant = tenantRepository.save(tenant);
-
-        // Setze TenantContext für User-Speicherung
-
-//        Long originalTenant = TenantContext.getCurrentTenant();
-//        TenantContext.clearCurrentTenant();
-        TenantContext.setCurrentTenant(savedTenant.getId());
-
-
         try {
-            // Erstelle User
-            User user = new User();
-            user.setTenantId(savedTenant.getId());
-            user.setEmail(userAndTenantDto.getEmail());
-            user.setFirstName(userAndTenantDto.getFirstName());
-            user.setLastName(userAndTenantDto.getLastName());
-            user.setPassword(passwordEncoder.encode(userAndTenantDto.getPassword()));
-            User savedUser = userRepository.save(user);
-
-            // Erstelle AuthUser
-            AuthUser authUser = new AuthUser();
-            authUser.setTenantId(savedTenant.getId());
-            authUser.setEmail(savedUser.getEmail());
-            authUserRepository.save(authUser);
+            Tenant savedTenant = createTenant(userAndTenantDto.getTenantName());
+             createUser(userAndTenantDto, savedTenant);
 
             return new RegisterTenantResponseDTO(savedTenant.getId(), savedTenant.getName());
         } catch (Exception e) {
+            //TODO add custom exception
             throw new RuntimeException("Registration failed: " + e.getMessage(), e);
-        } finally {
-            System.out.println("fff");
         }
+    }
+
+    public Tenant createTenant (String name) {
+
+        if(tenantRepository.existsByName(name)){
+            throw new TenantAlreadyExistsException();
+        }
+
+        Tenant tenant = new Tenant();
+        tenant.setName(name);
+         return tenantRepository.save(tenant);
+    }
+
+    public void createUser (RegisterTenantRequestDTO request, Tenant tenant) {
+        Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
+
+        if(optionalUser.isPresent()){
+            //TODO add custom exception
+            throw new RuntimeException(Error.EMAIL_INVALID.getCode());
+        }
+
+
+        User newUser = new User();
+        newUser.setTenantId(tenant.getId());
+        newUser.setEmail(request.getEmail());
+        newUser.setFirstName(request.getFirstName());
+        newUser.setLastName(request.getLastName());
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(newUser);
     }
 
 
 
+
     public AuthResponseDTO login(LoginRequestDTO loginRequest) {
+        Optional<User> optionalUser = userRepository.findByEmail(loginRequest.getEmail());
+
+        if (optionalUser.isEmpty()) {
+            throw new BadCredentialsException();
+        }
+
+        User user = optionalUser.get();
+
         try {
-
-            AuthUser authUser = authUserRepository.findByEmail(loginRequest.getEmail());
-            TenantContext.setCurrentTenant(authUser.getTenantId());
-
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
             );
 
+            String accessToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId());
+            UserResponseDTO userResponseDTO = new UserResponseDTO(user.getFirstName(), user.getLastName(), user.getEmail());
 
-            User userData = userRepository.findByEmail(loginRequest.getEmail());
-
-            String accessToken = jwtService.generateToken(loginRequest.getEmail(), userData.getTenantId());
-            UserResponseDTO userResponseDTO = new UserResponseDTO(userData.getFirstName(), userData.getLastName(), userData.getEmail());
             return new AuthResponseDTO(accessToken, userResponseDTO);
 
         } catch (AuthenticationException ex) {
