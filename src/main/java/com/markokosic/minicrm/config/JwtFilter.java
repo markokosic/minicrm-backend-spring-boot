@@ -6,6 +6,7 @@ import com.markokosic.minicrm.service.JWTService;
 import com.markokosic.minicrm.service.MyUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,36 +33,40 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
-        String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
         Long tenantId = null;
 
+        // Extract JWT from cookies
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("accessToken".equals(cookie.getName())) { // Replace "jwtToken" with your cookie name
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
 
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                token = authHeader.substring(7);
+        try {
+            if (token != null) {
                 username = jwtService.extractEmail(token);
                 tenantId = jwtService.extractTenantId(token);
             }
 
-            try{
-
-
-                if (username != null && tenantId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = context.getBean(MyUserDetailsService.class).loadUserByUsername(username);
-                    if (jwtService.validateToken(token, userDetails)) {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        authToken.setDetails(new WebAuthenticationDetailsSource()
-                                .buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                        TenantContextHolder.setTenantId(tenantId);
-                    }
+            if (username != null && tenantId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = context.getBean(MyUserDetailsService.class).loadUserByUsername(username);
+                if (jwtService.validateToken(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    TenantContextHolder.setTenantId(tenantId);
                 }
-                filterChain.doFilter(request, response);
             }
-            finally {
-                TenantContextHolder.clear();
-            }
+            filterChain.doFilter(request, response);
+        } finally {
+            TenantContextHolder.clear();
+        }
     }
 }

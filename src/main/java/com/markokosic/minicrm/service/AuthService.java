@@ -2,15 +2,16 @@ package com.markokosic.minicrm.service;
 
 
 import com.markokosic.minicrm.common.Error;
-import com.markokosic.minicrm.exception.TenantAlreadyExistsException;
 import com.markokosic.minicrm.dto.request.LoginRequestDTO;
 import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
 import com.markokosic.minicrm.dto.response.AuthResponseDTO;
 import com.markokosic.minicrm.dto.response.RegisterTenantResponseDTO;
 import com.markokosic.minicrm.dto.response.UserResponseDTO;
 import com.markokosic.minicrm.exception.BadCredentialsException;
+import com.markokosic.minicrm.exception.TenantAlreadyExistsException;
 import com.markokosic.minicrm.model.Tenant;
 import com.markokosic.minicrm.model.User;
+import com.markokosic.minicrm.model.UserPrincipal;
 import com.markokosic.minicrm.repository.TenantRepository;
 import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +19,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.Optional;
 
@@ -95,12 +98,27 @@ public class AuthService {
             );
 
             String accessToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId());
-            UserResponseDTO userResponseDTO = new UserResponseDTO(user.getFirstName(), user.getLastName(), user.getEmail());
+            UserResponseDTO userResponseDTO = new UserResponseDTO(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
+
+
 
             return new AuthResponseDTO(accessToken, userResponseDTO);
 
         } catch (AuthenticationException ex) {
             throw new BadCredentialsException();
         }
+    }
+
+    @GetMapping("/me")
+    public UserResponseDTO getMe() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+
+        UserPrincipal principal = (UserPrincipal) auth.getPrincipal(); // dein CustomUserDetails
+        UserResponseDTO userDto = new UserResponseDTO();
+        userDto.setId(principal.getId());
+        userDto.setEmail(principal.getEmail());
+
+        return userDto;
     }
 }

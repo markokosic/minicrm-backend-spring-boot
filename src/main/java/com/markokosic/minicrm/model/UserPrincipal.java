@@ -20,6 +20,10 @@ public class UserPrincipal implements UserDetails {
         return Collections.singleton(new SimpleGrantedAuthority("USER"));
     }
 
+
+    public Long getId(){return user.getId();}
+    public String getEmail(){return user.getEmail();}
+
     @Override
     public String getPassword() {
         return user.getPassword();
@@ -43,6 +47,7 @@ public class UserPrincipal implements UserDetails {
 //        return UserDetails.super.isAccountNonLocked();
         return true;
     }
+
 
     @Override
     public boolean isCredentialsNonExpired() {
