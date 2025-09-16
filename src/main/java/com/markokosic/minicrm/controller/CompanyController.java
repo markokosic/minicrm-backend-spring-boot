@@ -10,15 +10,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/companies")
+@RequestMapping("/api/")
 @RequiredArgsConstructor
 public class CompanyController {
 
 	private final CompanyService companyService;
 
-	@PostMapping("/")
+	@PostMapping("/companies")
 	public void createCompany(@Valid @RequestBody CreateCompanyRequestDTO createCompanyRequest){
-//		companyService.createCompany();
+		companyService.createCompany(createCompanyRequest);
 	}
 
 }

@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.TenantId;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +17,7 @@ public class Company {
 
 	@Id
 	@Column(name="id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Column(name="tenant_id")
