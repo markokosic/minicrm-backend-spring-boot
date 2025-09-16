@@ -1,6 +1,7 @@
 package com.markokosic.minicrm.mapper;
 
 import com.markokosic.minicrm.dto.request.CreateCompanyRequestDTO;
+import com.markokosic.minicrm.dto.response.CompanyResponseDTO;
 import com.markokosic.minicrm.model.Company;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -12,5 +13,5 @@ public interface CompanyMapper {
 	Company toEntity(CreateCompanyRequestDTO dto, @Context Long tenantId);
 
 
-	CreateCompanyRequestDTO toDto(Company company);
+	CompanyResponseDTO toResponseDto(Company company);
 }
