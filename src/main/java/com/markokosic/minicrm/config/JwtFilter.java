@@ -2,8 +2,10 @@ package com.markokosic.minicrm.config;
 
 
 import com.markokosic.minicrm.context.TenantContextHolder;
+import com.markokosic.minicrm.exception.ExpiredAuthTokenException;
 import com.markokosic.minicrm.service.JWTService;
 import com.markokosic.minicrm.service.MyUserDetailsService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -41,7 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("accessToken".equals(cookie.getName())) { // Replace "jwtToken" with your cookie name
+                if ("accessToken".equals(cookie.getName())) {
                     token = cookie.getValue();
                     break;
                 }
@@ -49,22 +51,50 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         try {
-            if (token != null) {
-                username = jwtService.extractEmail(token);
-                tenantId = jwtService.extractTenantId(token);
-            }
+//            if (token != null) {
+//                username = jwtService.extractEmail(token);
+//                tenantId = jwtService.extractTenantId(token);
+//            }
+//
+//            try {
+//
+//                if (username != null && tenantId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+//                    UserDetails userDetails = context.getBean(MyUserDetailsService.class).loadUserByUsername(username);
+//                    if (jwtService.validateToken(token, userDetails)) {
+//                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+//                                userDetails, null, userDetails.getAuthorities());
+//                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//                        SecurityContextHolder.getContext().setAuthentication(authToken);
+//                        TenantContextHolder.setTenantId(tenantId);
+//                    }
+//                }
+//            } catch (ExpiredJwtException e){
+//                throw new ExpiredAuthTokenException();
+//            }
+//            filterChain.doFilter(request, response);
 
-            if (username != null && tenantId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = context.getBean(MyUserDetailsService.class).loadUserByUsername(username);
-                if (jwtService.validateToken(token, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                    TenantContextHolder.setTenantId(tenantId);
+
+            if (token != null) {
+                try {
+                    username = jwtService.extractEmail(token);
+                    tenantId = jwtService.extractTenantId(token);
+
+                    if (username != null && tenantId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                        UserDetails userDetails = context.getBean(MyUserDetailsService.class).loadUserByUsername(username);
+                        if (jwtService.validateToken(token, userDetails)) {
+                            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
+                            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            SecurityContextHolder.getContext().setAuthentication(authToken);
+                            TenantContextHolder.setTenantId(tenantId);
+                        }
+                    }
+                } catch (ExpiredJwtException e) {
+                    throw new ExpiredAuthTokenException();
                 }
             }
             filterChain.doFilter(request, response);
+
         } finally {
             TenantContextHolder.clear();
         }

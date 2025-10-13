@@ -2,6 +2,8 @@ package com.markokosic.minicrm.advice;
 
 import com.markokosic.minicrm.dto.response.ErrorResponseDTO;
 import com.markokosic.minicrm.exception.BadCredentialsException;
+import com.markokosic.minicrm.exception.ExpiredAuthTokenException;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +59,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		ErrorResponseDTO error = new ErrorResponseDTO();
 		error.setSuccess(false);
 		error.setMessage("Authentication failed");
+		error.setCode(401);
+		error.setErrors(Map.of());
+		return ResponseEntity.status(401).body(error);
+	}
+
+	@ExceptionHandler(ExpiredJwtException.class)
+	public ResponseEntity<ErrorResponseDTO> handleExpiredJwtException(ExpiredAuthTokenException ex) {
+		ErrorResponseDTO error = new ErrorResponseDTO();
+		error.setSuccess(false);
+		error.setMessage(ex.getMessage());
 		error.setCode(401);
 		error.setErrors(Map.of());
 		return ResponseEntity.status(401).body(error);

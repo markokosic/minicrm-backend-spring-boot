@@ -37,7 +37,14 @@ public class AuthController {
     public ResponseEntity<ApiResponseDTO<AuthResponseDTO>> login(@Valid @RequestBody LoginRequestDTO loginRequest)  {
        AuthResponseDTO authResponse = authService.login(loginRequest);
 
-        ResponseCookie cookie = ResponseCookie.from("accessToken", authResponse.getAccessToken())
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", authResponse.getAccessToken())
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .build();
+
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", authResponse.getRefreshToken())
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
@@ -45,9 +52,20 @@ public class AuthController {
                 .maxAge(7 * 24 * 60 * 60)
                 .build();
 
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body(new ApiResponseDTO<>(true, authResponse, "Successfully logged in"));
     }
 
+    @GetMapping("/refresh-token")
+    public void refreshToken(@CookieValue("refreshToken") String refreshToken){
+       //prüfen ob token überhaupt da ist
+
+        // refresh token holen / validieren
+        authService.refreshAccessToken(refreshToken);
+
+        //auth response
+    }
 }

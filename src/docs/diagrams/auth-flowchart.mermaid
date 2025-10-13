@@ -1,0 +1,195 @@
+sequenceDiagram
+    actor User
+    participant Frontend
+    participant Backend
+    participant JwtFilter
+    participant AuthService
+    participant JWTService
+    participant Database
+    participant SecurityContext
+
+    %% ============================================
+    %% REGISTRATION FLOW
+    %% ============================================
+    Note over User,Database: 1. REGISTRATION FLOW
+
+    User->>Frontend: Enter registration data
+    Frontend->>Backend: POST /api/auth/register<br/>{tenantName, email, password, firstName, lastName}
+    
+    Backend->>AuthService: registerNewTenant(dto)
+    AuthService->>Database: Check if tenant exists
+    
+    alt Tenant already exists
+        Database-->>AuthService: Tenant found
+        AuthService-->>Backend: TenantAlreadyExistsException
+        Backend-->>Frontend: 409 Conflict
+        Frontend-->>User: "Tenant already exists"
+    else Tenant does not exist
+        AuthService->>Database: Create new tenant
+        Database-->>AuthService: Tenant saved
+        AuthService->>Database: Check if user email exists
+        
+        alt User email already exists
+            Database-->>AuthService: User found
+            AuthService-->>Backend: RuntimeException (EMAIL_INVALID)
+            Backend-->>Frontend: 400 Bad Request
+            Frontend-->>User: "Email already exists"
+        else User email available
+            AuthService->>AuthService: Encode password (BCrypt)
+            AuthService->>Database: Save new user with tenantId
+            Database-->>AuthService: User saved
+            AuthService-->>Backend: RegisterTenantResponseDTO
+            Backend-->>Frontend: 200 OK {tenantId, tenantName}
+            Frontend-->>User: "Registration successful"
+        end
+    end
+
+    %% ============================================
+    %% LOGIN FLOW
+    %% ============================================
+    Note over User,Database: 2. LOGIN FLOW
+
+    User->>Frontend: Enter credentials
+    Frontend->>Backend: POST /api/auth/login<br/>{email, password}
+    
+    Backend->>AuthService: login(loginRequest)
+    AuthService->>Database: findByEmail(email)
+    
+    alt User not found
+        Database-->>AuthService: Empty Optional
+        AuthService-->>Backend: BadCredentialsException
+        Backend-->>Frontend: 401 Unauthorized
+        Frontend-->>User: "Invalid credentials"
+    else User found
+        Database-->>AuthService: User data
+        AuthService->>AuthService: Authenticate with AuthenticationManager
+        
+        alt Authentication fails
+            AuthService-->>Backend: BadCredentialsException
+            Backend-->>Frontend: 401 Unauthorized
+            Frontend-->>User: "Invalid credentials"
+        else Authentication successful
+            AuthService->>JWTService: generateToken(email, tenantId, 30min)
+            JWTService-->>AuthService: accessToken
+            AuthService->>JWTService: generateToken(email, tenantId, 7days)
+            JWTService-->>AuthService: refreshToken
+            
+            AuthService-->>Backend: AuthResponseDTO<br/>{accessToken, refreshToken, user}
+            Backend->>Backend: Create HttpOnly Cookies<br/>- accessToken (30min)<br/>- refreshToken (7 days)
+            Backend-->>Frontend: 200 OK + Set-Cookie headers
+            Frontend->>Frontend: Store cookies (automatic)
+            Frontend-->>User: Redirect to dashboard
+        end
+    end
+
+    %% ============================================
+    %% PROTECTED REQUEST FLOW (with JWT)
+    %% ============================================
+    Note over User,SecurityContext: 3. PROTECTED REQUEST FLOW
+
+    User->>Frontend: Request protected resource
+    Frontend->>Backend: GET /api/users (with cookies)
+    
+    Backend->>JwtFilter: doFilterInternal(request)
+    JwtFilter->>JwtFilter: Extract accessToken from cookies
+    
+    alt No token found
+        JwtFilter->>Backend: Continue without authentication
+        Backend-->>Frontend: 401 Unauthorized
+        Frontend-->>User: Redirect to login
+    else Token found
+        JwtFilter->>JWTService: extractEmail(token)
+        JWTService-->>JwtFilter: email
+        JwtFilter->>JWTService: extractTenantId(token)
+        JWTService-->>JwtFilter: tenantId
+        
+        JwtFilter->>JWTService: validateToken(token, userDetails)
+        
+        alt Token invalid or expired
+            JWTService-->>JwtFilter: false
+            JwtFilter->>Backend: Continue without authentication
+            Backend-->>Frontend: 401 Unauthorized
+            Frontend->>Frontend: Attempt token refresh
+        else Token valid
+            JWTService-->>JwtFilter: true
+            JwtFilter->>SecurityContext: Set authentication
+            JwtFilter->>JwtFilter: TenantContextHolder.setTenantId(tenantId)
+            JwtFilter->>Backend: Continue with authentication
+            
+            Backend->>Backend: Process request<br/>(user is authenticated)
+            Backend->>Database: Query with tenantId filter
+            Database-->>Backend: Tenant-specific data
+            Backend-->>Frontend: 200 OK + response data
+            Frontend-->>User: Display data
+            
+            JwtFilter->>JwtFilter: TenantContextHolder.clear()
+        end
+    end
+
+    %% ============================================
+    %% REFRESH TOKEN FLOW
+    %% ============================================
+    Note over User,SecurityContext: 4. REFRESH TOKEN FLOW
+
+    Frontend->>Frontend: Access token expired (401 received)
+    Frontend->>Backend: POST /api/auth/refresh-token<br/>(with refreshToken cookie)
+    
+    Backend->>Backend: Extract refreshToken from cookie
+    
+    alt No refresh token
+        Backend-->>Frontend: 401 Unauthorized
+        Frontend->>Frontend: Clear cookies
+        Frontend-->>User: Redirect to login
+    else Refresh token present
+        Backend->>JWTService: refreshAccessToken(refreshToken)
+        JWTService->>JWTService: validateRefreshToken(refreshToken)
+        JWTService->>Database: findByEmail(extractEmail(token))
+        
+        alt Refresh token invalid/expired
+            JWTService-->>Backend: RuntimeException
+            Backend-->>Frontend: 401 Unauthorized
+            Frontend->>Frontend: Clear cookies
+            Frontend-->>User: Redirect to login
+        else Refresh token valid
+            Database-->>JWTService: User data
+            JWTService->>JWTService: generateToken(email, tenantId, 30min)
+            JWTService-->>Backend: newAccessToken
+            
+            Backend->>Backend: Create new accessToken cookie
+            Backend-->>Frontend: 200 OK + Set-Cookie header<br/>{newAccessToken, user, refreshToken}
+            Frontend->>Frontend: Update cookies (automatic)
+            Frontend->>Frontend: Retry original request
+        end
+    end
+
+    %% ============================================
+    %% LOGOUT FLOW
+    %% ============================================
+    Note over User,Frontend: 5. LOGOUT FLOW
+
+    User->>Frontend: Click logout
+    Frontend->>Backend: POST /api/auth/logout
+    
+    Backend->>Backend: Create expired cookies<br/>(maxAge=0)
+    Backend-->>Frontend: 200 OK + Set-Cookie headers<br/>(delete accessToken & refreshToken)
+    Frontend->>Frontend: Clear cookies (automatic)
+    Frontend->>Frontend: Clear local state
+    Frontend-->>User: Redirect to login
+
+    %% ============================================
+    %% GET CURRENT USER FLOW
+    %% ============================================
+    Note over User,SecurityContext: 6. GET CURRENT USER (/me)
+
+    User->>Frontend: App loads
+    Frontend->>Backend: GET /api/auth/me (with cookies)
+    Backend->>JwtFilter: Validate JWT (same as protected request)
+    JwtFilter->>SecurityContext: Set authentication
+    Backend->>AuthService: getMe()
+    AuthService->>SecurityContext: Get current user from context
+    SecurityContext-->>AuthService: UserPrincipal
+    AuthService-->>Backend: UserResponseDTO
+    Backend-->>Frontend: 200 OK {id, email, firstName, lastName}
+    Frontend-->>User: Display user info
+
+

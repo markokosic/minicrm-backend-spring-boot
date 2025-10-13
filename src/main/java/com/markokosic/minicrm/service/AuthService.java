@@ -30,6 +30,10 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+//    private static final long ACCESS_TOKEN_EXPIRATION_IN_MINUTES = 30; //  30 Minutes
+    private static final long ACCESS_TOKEN_EXPIRATION_IN_MINUTES = 1; //  1 Minute
+    private static final long REFRESH_TOKEN_EXPIRATION_IN_MINUTES = 7 * 24 * 60L; // 7 Days in Minutes
+
 
     private final TenantRepository tenantRepository;
     private final UserRepository userRepository;
@@ -97,19 +101,21 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
             );
 
-            String accessToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId());
+            String accessToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), ACCESS_TOKEN_EXPIRATION_IN_MINUTES);
+            String refreshToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), REFRESH_TOKEN_EXPIRATION_IN_MINUTES);
             UserResponseDTO userResponseDTO = new UserResponseDTO(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
 
 
 
-            return new AuthResponseDTO(accessToken, userResponseDTO);
+            return new AuthResponseDTO(accessToken, refreshToken, userResponseDTO);
 
         } catch (AuthenticationException ex) {
             throw new BadCredentialsException();
         }
     }
 
-    @GetMapping("/me")
+
+
     public UserResponseDTO getMe() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
@@ -121,4 +127,16 @@ public class AuthService {
 
         return userDto;
     }
+
+    @GetMapping("/refresh-token")
+    public void refreshAccessToken(String refreshToken){
+        //return fehler wenn kein refreshToken im Cookie
+
+        //validate ob refreshToken gültig ist
+//        jwtService.validateToken(refreshToken);
+
+        //vom JWTService .refreshAccessToken zurück geben mit neuem Tokenc
+
+    }
+
 }
