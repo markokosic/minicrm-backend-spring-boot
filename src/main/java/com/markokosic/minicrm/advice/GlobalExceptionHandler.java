@@ -1,10 +1,8 @@
 package com.markokosic.minicrm.advice;
 
-import com.markokosic.minicrm.common.ErrorCode;
+import com.markokosic.minicrm.common.ApiErrorCode;
 import com.markokosic.minicrm.dto.response.ErrorResponseDTO;
-import com.markokosic.minicrm.exception.BadCredentialsException;
-import com.markokosic.minicrm.exception.ExpiredAuthTokenException;
-import io.jsonwebtoken.ExpiredJwtException;
+import com.markokosic.minicrm.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -17,51 +15,57 @@ import java.time.Instant;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-//	@ExceptionHandler(AuthenticationException.class)
-//	public ResponseEntity<ErrorResponseDTO> handleAuthenticationException(AuthenticationException ex) {
-//		HttpStatusCode statusCode = HttpStatus.UNAUTHORIZED;
-//		ErrorResponseDTO error = ErrorResponseDTO.builder()
-//				.statusCode(statusCode)
-//				.message(ErrorCode.AUTH_INVALID_CREDENTIALS.getMessage())
-//				.errorKey(ErrorCode.AUTH_INVALID_CREDENTIALS.getKey())
-//				.timestamp(Instant.now())
-//				.build();
-//		return ResponseEntity.status(statusCode).body(error);
+
+	@ExceptionHandler(ApiException.class)
+	public ResponseEntity<ErrorResponseDTO> handleApiException(ApiException ex) {
+		return buildError(ex.getErrorCode(), ex.getStatus());
+	}
+
+	@ExceptionHandler(AuthException.class)
+	public ResponseEntity<ErrorResponseDTO> handleAuthException(AuthException ex) {
+		return buildError(ex.getErrorCode(), ex.getStatus());
+	}
+
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<ErrorResponseDTO> handleNotFoundException(NotFoundException ex) {
+		return buildError(ex.getErrorCode(), ex.getStatus());
+	}
+
+	@ExceptionHandler(BusinessException.class)
+	public ResponseEntity<ErrorResponseDTO> handleBusinessException(BusinessException ex) {
+		return buildError(ex.getErrorCode(), ex.getStatus());
+	}
+
+//	@ExceptionHandler(BadCredentialsException.class)
+//	public ResponseEntity<ErrorResponseDTO> handleBadCredentials(BadCredentialsException ex) {
+//		return buildError(ex.getErrorKey(), HttpStatus.UNAUTHORIZED);
 //	}
 
-	@ExceptionHandler(BadCredentialsException.class)
-	public ResponseEntity<ErrorResponseDTO> handleBadCredentials(BadCredentialsException ex) {
-		return buildError(ex.getErrorKey(), HttpStatus.UNAUTHORIZED);
-	}
-
-	@ExceptionHandler(ExpiredJwtException.class)
-	public ResponseEntity<ErrorResponseDTO> handleExpiredJwt(ExpiredJwtException ex) {
-		return buildError(ErrorCode.ACCESS_TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED);
-	}
+//	@ExceptionHandler(ExpiredJwtException.class)
+//	public ResponseEntity<ErrorResponseDTO> handleExpiredJwt(ExpiredJwtException ex) {
+//		return buildError(ApiErrorCode.AUTH_TOKEN_EXPIRED.getMessage(), HttpStatus.UNAUTHORIZED);
+//	}
 
 
 
-	@ExceptionHandler(ExpiredJwtException.class)
-	public ResponseEntity<ErrorResponseDTO> handleExpiredJwtException(ExpiredAuthTokenException ex) {
-
-
-		ErrorResponseDTO error = new ErrorResponseDTO();
-		error.setSuccess(false);
-		error.setMessage(ex.getMessage());
-		error.setStatusCode(401);
-		return ResponseEntity.status(401).body(error);
-	}
+//	@ExceptionHandler(ExpiredJwtException.class)
+//	public ResponseEntity<ErrorResponseDTO> handleExpiredJwtException(ExpiredAuthTokenException ex) {
+//
+//
+//		ErrorResponseDTO error = new ErrorResponseDTO();
+//		error.setSuccess(false);
+//		error.setMessage(ex.getMessage());
+//		error.setStatusCode(401);
+//		return ResponseEntity.status(401).body(error);
+//	}
 
 
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ErrorResponseDTO> handleOtherExceptions(Exception ex) {
-		ErrorResponseDTO error = new ErrorResponseDTO();
-		error.setSuccess(false);
-		error.setMessage("Internal Server Error" + " "  + ex.getMessage());
-		return ResponseEntity.status(500).body(error);
+	public ResponseEntity<ErrorResponseDTO> handleOtherExceptions(ApiException ex) {
+		return buildError(ex.getErrorCode(), HttpStatus.UNAUTHORIZED);
 	}
 
-	private ResponseEntity<ErrorResponseDTO> buildError(ErrorCode code, HttpStatusCode status) {
+	private ResponseEntity<ErrorResponseDTO> buildError(ApiErrorCode code, HttpStatusCode status) {
 		ErrorResponseDTO error = ErrorResponseDTO.builder()
 				.statusCode(status)
 				.message(code.getMessage())

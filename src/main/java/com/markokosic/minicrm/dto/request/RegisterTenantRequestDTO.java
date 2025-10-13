@@ -1,7 +1,5 @@
 package com.markokosic.minicrm.dto.request;
 
-import com.markokosic.minicrm.common.ErrorCodes;
-import com.markokosic.minicrm.dto.response.UserResponseDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -18,14 +16,14 @@ import lombok.Setter;
 public class RegisterTenantRequestDTO  {
 
     @NotBlank
-    @Size(min = 3, message = ErrorCodes.MIN_SIZE_3)
-    @Size(max = 15, message = ErrorCodes.MAX_SIZE_15)
-    @Pattern(regexp = "^[a-zA-Z0-9]+$", message = ErrorCodes.TENANTNAME_INVALID)
+    @Size(min = 3, message = "min-size-3")
+    @Size(max = 15, message = "max-size-15")
+    @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "tenant-name-invalid")
     private String tenantName;
 
     @NotBlank
-    @Size(min = 8, message = ErrorCodes.MIN_SIZE_8)
-    @Size(max = 100, message = ErrorCodes.MAX_SIZE_100)
+    @Size(min = 8, message = "min-size-8")
+    @Size(max = 100, message = "max-size-100")
     private String password;
 
     @NotBlank
