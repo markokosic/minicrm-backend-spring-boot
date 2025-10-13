@@ -1,13 +1,17 @@
 package com.markokosic.minicrm.exception;
 
-
-import com.markokosic.minicrm.common.ErrorCodes;
+import com.markokosic.minicrm.common.ErrorCode;
 
 public class BadCredentialsException extends RuntimeException {
+
+	private final ErrorCode errorKey;
+
 	public BadCredentialsException() {
-		super(String.valueOf(ErrorCodes.AUTH_INVALID_CREDENTIALS));
+		super(ErrorCode.AUTH_BAD_CREDENTIALS.getMessage());
+		this.errorKey = ErrorCode.AUTH_BAD_CREDENTIALS;
 	}
-	public BadCredentialsException(String message) {
-		super(message);
+
+	public ErrorCode getErrorKey() {
+		return errorKey;
 	}
 }

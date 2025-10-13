@@ -1,6 +1,10 @@
 package com.markokosic.minicrm.common;
 
-public enum Error {
+public enum ErrorCode {
+	//AUTHENTICATION
+	AUTH_BAD_CREDENTIALS("auth-invalid-credentials", "The email or password you entered is incorrect"),
+
+
 	NOT_BLANK("not-blank", "Field cannot be blank"),
 	EMAIL_REQUIRED("email-required", "Email is required"),
 	EMAIL_INVALID("email-invalid", "Email is invalid"),
@@ -13,16 +17,18 @@ public enum Error {
 	MAX_SIZE_100("max-size-100", "Must be at most 100 characters"),
 	TENANTNAME_INVALID("tenantname-invalid", "Tenant name is invalid");
 
-	private final String code;
+
+
+	private final String key;
 	private final String message;
 
-	Error(String code, String message) {
-		this.code = code;
+	ErrorCode(String key, String message) {
+		this.key = key;
 		this.message = message;
 	}
 
-	public String getCode() {
-		return code;
+	public String getKey() {
+		return key;
 	}
 
 	public String getMessage() {

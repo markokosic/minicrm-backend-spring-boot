@@ -1,7 +1,7 @@
 package com.markokosic.minicrm.service;
 
 
-import com.markokosic.minicrm.common.Error;
+import com.markokosic.minicrm.common.ErrorCode;
 import com.markokosic.minicrm.dto.request.LoginRequestDTO;
 import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
 import com.markokosic.minicrm.dto.response.AuthResponseDTO;
@@ -71,7 +71,7 @@ public class AuthService {
 
         if(optionalUser.isPresent()){
             //TODO add custom exception
-            throw new RuntimeException(Error.EMAIL_INVALID.getCode());
+            throw new RuntimeException(ErrorCode.EMAIL_INVALID.getKey());
         }
 
 

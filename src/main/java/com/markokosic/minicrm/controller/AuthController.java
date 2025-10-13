@@ -24,6 +24,7 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> getMe(){
         UserResponseDTO meResponse = authService.getMe();
+        return ResponseEntity.status(true)
         return ResponseEntity.ok(new ApiResponseDTO<>(true, meResponse, "Session is valid" ));
     }
 
