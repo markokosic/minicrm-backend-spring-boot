@@ -12,5 +12,5 @@ public class BusinessException extends ApiException {
 	public BusinessException(ApiErrorCode errorCode, HttpStatus status) {
 		super(errorCode, status);
 	}
-	}
 }
+

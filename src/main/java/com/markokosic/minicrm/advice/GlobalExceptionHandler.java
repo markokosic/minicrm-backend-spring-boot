@@ -36,33 +36,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return buildError(ex.getErrorCode(), ex.getStatus());
 	}
 
-//	@ExceptionHandler(BadCredentialsException.class)
-//	public ResponseEntity<ErrorResponseDTO> handleBadCredentials(BadCredentialsException ex) {
-//		return buildError(ex.getErrorKey(), HttpStatus.UNAUTHORIZED);
-//	}
-
-//	@ExceptionHandler(ExpiredJwtException.class)
-//	public ResponseEntity<ErrorResponseDTO> handleExpiredJwt(ExpiredJwtException ex) {
-//		return buildError(ApiErrorCode.AUTH_TOKEN_EXPIRED.getMessage(), HttpStatus.UNAUTHORIZED);
-//	}
-
-
-
-//	@ExceptionHandler(ExpiredJwtException.class)
-//	public ResponseEntity<ErrorResponseDTO> handleExpiredJwtException(ExpiredAuthTokenException ex) {
-//
-//
-//		ErrorResponseDTO error = new ErrorResponseDTO();
-//		error.setSuccess(false);
-//		error.setMessage(ex.getMessage());
-//		error.setStatusCode(401);
-//		return ResponseEntity.status(401).body(error);
-//	}
-
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponseDTO> handleOtherExceptions(ApiException ex) {
-		return buildError(ex.getErrorCode(), HttpStatus.UNAUTHORIZED);
+		return buildError(ex.getErrorCode(), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	private ResponseEntity<ErrorResponseDTO> buildError(ApiErrorCode code, HttpStatusCode status) {

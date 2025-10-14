@@ -2,10 +2,7 @@ package com.markokosic.minicrm.controller;
 
 import com.markokosic.minicrm.dto.request.LoginRequestDTO;
 import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
-import com.markokosic.minicrm.dto.response.ApiResponseDTO;
-import com.markokosic.minicrm.dto.response.AuthResponseDTO;
-import com.markokosic.minicrm.dto.response.RegisterTenantResponseDTO;
-import com.markokosic.minicrm.dto.response.UserResponseDTO;
+import com.markokosic.minicrm.dto.response.*;
 import com.markokosic.minicrm.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +21,6 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> getMe(){
         UserResponseDTO meResponse = authService.getMe();
-        return ResponseEntity.status(true)
         return ResponseEntity.ok(new ApiResponseDTO<>(true, meResponse, "Session is valid" ));
     }
 
@@ -61,12 +57,26 @@ public class AuthController {
     }
 
     @GetMapping("/refresh-token")
-    public void refreshToken(@CookieValue("refreshToken") String refreshToken){
-       //prüfen ob token überhaupt da ist
+    public ResponseEntity<ApiResponseDTO<RefreshAccessTokenResponseDTO>> refreshAccessToken(@CookieValue("refreshToken") String refreshToken){
 
-        // refresh token holen / validieren
-        authService.refreshAccessToken(refreshToken);
 
-        //auth response
+        String accessToken = authService.refreshAccessToken(refreshToken);
+
+        //remove old accessToken cookie, return new accessToken cookie
+
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .build();
+
+        RefreshAccessTokenResponseDTO responseDTO = new RefreshAccessTokenResponseDTO();
+        responseDTO.setAccessToken(accessToken);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .body(new ApiResponseDTO<>(true, responseDTO, "Successfully refreshed Access Token"));
+
     }
 }
