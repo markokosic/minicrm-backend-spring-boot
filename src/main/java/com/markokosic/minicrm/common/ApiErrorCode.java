@@ -4,6 +4,7 @@ public enum ApiErrorCode {
 	// Authentication Errors
 	AUTH_INVALID_CREDENTIALS("auth-invalid-credentials", "The email or password you entered is incorrect"),
 	AUTH_TOKEN_EXPIRED("auth-token-expired", "Token has expired"),
+	AUTH_REGISTRATION_FAILED("auth-registration-failed", "Registration failed"),
 
 	// Validation Errors
 	VALIDATION_NOT_BLANK("not-blank", "Field cannot be blank"),

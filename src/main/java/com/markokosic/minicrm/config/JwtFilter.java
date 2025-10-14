@@ -1,8 +1,9 @@
 package com.markokosic.minicrm.config;
 
 
+import com.markokosic.minicrm.common.ApiErrorCode;
 import com.markokosic.minicrm.context.TenantContextHolder;
-import com.markokosic.minicrm.exception.ExpiredAuthTokenException;
+import com.markokosic.minicrm.exception.AuthException;
 import com.markokosic.minicrm.service.JWTService;
 import com.markokosic.minicrm.service.MyUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -90,7 +91,7 @@ public class JwtFilter extends OncePerRequestFilter {
                         }
                     }
                 } catch (ExpiredJwtException e) {
-                    throw new ExpiredAuthTokenException();
+                    throw new AuthException(ApiErrorCode.AUTH_TOKEN_EXPIRED);
                 }
             }
             filterChain.doFilter(request, response);

@@ -7,14 +7,16 @@ import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
 import com.markokosic.minicrm.dto.response.AuthResponseDTO;
 import com.markokosic.minicrm.dto.response.RegisterTenantResponseDTO;
 import com.markokosic.minicrm.dto.response.UserResponseDTO;
-import com.markokosic.minicrm.exception.BadCredentialsException;
-import com.markokosic.minicrm.exception.TenantAlreadyExistsException;
+import com.markokosic.minicrm.exception.ApiException;
+import com.markokosic.minicrm.exception.AuthException;
+import com.markokosic.minicrm.exception.ValidationException;
 import com.markokosic.minicrm.model.Tenant;
 import com.markokosic.minicrm.model.User;
 import com.markokosic.minicrm.model.UserPrincipal;
 import com.markokosic.minicrm.repository.TenantRepository;
 import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -50,15 +53,16 @@ public class AuthService {
 
             return new RegisterTenantResponseDTO(savedTenant.getId(), savedTenant.getName());
         } catch (Exception e) {
-            //TODO add custom exception
-            throw new RuntimeException("Registration failed: " + e.getMessage(), e);
+            log.error("DEBUG: Registration failed for tenant '" + userAndTenantDto.getTenantName() + "'");
+            e.printStackTrace();
+            throw new ApiException(ApiErrorCode.AUTH_REGISTRATION_FAILED);
         }
     }
 
     public Tenant createTenant (String name) {
 
         if(tenantRepository.existsByName(name)){
-            throw new TenantAlreadyExistsException();
+            throw new ValidationException(ApiErrorCode.TENANT_NAME_INVALID);
         }
 
         Tenant tenant = new Tenant();
@@ -70,10 +74,8 @@ public class AuthService {
         Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
 
         if(optionalUser.isPresent()){
-            //TODO add custom exception
-            throw new RuntimeException(ApiErrorCode.EMAIL_INVALID.getKey());
+            throw new ValidationException(ApiErrorCode.VALIDATION_EMAIL_INVALID);
         }
-
 
         User newUser = new User();
         newUser.setTenantId(tenant.getId());
@@ -91,7 +93,7 @@ public class AuthService {
         Optional<User> optionalUser = userRepository.findByEmail(loginRequest.getEmail());
 
         if (optionalUser.isEmpty()) {
-            throw new BadCredentialsException();
+            throw new AuthException(ApiErrorCode.AUTH_INVALID_CREDENTIALS);
         }
 
         User user = optionalUser.get();
@@ -110,7 +112,8 @@ public class AuthService {
             return new AuthResponseDTO(accessToken, refreshToken, userResponseDTO);
 
         } catch (AuthenticationException ex) {
-            throw new BadCredentialsException();
+            throw new AuthException(ApiErrorCode.AUTH_INVALID_CREDENTIALS);
+
         }
     }
 
