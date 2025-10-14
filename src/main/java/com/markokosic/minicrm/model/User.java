@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
-
 @Entity
 @Getter
 @Setter
@@ -18,15 +17,15 @@ import lombok.Setter;
 @Table(name="users")
 public class User {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id", nullable = false)
+    @Column(name = "tenant_id", nullable = false)
     @NotNull
-    private Tenant tenant;
+    private Long tenantId;
 
     @Column(name="first_name")
     private String firstName;
@@ -42,6 +41,7 @@ public class User {
     @Column(name="password")
     @NotNull
     private String password;
+
 
 }
 

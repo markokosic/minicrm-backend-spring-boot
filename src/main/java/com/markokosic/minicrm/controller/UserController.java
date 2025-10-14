@@ -1,6 +1,6 @@
 package com.markokosic.minicrm.controller;
 
-import com.markokosic.minicrm.dto.response.UserResponse;
+import com.markokosic.minicrm.dto.response.UserResponseDTO;
 import com.markokosic.minicrm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +18,14 @@ public class UserController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
-        UserResponse user = userService.getUserById(id);
+    public ResponseEntity<UserResponseDTO> getUser(@PathVariable Long id) {
+        UserResponseDTO user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        List<UserResponse> users = userService.getAllUsers();
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        List<UserResponseDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 

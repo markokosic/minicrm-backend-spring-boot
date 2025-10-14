@@ -1,0 +1,21 @@
+meta {
+  name: createCompany
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{API_URL}}/companies
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "name": "ABC GmbH1",
+      "vat": "AT121131231",
+      "email": "max1@examp1le.com",
+      "phone": "+43 987 654321",
+      "website": "abc.com"  
+  }
+}

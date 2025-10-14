@@ -6,7 +6,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 public class UserPrincipal implements UserDetails {
 
@@ -21,6 +20,10 @@ public class UserPrincipal implements UserDetails {
         return Collections.singleton(new SimpleGrantedAuthority("USER"));
     }
 
+
+    public Long getId(){return user.getId();}
+    public String getEmail(){return user.getEmail();}
+
     @Override
     public String getPassword() {
         return user.getPassword();
@@ -30,6 +33,8 @@ public class UserPrincipal implements UserDetails {
     public String getUsername() {
         return user.getEmail();
     }
+
+    public Long getTenantId(){return user.getTenantId();}
 
     @Override
     public boolean isAccountNonExpired() {
@@ -42,6 +47,7 @@ public class UserPrincipal implements UserDetails {
 //        return UserDetails.super.isAccountNonLocked();
         return true;
     }
+
 
     @Override
     public boolean isCredentialsNonExpired() {
