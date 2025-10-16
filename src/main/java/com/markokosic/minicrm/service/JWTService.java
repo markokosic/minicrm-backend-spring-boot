@@ -4,12 +4,11 @@ package com.markokosic.minicrm.service;
 import com.markokosic.minicrm.model.User;
 import com.markokosic.minicrm.repository.UserRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
@@ -22,9 +21,7 @@ import java.util.function.Function;
 @Service
 public class JWTService {
 
-
-    @Value("${jwt.secret}")
-    private final String secretKey;
+    private String secretKey;
 
     private final UserRepository userRepository;
 
@@ -60,7 +57,7 @@ public class JWTService {
 
     private SecretKey getKey() {
         byte[] keyByes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
+        return Keys.hmacShaKeyFor(keyByes);
     }
 
     public String extractEmail(String token) {
@@ -86,43 +83,51 @@ public class JWTService {
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
-        final String userName = extractEmail(token);
-        return (!isTokenExpired(token) && userName.equals(userDetails.getUsername())  );
-    }
-
-    public boolean validateRefreshToken(String token) {
-        String email = extractEmail(token);
-
-        Optional<User> user = Optional.ofNullable(userRepository.findByEmail(email)
-				.orElseThrow(() -> new UsernameNotFoundException("User not found")));
+        //TODO REFACTOR TO SHOW EMAIL NOT USERNAME
+        if (!isTokenSigned(token)) {
+            return false;
+        }
 
         if (isTokenExpired(token)) {
             return false;
         }
 
-
-        return true;
+        final String userEmail = extractEmail(token);
+        return ( userEmail.equals(userDetails.getUsername())  );
     }
 
-    public String refreshAccessToken(String refreshToken) {
-        //HIER WEITER MACHEN ICH BIN GERADE IM REFRESH FLOW FÜR TOKEN
-        if (!validateRefreshToken(refreshToken)) {
-            throw new RuntimeException("Invalid refresh token");
+    public boolean validateRefreshToken(String token) {
+        if (!isTokenSigned(token)) {
+            return false;
         }
 
-        String email = extractEmail(refreshToken);
-        User user = userRepository.findByEmail(email).get();
+        String email = extractEmail(token);
+        if (isTokenExpired(token)) {
+            return false;
+        }
 
-        return generateToken(user.getEmail(), user.getTenantId(), 15L); // z.B. 15 Minuten
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            return false;
+        }
+
+        User user = userOptional.get();
+        return email.equals(user.getEmail());
     }
+
+    public boolean isTokenSigned(String token) {
+        try {
+            Jwts.parser().verifyWith(getKey()).build().parseSignedClaims(token);
+            return true;
+        } catch (JwtException e){
+            return false;
+        }
+    }
+
 
     public boolean isTokenExpired(String token) {
-
             return extractAllClaims(token).getExpiration().before(new Date());
-//        return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
+
 }

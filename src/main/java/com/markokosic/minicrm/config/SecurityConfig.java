@@ -27,8 +27,11 @@ public class SecurityConfig {
     @Autowired
     private UserDetailsService userDetailsService;
 
+   
 
-    @Bean
+
+
+	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(customizer -> customizer.disable())
@@ -36,7 +39,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh-token", "/error").permitAll()
                         .anyRequest().authenticated()).
-                sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            //TODO ADD CUSTOM AuthenticationEntryPoint
+//                .exceptionHandling((exception) -> exception.authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

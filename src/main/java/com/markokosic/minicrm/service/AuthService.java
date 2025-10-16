@@ -2,6 +2,7 @@ package com.markokosic.minicrm.service;
 
 
 import com.markokosic.minicrm.common.ApiErrorCode;
+import com.markokosic.minicrm.config.TokenProperties;
 import com.markokosic.minicrm.dto.request.LoginRequestDTO;
 import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
 import com.markokosic.minicrm.dto.response.AuthResponseDTO;
@@ -17,6 +18,7 @@ import com.markokosic.minicrm.repository.TenantRepository;
 import com.markokosic.minicrm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,7 +27,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.Optional;
 
@@ -33,17 +34,13 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-//    private static final long ACCESS_TOKEN_EXPIRATION_IN_MINUTES = 30; //  30 Minutes
-    private static final long ACCESS_TOKEN_EXPIRATION_IN_MINUTES = 1; //  1 Minute
-    private static final long REFRESH_TOKEN_EXPIRATION_IN_MINUTES = 7 * 24 * 60L; // 7 Days in Minutes
-
-
+    private final ApplicationContext applicationContext;
     private final TenantRepository tenantRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-//    private final UserMapper userMapper;
     private final JWTService jwtService;
-    private final    AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
+    private final TokenProperties tokenProperties;
 
     @Transactional
     public RegisterTenantResponseDTO registerNewTenant(RegisterTenantRequestDTO userAndTenantDto) {
@@ -60,7 +57,6 @@ public class AuthService {
     }
 
     public Tenant createTenant (String name) {
-
         if(tenantRepository.existsByName(name)){
             throw new ValidationException(ApiErrorCode.TENANT_NAME_INVALID);
         }
@@ -103,11 +99,9 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
             );
 
-            String accessToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), ACCESS_TOKEN_EXPIRATION_IN_MINUTES);
-            String refreshToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), REFRESH_TOKEN_EXPIRATION_IN_MINUTES);
+            String accessToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), tokenProperties.getAccess().getExpirationMinutes());
+            String refreshToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), tokenProperties.getRefresh().getExpirationMinutes());
             UserResponseDTO userResponseDTO = new UserResponseDTO(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
-
-
 
             return new AuthResponseDTO(accessToken, refreshToken, userResponseDTO);
 
@@ -121,24 +115,28 @@ public class AuthService {
 
     public UserResponseDTO getMe() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-
-        UserPrincipal principal = (UserPrincipal) auth.getPrincipal(); // dein CustomUserDetails
+        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
         UserResponseDTO userDto = new UserResponseDTO();
         userDto.setId(principal.getId());
         userDto.setEmail(principal.getEmail());
-
         return userDto;
     }
 
-    @GetMapping("/refresh-token")
-    public void refreshAccessToken(String refreshToken){
-        //return fehler wenn kein refreshToken im Cookie
+    public String refreshAccessToken(String refreshToken){
+        //1. checkk if refreshToken is received
+        if(refreshToken.isEmpty()){
+            throw new ValidationException(ApiErrorCode.AUTH_NO_TOKEN_RECEIVED);
+        }
 
-        //validate ob refreshToken gültig ist
-//        jwtService.validateToken(refreshToken);
+        //2 validate refresh token, if not valid return UNAUTH, please login again
+        boolean isSignedAndValid = jwtService.validateRefreshToken(refreshToken);
+        if(!isSignedAndValid){
+            throw new AuthException(ApiErrorCode.AUTH_TOKEN_EXPIRED);
+        };
 
-        //vom JWTService .refreshAccessToken zurück geben mit neuem Tokenc
+        String username = jwtService.extractEmail(refreshToken);
+        Long tenantId = jwtService.extractTenantId(refreshToken);
+        return jwtService.generateToken(username, tenantId, tokenProperties.getAccess().getExpirationMinutes());
 
     }
 
