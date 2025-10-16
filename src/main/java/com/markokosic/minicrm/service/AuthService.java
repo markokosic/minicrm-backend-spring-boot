@@ -2,6 +2,7 @@ package com.markokosic.minicrm.service;
 
 
 import com.markokosic.minicrm.common.ApiErrorCode;
+import com.markokosic.minicrm.config.TokenProperties;
 import com.markokosic.minicrm.dto.request.LoginRequestDTO;
 import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
 import com.markokosic.minicrm.dto.response.AuthResponseDTO;
@@ -33,16 +34,13 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private static final long ACCESS_TOKEN_EXPIRATION_IN_MINUTES = 30; //  30 Minutes
-    private static final long REFRESH_TOKEN_EXPIRATION_IN_MINUTES = 7 * 24 * 60L; // 7 Days in Minutes
-
     private final ApplicationContext applicationContext;
     private final TenantRepository tenantRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-//    private final UserMapper userMapper;
     private final JWTService jwtService;
-    private final    AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
+    private final TokenProperties tokenProperties;
 
     @Transactional
     public RegisterTenantResponseDTO registerNewTenant(RegisterTenantRequestDTO userAndTenantDto) {
@@ -101,11 +99,9 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
             );
 
-            String accessToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), ACCESS_TOKEN_EXPIRATION_IN_MINUTES);
-            String refreshToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), REFRESH_TOKEN_EXPIRATION_IN_MINUTES);
+            String accessToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), tokenProperties.getAccess().getExpirationMinutes());
+            String refreshToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), tokenProperties.getRefresh().getExpirationMinutes());
             UserResponseDTO userResponseDTO = new UserResponseDTO(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
-
-
 
             return new AuthResponseDTO(accessToken, refreshToken, userResponseDTO);
 
@@ -140,7 +136,7 @@ public class AuthService {
 
         String username = jwtService.extractEmail(refreshToken);
         Long tenantId = jwtService.extractTenantId(refreshToken);
-        return jwtService.generateToken(username, tenantId, ACCESS_TOKEN_EXPIRATION_IN_MINUTES);
+        return jwtService.generateToken(username, tenantId, tokenProperties.getAccess().getExpirationMinutes());
 
     }
 

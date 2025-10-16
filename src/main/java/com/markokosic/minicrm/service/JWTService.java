@@ -8,7 +8,6 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +21,7 @@ import java.util.function.Function;
 @Service
 public class JWTService {
 
-
-    @Value("${jwt.secret}")
-    private final String secretKey;
+    private String secretKey;
 
     private final UserRepository userRepository;
 
@@ -60,7 +57,7 @@ public class JWTService {
 
     private SecretKey getKey() {
         byte[] keyByes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
+        return Keys.hmacShaKeyFor(keyByes);
     }
 
     public String extractEmail(String token) {

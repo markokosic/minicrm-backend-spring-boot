@@ -1,12 +1,16 @@
 package com.markokosic.minicrm.controller;
 
+import com.markokosic.minicrm.config.TokenProperties;
 import com.markokosic.minicrm.dto.request.LoginRequestDTO;
 import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
 import com.markokosic.minicrm.dto.response.*;
+import com.markokosic.minicrm.exception.AuthException;
+import com.markokosic.minicrm.exception.ValidationException;
 import com.markokosic.minicrm.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final TokenProperties tokenProperties;
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> getMe(){
@@ -38,6 +43,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
+                .maxAge(tokenProperties.getAccess().getExpirationMinutes() * 60)
                 .path("/")
                 .build();
 
@@ -45,8 +51,8 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
+                .maxAge(tokenProperties.getRefresh().getExpirationMinutes()*60)
                 .path("/")
-                .maxAge(7 * 24 * 60 * 60)
                 .build();
 
 
@@ -56,27 +62,75 @@ public class AuthController {
                 .body(new ApiResponseDTO<>(true, authResponse, "Successfully logged in"));
     }
 
+    //TODO CREATE COOKIE SERVICE
     @GetMapping("/refresh-token")
     public ResponseEntity<ApiResponseDTO<RefreshAccessTokenResponseDTO>> refreshAccessToken(@CookieValue("refreshToken") String refreshToken){
 
+        try {
+            String accessToken = authService.refreshAccessToken(refreshToken);
 
-        String accessToken = authService.refreshAccessToken(refreshToken);
+            ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("None")
+                    .maxAge(tokenProperties.getAccess().getExpirationMinutes() * 60)
+                    .path("/")
+                    .build();
 
-        //remove old accessToken cookie, return new accessToken cookie
+            RefreshAccessTokenResponseDTO responseDTO = new RefreshAccessTokenResponseDTO();
+            responseDTO.setAccessToken(accessToken);
 
-        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                    .body(new ApiResponseDTO<>(true, responseDTO, "Successfully refreshed Access Token"));
+
+        } catch (AuthException | ValidationException e) {
+            ResponseCookie clearAccessToken = ResponseCookie.from("accessToken", "")
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("None")
+                    .path("/")
+                    .maxAge(0)
+                    .build();
+
+            ResponseCookie clearRefreshToken = ResponseCookie.from("refreshToken", "")
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("None")
+                    .path("/")
+                    .maxAge(0)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .header(HttpHeaders.SET_COOKIE, clearAccessToken.toString())
+                    .header(HttpHeaders.SET_COOKIE, clearRefreshToken.toString())
+                    .body(new ApiResponseDTO<>(false, null, "Session expired. Please login again."));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponseDTO<Void>> logout() {
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
                 .path("/")
+                .maxAge(0)
                 .build();
 
-        RefreshAccessTokenResponseDTO responseDTO = new RefreshAccessTokenResponseDTO();
-        responseDTO.setAccessToken(accessToken);
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                .body(new ApiResponseDTO<>(true, responseDTO, "Successfully refreshed Access Token"));
-
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(new ApiResponseDTO<>(true, null, "Successfully logged out"));
     }
+
+
 }
