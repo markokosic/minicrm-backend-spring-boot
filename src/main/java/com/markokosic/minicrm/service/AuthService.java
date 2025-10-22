@@ -67,9 +67,7 @@ public class AuthService {
     }
 
     public void createUser (RegisterTenantRequestDTO request, Tenant tenant) {
-        Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
-
-        if(optionalUser.isPresent()){
+        if(userRepository.existsByEmail(request.getEmail())){
             throw new ValidationException(ApiErrorCode.VALIDATION_EMAIL_INVALID);
         }
 
