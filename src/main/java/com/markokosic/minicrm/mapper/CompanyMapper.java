@@ -13,5 +13,5 @@ public interface CompanyMapper {
 	Company toEntity(CreateCompanyRequestDTO dto, @Context Long tenantId);
 
 
-	CompanyResponseDTO toResponseDto(Company company);
+	CompanyResponseDTO toResponseDTO(Company company);
 }

@@ -1,0 +1,257 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuthService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.markokosic.minicrm.service</a>
+</div>
+
+<h1>Coverage Summary for Class: AuthService (com.markokosic.minicrm.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuthService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    42.9%
+  </span>
+  <span class="absValue">
+    (3/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    40%
+  </span>
+  <span class="absValue">
+    (4/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    32.6%
+  </span>
+  <span class="absValue">
+    (15/46)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.markokosic.minicrm.service;
+&nbsp;
+&nbsp;
+&nbsp;import com.markokosic.minicrm.common.ApiErrorCode;
+&nbsp;import com.markokosic.minicrm.config.TokenProperties;
+&nbsp;import com.markokosic.minicrm.dto.request.LoginRequestDTO;
+&nbsp;import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
+&nbsp;import com.markokosic.minicrm.dto.response.AuthResponseDTO;
+&nbsp;import com.markokosic.minicrm.dto.response.RegisterTenantResponseDTO;
+&nbsp;import com.markokosic.minicrm.dto.response.UserResponseDTO;
+&nbsp;import com.markokosic.minicrm.exception.ApiException;
+&nbsp;import com.markokosic.minicrm.exception.AuthException;
+&nbsp;import com.markokosic.minicrm.exception.ValidationException;
+&nbsp;import com.markokosic.minicrm.model.Tenant;
+&nbsp;import com.markokosic.minicrm.model.User;
+&nbsp;import com.markokosic.minicrm.model.UserPrincipal;
+&nbsp;import com.markokosic.minicrm.repository.TenantRepository;
+&nbsp;import com.markokosic.minicrm.repository.UserRepository;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.context.ApplicationContext;
+&nbsp;import org.springframework.security.authentication.AuthenticationManager;
+&nbsp;import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+&nbsp;import org.springframework.security.core.Authentication;
+&nbsp;import org.springframework.security.core.AuthenticationException;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.security.crypto.password.PasswordEncoder;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import java.util.Optional;
+&nbsp;
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class AuthService {
+&nbsp;    private final ApplicationContext applicationContext;
+&nbsp;    private final TenantRepository tenantRepository;
+&nbsp;    private final UserRepository userRepository;
+&nbsp;    private final PasswordEncoder passwordEncoder;
+&nbsp;    private final JWTService jwtService;
+&nbsp;    private final AuthenticationManager authenticationManager;
+&nbsp;    private final TokenProperties tokenProperties;
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public RegisterTenantResponseDTO registerNewTenant(RegisterTenantRequestDTO userAndTenantDto) {
+&nbsp;        try {
+<b class="nc">&nbsp;            Tenant savedTenant = createTenant(userAndTenantDto.getTenantName());</b>
+<b class="nc">&nbsp;             createUser(userAndTenantDto, savedTenant);</b>
+&nbsp;
+<b class="nc">&nbsp;            return new RegisterTenantResponseDTO(savedTenant.getId(), savedTenant.getName());</b>
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            log.error(&quot;DEBUG: Registration failed for tenant &#39;&quot; + userAndTenantDto.getTenantName() + &quot;&#39;&quot;);</b>
+<b class="nc">&nbsp;            e.printStackTrace();</b>
+<b class="nc">&nbsp;            throw new ApiException(ApiErrorCode.AUTH_REGISTRATION_FAILED);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public Tenant createTenant (String name) {
+<b class="fc">&nbsp;        if(tenantRepository.existsByName(name)){</b>
+<b class="fc">&nbsp;            throw new ValidationException(ApiErrorCode.TENANT_NAME_INVALID);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Tenant tenant = new Tenant();</b>
+<b class="fc">&nbsp;        tenant.setName(name);</b>
+<b class="fc">&nbsp;         return tenantRepository.save(tenant);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void createUser (RegisterTenantRequestDTO request, Tenant tenant) {
+<b class="fc">&nbsp;        if(userRepository.existsByEmail(request.getEmail())){</b>
+<b class="fc">&nbsp;            throw new ValidationException(ApiErrorCode.VALIDATION_EMAIL_INVALID);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        User newUser = new User();</b>
+<b class="fc">&nbsp;        newUser.setTenantId(tenant.getId());</b>
+<b class="fc">&nbsp;        newUser.setEmail(request.getEmail());</b>
+<b class="fc">&nbsp;        newUser.setFirstName(request.getFirstName());</b>
+<b class="fc">&nbsp;        newUser.setLastName(request.getLastName());</b>
+<b class="fc">&nbsp;        newUser.setPassword(passwordEncoder.encode(request.getPassword()));</b>
+<b class="fc">&nbsp;        userRepository.save(newUser);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;    public AuthResponseDTO login(LoginRequestDTO loginRequest) {
+<b class="nc">&nbsp;        Optional&lt;User&gt; optionalUser = userRepository.findByEmail(loginRequest.getEmail());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (optionalUser.isEmpty()) {</b>
+<b class="nc">&nbsp;            throw new AuthException(ApiErrorCode.AUTH_INVALID_CREDENTIALS);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        User user = optionalUser.get();</b>
+&nbsp;
+&nbsp;        try {
+<b class="nc">&nbsp;            Authentication authentication = authenticationManager.authenticate(</b>
+<b class="nc">&nbsp;                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())</b>
+&nbsp;            );
+&nbsp;
+<b class="nc">&nbsp;            String accessToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), tokenProperties.getAccess().getExpirationMinutes());</b>
+<b class="nc">&nbsp;            String refreshToken = jwtService.generateToken(loginRequest.getEmail(), user.getTenantId(), tokenProperties.getRefresh().getExpirationMinutes());</b>
+<b class="nc">&nbsp;            UserResponseDTO userResponseDTO = new UserResponseDTO(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());</b>
+&nbsp;
+<b class="nc">&nbsp;            return new AuthResponseDTO(accessToken, refreshToken, userResponseDTO);</b>
+&nbsp;
+&nbsp;        } catch (AuthenticationException ex) {
+<b class="nc">&nbsp;            throw new AuthException(ApiErrorCode.AUTH_INVALID_CREDENTIALS);</b>
+&nbsp;
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;    public UserResponseDTO getMe() {
+<b class="nc">&nbsp;        Authentication auth = SecurityContextHolder.getContext().getAuthentication();</b>
+<b class="nc">&nbsp;        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();</b>
+<b class="nc">&nbsp;        UserResponseDTO userDto = new UserResponseDTO();</b>
+<b class="nc">&nbsp;        userDto.setId(principal.getId());</b>
+<b class="nc">&nbsp;        userDto.setEmail(principal.getEmail());</b>
+<b class="nc">&nbsp;        return userDto;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public String refreshAccessToken(String refreshToken){
+&nbsp;        //1. checkk if refreshToken is received
+<b class="nc">&nbsp;        if(refreshToken.isEmpty()){</b>
+<b class="nc">&nbsp;            throw new ValidationException(ApiErrorCode.AUTH_NO_TOKEN_RECEIVED);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        //2 validate refresh token, if not valid return UNAUTH, please login again
+<b class="nc">&nbsp;        boolean isSignedAndValid = jwtService.validateRefreshToken(refreshToken);</b>
+<b class="nc">&nbsp;        if(!isSignedAndValid){</b>
+<b class="nc">&nbsp;            throw new AuthException(ApiErrorCode.AUTH_TOKEN_EXPIRED);</b>
+&nbsp;        };
+&nbsp;
+<b class="nc">&nbsp;        String username = jwtService.extractEmail(refreshToken);</b>
+<b class="nc">&nbsp;        Long tenantId = jwtService.extractTenantId(refreshToken);</b>
+<b class="nc">&nbsp;        return jwtService.generateToken(username, tenantId, tokenProperties.getAccess().getExpirationMinutes());</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-11-12 12:05</div>
+</div>
+</body>
+</html>

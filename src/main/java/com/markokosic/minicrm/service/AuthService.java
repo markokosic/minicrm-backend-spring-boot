@@ -8,7 +8,6 @@ import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
 import com.markokosic.minicrm.dto.response.AuthResponseDTO;
 import com.markokosic.minicrm.dto.response.RegisterTenantResponseDTO;
 import com.markokosic.minicrm.dto.response.UserResponseDTO;
-import com.markokosic.minicrm.exception.ApiException;
 import com.markokosic.minicrm.exception.AuthException;
 import com.markokosic.minicrm.exception.ValidationException;
 import com.markokosic.minicrm.model.Tenant;
@@ -44,21 +43,17 @@ public class AuthService {
 
     @Transactional
     public RegisterTenantResponseDTO registerNewTenant(RegisterTenantRequestDTO userAndTenantDto) {
-        try {
-            Tenant savedTenant = createTenant(userAndTenantDto.getTenantName());
-             createUser(userAndTenantDto, savedTenant);
 
-            return new RegisterTenantResponseDTO(savedTenant.getId(), savedTenant.getName());
-        } catch (Exception e) {
-            log.error("DEBUG: Registration failed for tenant '" + userAndTenantDto.getTenantName() + "'");
-            e.printStackTrace();
-            throw new ApiException(ApiErrorCode.AUTH_REGISTRATION_FAILED);
-        }
+        Tenant savedTenant = createTenant(userAndTenantDto.getTenantName());
+        createUser(userAndTenantDto, savedTenant);
+
+        return new RegisterTenantResponseDTO(savedTenant.getId(), savedTenant.getName());
     }
 
     public Tenant createTenant (String name) {
+
         if(tenantRepository.existsByName(name)){
-            throw new ValidationException(ApiErrorCode.TENANT_NAME_INVALID);
+            throw new ValidationException(ApiErrorCode.TENANT_NAME_DUPLICATE);
         }
 
         Tenant tenant = new Tenant();
@@ -68,7 +63,7 @@ public class AuthService {
 
     public void createUser (RegisterTenantRequestDTO request, Tenant tenant) {
         if(userRepository.existsByEmail(request.getEmail())){
-            throw new ValidationException(ApiErrorCode.VALIDATION_EMAIL_INVALID);
+            throw new ValidationException(ApiErrorCode.VALIDATION_EMAIL_DUPLICATE);
         }
 
         User newUser = new User();

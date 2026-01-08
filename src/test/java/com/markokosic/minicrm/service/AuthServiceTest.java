@@ -43,7 +43,7 @@ public class AuthServiceTest {
 
 
 	@Test
-	void createTenant_withUniqueName_shouldSaveToRepo() {
+	void testCreateTenant_withUniqueName_shouldSaveToRepo() {
 		// ARRANGE
 		String tenantName = "testTenant";
 
@@ -64,7 +64,7 @@ public class AuthServiceTest {
 
 
 	@Test
-	void createTenant_withExistingName_shouldThrowValidationException(){
+	void testCreateTenant_withExistingName_shouldThrowValidationException(){
 		String tenantName = "testTenant";
 
 		Mockito.when(tenantRepository.existsByName(tenantName)).thenReturn(true);
@@ -75,7 +75,7 @@ public class AuthServiceTest {
 	}
 
 	@Test
-	void createUser_withUniqueEmail_shouldSaveToRepo() {
+	void testCreateUser_withUniqueEmail_shouldSaveToRepo() {
 
 		Tenant tenant = new Tenant();
 		tenant.setId(100L);
@@ -103,7 +103,7 @@ public class AuthServiceTest {
 	}
 
 	@Test
-	void createUser_withExistingEmail_shouldThrowValidationException() {
+	void testCreateUser_withExistingEmail_shouldThrowValidationException() {
 		Tenant tenant = new Tenant();
 		tenant.setId(100L);
 		tenant.setName("TEST TENANT");
