@@ -1,7 +1,7 @@
 package com.markokosic.minicrm.mapper;
 
 import com.markokosic.minicrm.dto.request.CreateCustomerRequestDTO;
-import com.markokosic.minicrm.dto.response.CustomerResponseDTO;
+import com.markokosic.minicrm.dto.response.CreateCustomerResponseDTO;
 import com.markokosic.minicrm.model.Customer;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -12,5 +12,5 @@ public interface CustomerMapper {
 	@Mapping(target="tenantId", expression = "java(tenantId)")
 	Customer toEntity(CreateCustomerRequestDTO dto, @Context Long tenantId);
 
-	CustomerResponseDTO toResponseDTO(Customer customer);
+	CreateCustomerResponseDTO toResponseDTO(Customer customer);
 }

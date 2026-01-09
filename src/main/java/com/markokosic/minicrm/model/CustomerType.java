@@ -13,10 +13,9 @@ import lombok.Setter;
 @Table(name="customer_types")
 public class CustomerType {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="id")
 	private Long id;
 
-	@Column(nullable = false, name = "code")
+	@Column(nullable = false, unique = true, name="code")
 	private String code;
 }

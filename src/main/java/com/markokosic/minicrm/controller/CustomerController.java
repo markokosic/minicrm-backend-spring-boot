@@ -2,7 +2,7 @@ package com.markokosic.minicrm.controller;
 
 import com.markokosic.minicrm.dto.request.CreateCustomerRequestDTO;
 import com.markokosic.minicrm.dto.response.ApiResponseDTO;
-import com.markokosic.minicrm.dto.response.CustomerResponseDTO;
+import com.markokosic.minicrm.dto.response.CreateCustomerResponseDTO;
 import com.markokosic.minicrm.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,8 @@ public class CustomerController {
 	private final CustomerService customerService;
 
 	@PostMapping("/customers")
-	public ResponseEntity<ApiResponseDTO<CustomerResponseDTO>> createCustomer(@Valid @RequestBody CreateCustomerRequestDTO createCustomerRequest){
-		CustomerResponseDTO newCustomer = customerService.createCustomer(createCustomerRequest);
+	public ResponseEntity<ApiResponseDTO<CreateCustomerResponseDTO>> createCustomer(@Valid @RequestBody CreateCustomerRequestDTO createCustomerRequest){
+		CreateCustomerResponseDTO newCustomer = customerService.createCustomer(createCustomerRequest);
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, newCustomer, "Successfully created new customer."));
 	};
 }
