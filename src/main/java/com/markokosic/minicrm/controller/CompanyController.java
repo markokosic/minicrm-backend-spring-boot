@@ -31,5 +31,4 @@ public class CompanyController {
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, allCompanies, "Successfully fetched all companies" ));
 
 	}
-
 }

@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -17,6 +19,6 @@ public class ErrorResponseDTO {
 	private String message;
 	private String errorKey;
 	private HttpStatusCode statusCode;
-//	private Map<String, List<String>> fieldErrors;
+	private Map<String, List<String>> fieldErrors;
 	private Instant timestamp;
 }

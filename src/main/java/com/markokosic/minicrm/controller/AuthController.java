@@ -32,6 +32,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponseDTO<RegisterTenantResponseDTO>> register (@Valid @RequestBody RegisterTenantRequestDTO userAndTenantDto){
         RegisterTenantResponseDTO registrationResponse =  authService.registerNewTenant(userAndTenantDto);
+
         return ResponseEntity.ok(new ApiResponseDTO<>(true, registrationResponse, "Successfully registered new tenant."));
     }
 

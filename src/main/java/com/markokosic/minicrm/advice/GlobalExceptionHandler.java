@@ -2,7 +2,10 @@ package com.markokosic.minicrm.advice;
 
 import com.markokosic.minicrm.common.ApiErrorCode;
 import com.markokosic.minicrm.dto.response.ErrorResponseDTO;
-import com.markokosic.minicrm.exception.*;
+import com.markokosic.minicrm.exception.ApiException;
+import com.markokosic.minicrm.exception.AuthException;
+import com.markokosic.minicrm.exception.BusinessException;
+import com.markokosic.minicrm.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;

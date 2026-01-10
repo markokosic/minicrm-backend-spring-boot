@@ -22,7 +22,7 @@ public class CompanyService {
 	private final CompanyRepository companyRepository;
 
 	public List<CompanyResponseDTO> getAllCompanies (){
-		return companyRepository.findAllByTenantId(TenantContextHolder.getTenantId()).stream().map(companyMapper::toResponseDto).collect(Collectors.toList());
+		return companyRepository.findAllByTenantId(TenantContextHolder.getTenantId()).stream().map(companyMapper::toResponseDTO).collect(Collectors.toList());
 	}
 
 	@Transactional
@@ -32,7 +32,7 @@ public class CompanyService {
 			Company company = companyMapper.toEntity(request, tenantId);
 			companyRepository.save(company);
 
-			return companyMapper.toResponseDto(company);
+			return companyMapper.toResponseDTO(company);
 
 		} catch (Exception e) {
 			//TODO add custom exception

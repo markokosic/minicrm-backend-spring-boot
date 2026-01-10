@@ -2,6 +2,7 @@ package com.markokosic.minicrm.model;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,15 +15,24 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table(name="customers")
 public class Customer {
-	@Column(name="tenant_id")
-	private Long tenantId;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="id")
 	private Long id;
 
-	@Column(name="customer_type_id")
+
+	@Column(name = "tenant_id", nullable = false)
+	@NotNull
+	private Long tenantId;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+			name = "customer_type_id",
+			referencedColumnName = "id",
+			foreignKey = @ForeignKey(name = "FK_CUSTOMER_TYPE")
+	)
+//	@Column(name="customer_type_id")
 	private Long customerTypeId;
 
 

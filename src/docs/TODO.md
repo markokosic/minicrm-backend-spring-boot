@@ -9,9 +9,9 @@
 - [x] Login with JWT (access + refresh tokens)
 - [x] JWT Filter for request authentication
 - [x] Tenant context isolation (ThreadLocal)
-- [ ] **Refresh token endpoint** ← IN PROGRESS
-- [ ] Get current user (/me endpoint)
-- [ ] Logout endpoint (clear cookies)
+- [x] Refresh token endpoint
+- [x] Get current user (/me endpoint)
+- [x] Logout endpoint (clear cookies)
 - [ ] Unit tests (80% coverage target)
 - [ ] Integration tests
 - [ ] Password validation rules
