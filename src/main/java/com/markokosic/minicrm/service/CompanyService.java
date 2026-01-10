@@ -26,10 +26,9 @@ public class CompanyService {
 	}
 
 	@Transactional
-	public CompanyResponseDTO createCompany(CreateCompanyRequestDTO request){
+	public CompanyResponseDTO createCompany(CreateCompanyRequestDTO companyReq, Long tenantId){
 		try{
-			Long tenantId = TenantContextHolder.getTenantId();
-			Company company = companyMapper.toEntity(request, tenantId);
+			Company company = companyMapper.toEntity(companyReq, tenantId);
 			companyRepository.save(company);
 
 			return companyMapper.toResponseDTO(company);
