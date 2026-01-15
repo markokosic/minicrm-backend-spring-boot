@@ -1,7 +1,8 @@
-package com.markokosic.minicrm.model;
+package com.markokosic.minicrm.model.customer;
+
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,32 +13,22 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name="companies")
-public class Company {
+@Table(name="customers")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "type")
+public class Customer {
 
 	@Id
-	@Column(name="id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name="id")
 	private Long id;
 
-	@Column(name="tenant_id")
+	@Column(name = "tenant_id", nullable = false)
+	@NotNull
 	private Long tenantId;
 
-	@Column(name="name")
-	private String name;
-
-	@Column(name="vat")
-	private String vat;
-
-	@Email
-	@Column(name="email")
-	private String email;
-
-	@Column(name="phone")
-	private String phone;
-
-	@Column(name="website")
-	private String website;
+	@Column(name="status")
+	private String status;
 
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
@@ -55,6 +46,7 @@ public class Company {
 	protected void onUpdate() {
 		this.updatedAt = LocalDateTime.now();
 	}
+
 
 
 

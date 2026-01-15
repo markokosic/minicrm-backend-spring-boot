@@ -1,15 +1,12 @@
 package com.markokosic.minicrm.service;
 
 import com.markokosic.minicrm.common.ApiErrorCode;
-import com.markokosic.minicrm.common.CustomerTypeConstant;
 import com.markokosic.minicrm.context.TenantContextHolder;
-import com.markokosic.minicrm.dto.request.CreateCompanyRequestDTO;
 import com.markokosic.minicrm.dto.request.CreateCustomerRequestDTO;
 import com.markokosic.minicrm.dto.response.CreateCustomerResponseDTO;
 import com.markokosic.minicrm.exception.ValidationException;
-import com.markokosic.minicrm.mapper.CompanyMapper;
 import com.markokosic.minicrm.mapper.CustomerMapper;
-import com.markokosic.minicrm.model.Customer;
+import com.markokosic.minicrm.model.customer.Customer;
 import com.markokosic.minicrm.repository.CustomerRepository;
 import com.markokosic.minicrm.repository.CustomerTypeRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +19,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomerService {
 
 	private final CustomerMapper customerMapper;
-	private final CompanyMapper companyMapper;
 	private final CustomerRepository customerRepository;
 	private final CustomerTypeRepository customerTypeRepository;
 
-	private final CompanyService companyService;
+//	private final CompanyService companyService;
 
 	@Transactional
+	//needs to become orchestrator
+	// seperation of concerns, extend code in seperate Class?
+	// validation -> SRP
 	public CreateCustomerResponseDTO createCustomer(CreateCustomerRequestDTO request ) {
 		try{
 
@@ -43,10 +42,11 @@ public class CustomerService {
 			Customer customer = customerMapper.toEntity(request, tenantId);
 			customerRepository.save(customer);
 
-			if (CustomerTypeConstant.COMPANY.getId().equals(request.getCustomerTypeId())) {
-				CreateCompanyRequestDTO companyReq = customerMapper.toCompanyDTO(request);
-				companyService.createCompany(companyReq, tenantId);
-			}
+			//USE POLYMORPHISM with CustomerCreator??
+//			if (CustomerTypeConstant.BUSINESS.getId().equals(request.getCustomerTypeId())) {
+//				CreateCompanyRequestDTO companyReq = customerMapper.toCompanyDTO(request);
+//				companyService.createCompany(companyReq, tenantId);
+//			}
 //			else if (CustomerTypeConstant.PERSON.getId().equals(request.getCustomerTypeId())) {
 //				createPersonLogic(customer);
 //			}

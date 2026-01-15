@@ -1,6 +1,6 @@
 package com.markokosic.minicrm.repository;
 
-import com.markokosic.minicrm.model.Customer;
+import com.markokosic.minicrm.model.customer.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

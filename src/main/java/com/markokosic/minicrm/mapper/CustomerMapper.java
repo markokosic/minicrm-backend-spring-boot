@@ -3,7 +3,7 @@ package com.markokosic.minicrm.mapper;
 import com.markokosic.minicrm.dto.request.CreateCompanyRequestDTO;
 import com.markokosic.minicrm.dto.request.CreateCustomerRequestDTO;
 import com.markokosic.minicrm.dto.response.CreateCustomerResponseDTO;
-import com.markokosic.minicrm.model.Customer;
+import com.markokosic.minicrm.model.customer.Customer;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

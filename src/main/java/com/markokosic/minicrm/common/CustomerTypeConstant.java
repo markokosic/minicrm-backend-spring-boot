@@ -1,8 +1,8 @@
 package com.markokosic.minicrm.common;
 
 public enum CustomerTypeConstant {
-	COMPANY(1L, "COMPANY"),
-	PERSON(2L, "PERSON");
+	BUSINESS(1L, "BUSINESS"),
+	CONSUMER(2L, "CONSUMER");
 
 	private final Long id;
 	private final String code;
