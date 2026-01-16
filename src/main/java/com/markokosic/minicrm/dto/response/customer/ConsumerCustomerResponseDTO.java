@@ -3,7 +3,7 @@ package com.markokosic.minicrm.dto.response.customer;
 import lombok.Data;
 
 @Data
-public class CreateConsumerCustomerResponseDTO extends CreateCustomerResponseDTO {
+public class ConsumerCustomerResponseDTO extends CustomerResponseDTO {
 	private String firstName;
 	private String lastName;
 	private String email;
