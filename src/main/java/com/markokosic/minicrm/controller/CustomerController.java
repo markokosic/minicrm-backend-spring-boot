@@ -1,8 +1,8 @@
 package com.markokosic.minicrm.controller;
 
-import com.markokosic.minicrm.dto.request.CreateCustomerRequestDTO;
+import com.markokosic.minicrm.dto.request.customer.CreateCustomerRequestDTO;
 import com.markokosic.minicrm.dto.response.ApiResponseDTO;
-import com.markokosic.minicrm.dto.response.CreateCustomerResponseDTO;
+import com.markokosic.minicrm.dto.response.customer.CreateCustomerResponseDTO;
 import com.markokosic.minicrm.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

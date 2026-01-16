@@ -1,19 +1,18 @@
 package com.markokosic.minicrm.mapper;
 
-import com.markokosic.minicrm.dto.request.CreateCompanyRequestDTO;
-import com.markokosic.minicrm.dto.request.CreateCustomerRequestDTO;
-import com.markokosic.minicrm.dto.response.CreateCustomerResponseDTO;
+import com.markokosic.minicrm.dto.response.customer.CreateBusinessCustomerResponseDTO;
+import com.markokosic.minicrm.dto.response.customer.CreateConsumerCustomerResponseDTO;
+import com.markokosic.minicrm.dto.response.customer.CreateCustomerResponseDTO;
+import com.markokosic.minicrm.model.customer.BusinessCustomer;
 import com.markokosic.minicrm.model.customer.Customer;
-import org.mapstruct.Context;
+import com.markokosic.minicrm.model.customer.ConsumerCustomer;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.SubclassMapping;
 
 @Mapper(componentModel = "spring")
 public interface CustomerMapper {
-	@Mapping(target="tenantId", expression = "java(tenantId)")
-	Customer toEntity(CreateCustomerRequestDTO dto, @Context Long tenantId);
-	CreateCompanyRequestDTO toCompanyDTO(CreateCustomerRequestDTO customerDTO);
 
-
+	@SubclassMapping(source = ConsumerCustomer.class, target = CreateConsumerCustomerResponseDTO.class)
+	@SubclassMapping(source = BusinessCustomer.class, target = CreateBusinessCustomerResponseDTO.class)
 	CreateCustomerResponseDTO toResponseDTO(Customer customer);
 }

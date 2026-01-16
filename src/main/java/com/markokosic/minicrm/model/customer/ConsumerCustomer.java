@@ -3,10 +3,14 @@ package com.markokosic.minicrm.model.customer;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @DiscriminatorValue("CONSUMER")
-public class PrivateCustomer extends Customer {
+@Getter
+@Setter
+public class ConsumerCustomer extends Customer {
 	@Column(name="first_name")
 	private String firstName;
 
