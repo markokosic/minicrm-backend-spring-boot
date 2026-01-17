@@ -1,16 +1,15 @@
 package com.markokosic.minicrm.modules.customer;
 
-import com.markokosic.minicrm.modules.customer.model.CustomerType;
+import com.markokosic.minicrm.modules.customer.dto.request.UpdateBusinessCustomerRequestDTO;
+import com.markokosic.minicrm.modules.customer.dto.request.UpdateConsumerCustomerRequestDTO;
 import com.markokosic.minicrm.modules.customer.dto.response.ConsumerCustomerResponseDTO;
 import com.markokosic.minicrm.modules.customer.dto.response.CreateBusinessCustomerResponseDTO;
 import com.markokosic.minicrm.modules.customer.dto.response.CustomerResponseDTO;
 import com.markokosic.minicrm.modules.customer.model.BusinessCustomer;
 import com.markokosic.minicrm.modules.customer.model.ConsumerCustomer;
 import com.markokosic.minicrm.modules.customer.model.Customer;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.SubclassMapping;
+import com.markokosic.minicrm.modules.customer.model.CustomerType;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface CustomerMapper {
@@ -27,4 +26,25 @@ public interface CustomerMapper {
 			dto.setType(CustomerType.CONSUMER.getCode());
 		}
 	}
+
+	// ✅ Custom mapping methoden für PATCH
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "tenantId", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+	ConsumerCustomer updateConsumerCustomer(
+			@MappingTarget ConsumerCustomer customer,
+			UpdateConsumerCustomerRequestDTO dto
+	);
+
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "tenantId", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+	BusinessCustomer updateBusinessCustomer(
+			@MappingTarget BusinessCustomer customer,
+			UpdateBusinessCustomerRequestDTO dto
+	);
 }

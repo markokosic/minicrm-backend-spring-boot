@@ -1,13 +1,17 @@
 package com.markokosic.minicrm.modules.customer;
 
 import com.markokosic.minicrm.common.error.ApiErrorCode;
-import com.markokosic.minicrm.modules.tenant.TenantContextHolder;
+import com.markokosic.minicrm.exception.NotFoundException;
 import com.markokosic.minicrm.modules.customer.dto.request.CreateCustomerRequestDTO;
+import com.markokosic.minicrm.modules.customer.dto.request.UpdateBusinessCustomerRequestDTO;
+import com.markokosic.minicrm.modules.customer.dto.request.UpdateConsumerCustomerRequestDTO;
+import com.markokosic.minicrm.modules.customer.dto.request.UpdateCustomerRequestDTO;
 import com.markokosic.minicrm.modules.customer.dto.response.CustomerResponseDTO;
-import com.markokosic.minicrm.exception.ValidationException;
+import com.markokosic.minicrm.modules.customer.model.BusinessCustomer;
+import com.markokosic.minicrm.modules.customer.model.ConsumerCustomer;
 import com.markokosic.minicrm.modules.customer.model.Customer;
+import com.markokosic.minicrm.modules.tenant.TenantContextHolder;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,27 +26,41 @@ public class CustomerService {
 	private final CustomerFactory customerFactory;
 
 	@Transactional
-	//needs to become orchestrator
 	public CustomerResponseDTO createCustomer(CreateCustomerRequestDTO request ) {
-		try{
 			Long tenantId = TenantContextHolder.getTenantId();
-			// POLYMORPHISMUS: Factory erstellt die richtige Customer-Subklasse
 			Customer customer = customerFactory.createCustomer(request, tenantId);
 			customerRepository.save(customer);
-
 			return customerMapper.toResponseDTO(customer);
-		} catch (Exception e) {
-			throw new ValidationException(ApiErrorCode.USER_NOT_FOUND, HttpStatus.CONFLICT);
-		}
-//		catch (Exception e) {
-//			// log.error("Error creating customer", e);
-//			throw new ValidationException(ApiErrorCode.CREATION_FAILED, HttpStatus.CONFLICT);
-//		}
+
 	}
 
 	public  List<CustomerResponseDTO> getCustomers( ) {
 		Long tenantId = TenantContextHolder.getTenantId();
 		return  customerRepository.findAllByTenantId(tenantId).stream().map(customerMapper::toResponseDTO).toList();
+	}
+
+	@Transactional
+	public CustomerResponseDTO updateCustomer(UpdateCustomerRequestDTO request) {
+		Long tenantId = TenantContextHolder.getTenantId();
+
+		Customer customer = customerRepository.findByIdAndTenantId(request.getId(), tenantId)
+				.orElseThrow(() -> new NotFoundException(ApiErrorCode.CUSTOMER_NOT_FOUND));
+
+		if (customer instanceof BusinessCustomer) {
+			customerMapper.updateBusinessCustomer(
+					(BusinessCustomer) customer,
+					(UpdateBusinessCustomerRequestDTO) request
+			);
+		} else if ( customer instanceof ConsumerCustomer) {
+			customerMapper.updateConsumerCustomer(
+					(ConsumerCustomer) customer,
+					(UpdateConsumerCustomerRequestDTO) request
+			);
+		}
+
+		customerRepository.save(customer);
+		return customerMapper.toResponseDTO(customer);
+
 	}
 
 
