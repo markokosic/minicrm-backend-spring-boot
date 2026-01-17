@@ -1,12 +1,14 @@
 package com.markokosic.minicrm.service;
 
-import com.markokosic.minicrm.config.TokenProperties;
-import com.markokosic.minicrm.dto.request.RegisterTenantRequestDTO;
+import com.markokosic.minicrm.modules.auth.service.AuthService;
+import com.markokosic.minicrm.modules.auth.service.JWTService;
+import com.markokosic.minicrm.modules.auth.config.TokenProperties;
+import com.markokosic.minicrm.modules.auth.dto.request.RegisterTenantRequestDTO;
 import com.markokosic.minicrm.exception.ValidationException;
-import com.markokosic.minicrm.model.Tenant;
-import com.markokosic.minicrm.model.User;
-import com.markokosic.minicrm.repository.TenantRepository;
-import com.markokosic.minicrm.repository.UserRepository;
+import com.markokosic.minicrm.modules.tenant.Tenant;
+import com.markokosic.minicrm.modules.user.User;
+import com.markokosic.minicrm.modules.tenant.TenantRepository;
+import com.markokosic.minicrm.modules.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

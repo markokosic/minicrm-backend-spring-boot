@@ -1,6 +1,6 @@
 package com.markokosic.minicrm.exception;
 
-import com.markokosic.minicrm.common.ApiErrorCode;
+import com.markokosic.minicrm.common.error.ApiErrorCode;
 import org.springframework.http.HttpStatus;
 
 public class NotFoundException extends ApiException {
