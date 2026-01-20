@@ -13,7 +13,7 @@ import lombok.Data;
 )
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = ConsumerCustomerResponseDTO.class, name = "CONSUMER"),
-		@JsonSubTypes.Type(value = CreateBusinessCustomerResponseDTO.class, name = "BUSINESS")
+		@JsonSubTypes.Type(value = BusinessCustomerResponseDTO.class, name = "BUSINESS")
 })
 public class CustomerResponseDTO {
 private Long id;
