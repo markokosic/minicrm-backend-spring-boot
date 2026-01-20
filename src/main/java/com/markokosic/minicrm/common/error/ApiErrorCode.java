@@ -18,6 +18,7 @@ public enum ApiErrorCode {
 	VALIDATION_MIN_SIZE_8("validation.min-size-8", "Must be at least 8 characters"),
 	VALIDATION_MAX_SIZE_15("validation.max-size-15", "Must be at most 15 characters"),
 	VALIDATION_MAX_SIZE_100("validation.max-size-100", "Must be at most 100 characters"),
+	VALIDATION_INVALID_FIELD("validation.invalid-field", "One or more fields are not allowed for this customer type"),
 
 	// Tenant Errors
 	TENANT_NAME_DUPLICATE("tenant.duplicate", "Workspace name is already in use."),
