@@ -37,7 +37,6 @@ public class CustomerController {
 
 	//UPDATE
 	@PatchMapping("/{id}")
-	//TODO NOCHMAL KOMPLETT ANSEHEN UND VERSTEHEN!!!!!!
 	public ResponseEntity<ApiResponseDTO<CustomerResponseDTO>> updateCustomer(
 			@PathVariable Long id,
 			@RequestBody JsonNode requestBody
