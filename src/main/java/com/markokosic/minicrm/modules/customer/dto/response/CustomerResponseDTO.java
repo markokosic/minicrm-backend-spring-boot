@@ -2,6 +2,7 @@ package com.markokosic.minicrm.modules.customer.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.markokosic.minicrm.modules.customer.model.CustomerType;
 import lombok.Data;
 
 @Data
@@ -17,7 +18,7 @@ import lombok.Data;
 })
 public class CustomerResponseDTO {
 private Long id;
-private String type;
-private String status;
+private CustomerType type;
+//private CustomerStatus status;
 private Long tenantId;
 }

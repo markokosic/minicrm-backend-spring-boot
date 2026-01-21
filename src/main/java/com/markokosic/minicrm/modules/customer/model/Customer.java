@@ -27,8 +27,9 @@ public class Customer {
 	@NotNull
 	private Long tenantId;
 
-	@Column(name="status")
-	private String status;
+	@Column(name="status", nullable = false)
+	@Enumerated(EnumType.STRING)
+	private CustomerStatus status;
 
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
@@ -40,14 +41,13 @@ public class Customer {
 	protected void onCreate() {
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
+		this.status = CustomerStatus.ACTIVE;
 	}
 
 	@PreUpdate
 	protected void onUpdate() {
 		this.updatedAt = LocalDateTime.now();
 	}
-
-
 
 
 }

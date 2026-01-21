@@ -14,9 +14,7 @@ public class CustomerFactory {
 	}
 
 	public Customer createCustomer(CreateCustomerRequestDTO dto, Long tenantId) {
-		Customer customer = mapper.toEntity(dto, tenantId);
-
-		return customer;
+		return mapper.toEntity(dto, tenantId);
 	}
 
 }

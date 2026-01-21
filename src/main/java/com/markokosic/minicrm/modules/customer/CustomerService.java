@@ -9,10 +9,8 @@ import com.markokosic.minicrm.modules.customer.dto.request.CreateCustomerRequest
 import com.markokosic.minicrm.modules.customer.dto.request.UpdateBusinessCustomerRequestDTO;
 import com.markokosic.minicrm.modules.customer.dto.request.UpdateConsumerCustomerRequestDTO;
 import com.markokosic.minicrm.modules.customer.dto.response.CustomerResponseDTO;
-import com.markokosic.minicrm.modules.customer.model.BusinessCustomer;
-import com.markokosic.minicrm.modules.customer.model.ConsumerCustomer;
-import com.markokosic.minicrm.modules.customer.model.Customer;
-import com.markokosic.minicrm.modules.tenant.TenantContextHolder;
+import com.markokosic.minicrm.modules.customer.model.*;
+import com.markokosic.minicrm.modules.tenant.TenantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +22,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class CustomerService {
 
+	private final TenantService tenantService;
 	private final CustomerMapper customerMapper;
 	private final CustomerRepository customerRepository;
 	private final CustomerFactory customerFactory;
@@ -31,24 +30,22 @@ public class CustomerService {
 
 	@Transactional
 	public CustomerResponseDTO createCustomer(CreateCustomerRequestDTO request ) {
-		Long tenantId = TenantContextHolder.getTenantId();
-		Customer customer = customerFactory.createCustomer(request, tenantId);
+		Long tenantId = tenantService.getTenantIdFromContextHolder();
+		Customer customer = customerMapper.toEntity(request, tenantId);
 		customerRepository.save(customer);
 			return customerMapper.toDto(customer);
 
 	}
 
 	public  List<CustomerResponseDTO> getCustomers( ) {
-		Long tenantId = TenantContextHolder.getTenantId();
-		return  customerRepository.findAllByTenantId(tenantId).stream().map(customerMapper::toDto).toList();
+		//hier dürfen nur customer gepullt werden welche den STATUS active haben
+		return getCustomersByTenant();
 	}
 
 	@Transactional
 	public CustomerResponseDTO updateCustomer(Long id, JsonNode requestBody) {
-		Long tenantId = TenantContextHolder.getTenantId();
 
-		Customer customer = customerRepository.findByIdAndTenantId(id, tenantId)
-				.orElseThrow(() -> new NotFoundException(ApiErrorCode.CUSTOMER_NOT_FOUND));
+		Customer customer = getCustomerByTenantAndIdOrThrow(id);
 
 		if (customer instanceof BusinessCustomer) {
 			validateAllowedFieldsForBusinessCustomer(requestBody);
@@ -67,6 +64,13 @@ public class CustomerService {
 
 	}
 
+	@Transactional
+	public void deleteCustomer(Long id) {
+		Customer customer = validateCustomerDeletion(id);
+		customer.setStatus(CustomerStatus.DELETED);
+	}
+
+
 	private void validateAllowedFieldsForBusinessCustomer(JsonNode requestBody) {
 		var allowedFields = Set.of("companyName", "vat", "email", "phone", "website");
 		JsonUtils.validateAllowedFields(requestBody, allowedFields);
@@ -76,6 +80,34 @@ public class CustomerService {
 		var allowedFields = Set.of("firstName", "lastName", "email", "phone");
 		JsonUtils.validateAllowedFields(requestBody, allowedFields);
 	}
+
+	 private Customer getCustomerByTenantAndIdOrThrow(Long id) {
+		 Long tenantId = tenantService.getTenantIdFromContextHolder();
+		return customerRepository.findByIdAndTenantId(id, tenantId)
+			.orElseThrow(() -> new NotFoundException(ApiErrorCode.CUSTOMER_NOT_FOUND));
+	}
+
+	private Customer validateCustomerDeletion(Long id) {
+		Customer customer = getCustomerByTenantAndIdOrThrow(id);
+
+		if (CustomerStatus.DELETED.equals(customer.getStatus())) {
+			throw new NotFoundException(ApiErrorCode.USER_NOT_FOUND);
+		}
+
+//		if (hasActiveOrders(customer.getId())) {
+//			throw new ConflictException(ApiErrorCode.CUSTOMER_HAS_ACTIVE_ORDERS);
+//		}
+
+		return customer;
+	}
+
+
+	private List<CustomerResponseDTO> getCustomersByTenant() {
+		Long tenantId = tenantService.getTenantIdFromContextHolder();
+		return  customerRepository.findAllByTenantIdAndStatus(tenantId, CustomerStatus.ACTIVE).stream().map(customerMapper::toDto).toList();
+	}
+
+
 
 
 }

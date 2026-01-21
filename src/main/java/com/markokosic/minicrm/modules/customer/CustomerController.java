@@ -21,21 +21,18 @@ public class CustomerController {
 
 	private final CustomerService customerService;
 
-	//CREATE
 	@PostMapping
 	public ResponseEntity<ApiResponseDTO<CustomerResponseDTO>> createCustomer(@Valid @RequestBody CreateCustomerRequestDTO request){
 		CustomerResponseDTO newCustomer = customerService.createCustomer(request);
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, newCustomer, "Successfully created new customer."));
 	};
 
-	//READ
 	@GetMapping
 	public ResponseEntity<ApiResponseDTO<List<CustomerResponseDTO>>> getCustomer(){
 		List<CustomerResponseDTO> customers = customerService.getCustomers();
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, customers, "Successfully fetched customers"));
 	};
 
-	//UPDATE
 	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponseDTO<CustomerResponseDTO>> updateCustomer(
 			@PathVariable Long id,
@@ -43,6 +40,14 @@ public class CustomerController {
 	) {
 		CustomerResponseDTO updatedCustomer = customerService.updateCustomer(id, requestBody);
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, updatedCustomer, "Successfully updated customer"));
+	};
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<ApiResponseDTO<CustomerResponseDTO>> updateCustomer(
+			@PathVariable Long id
+	) {
+		 customerService.deleteCustomer(id);
+		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, null, "Successfully deleted customer"));
 	};
 
 }
