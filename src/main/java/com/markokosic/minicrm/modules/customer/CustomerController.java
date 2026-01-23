@@ -27,9 +27,15 @@ public class CustomerController {
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, newCustomer, "Successfully created new customer."));
 	};
 
+	@GetMapping("/{id}")
+	public ResponseEntity<ApiResponseDTO<CustomerResponseDTO>> getCustomer(@PathVariable Long id){
+		CustomerResponseDTO customer = customerService.getCustomer(id);
+		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, customer, "Successfully fetched customer"));
+	};
+
 	@GetMapping
-	public ResponseEntity<ApiResponseDTO<List<CustomerResponseDTO>>> getCustomer(){
-		List<CustomerResponseDTO> customers = customerService.getCustomers();
+	public ResponseEntity<ApiResponseDTO<List<CustomerResponseDTO>>> getAllCustomer(){
+		List<CustomerResponseDTO> customers = customerService.getAllCustomers();
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, customers, "Successfully fetched customers"));
 	};
 

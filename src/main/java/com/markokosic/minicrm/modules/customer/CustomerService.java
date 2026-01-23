@@ -37,9 +37,12 @@ public class CustomerService {
 
 	}
 
-	public  List<CustomerResponseDTO> getCustomers( ) {
-		//hier dürfen nur customer gepullt werden welche den STATUS active haben
+	public  List<CustomerResponseDTO> getAllCustomers( ) {
 		return getCustomersByTenant();
+	}
+
+	public  CustomerResponseDTO getCustomer(Long id ) {
+		return customerMapper.toDto(getCustomerByTenantAndIdOrThrow(id));
 	}
 
 	@Transactional

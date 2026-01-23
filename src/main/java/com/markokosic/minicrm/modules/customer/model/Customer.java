@@ -31,6 +31,10 @@ public class Customer {
 	@Enumerated(EnumType.STRING)
 	private CustomerStatus status;
 
+	@Column(name="type", insertable = false, updatable = false)
+	@Enumerated(EnumType.STRING)
+	private CustomerType type;
+
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
