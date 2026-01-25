@@ -1,6 +1,6 @@
 package com.markokosic.minicrm.exception;
 
-import com.markokosic.minicrm.common.ApiErrorCode;
+import com.markokosic.minicrm.common.error.ApiErrorCode;
 import org.springframework.http.HttpStatus;
 
 public class BusinessException extends ApiException {
@@ -12,5 +12,5 @@ public class BusinessException extends ApiException {
 	public BusinessException(ApiErrorCode errorCode, HttpStatus status) {
 		super(errorCode, status);
 	}
-	}
 }
+
