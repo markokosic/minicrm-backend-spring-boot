@@ -1,7 +1,7 @@
 package com.markokosic.minicrm.service;
 
 
-import com.markokosic.minicrm.dto.response.RegisterTenantResponseDTO;
+import com.markokosic.minicrm.modules.auth.dto.response.RegisterTenantResponseDTO;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;

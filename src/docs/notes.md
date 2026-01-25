@@ -21,6 +21,17 @@
 
 ---
 
+## 2. Customers (Kunden)
+| Methode | Route             | Beschreibung |
+|---------|-------------------|--------------|
+| GET     | `/api/customers`  | Alle User im Tenant |
+| GET     | `/api/users/{id}` | Einzelner User |
+| POST    | `/api/users`      | Neuen User erstellen |
+| PUT     | `/api/users/{id}` | User aktualisieren |
+| DELETE  | `/api/users/{id}` | User deaktivieren / archivieren |
+
+---
+
 ## 3. Companies (B2B-Kunden)
 | Methode | Route | Beschreibung |
 |---------|-------|--------------|
