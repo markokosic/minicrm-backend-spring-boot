@@ -29,7 +29,7 @@ public class CustomerController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponseDTO<CustomerResponseDTO>> getCustomer(@PathVariable Long id){
-		CustomerResponseDTO customer = customerService.getCustomer(id);
+		CustomerResponseDTO customer = customerService.getCustomerById(id);
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, customer, "Successfully fetched customer"));
 	};
 

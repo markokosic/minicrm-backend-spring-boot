@@ -12,11 +12,8 @@ public interface AddressMapper {
 
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "type", source = "dto.type")
-	@Mapping(target = "tenantId", source = "customer.tenantId")
 	@Mapping(target = "customer", source = "customer")
-	Address toEntity(CreateAddressRequestDTO dto, Customer customer);
+	Address toEntity(CreateAddressRequestDTO dto, Long tenantId, Customer customer);
 
 	AddressResponseDTO toDto(Address address);
-
-
 }

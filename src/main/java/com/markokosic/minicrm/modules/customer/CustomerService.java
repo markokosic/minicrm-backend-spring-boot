@@ -42,7 +42,7 @@ public class CustomerService {
 		return getCustomersByTenant();
 	}
 
-	public  CustomerResponseDTO getCustomer(Long id ) {
+	public  CustomerResponseDTO getCustomerById(Long id ) {
 		return customerMapper.toDto(validator.getCustomerByTenantAndIdOrThrow(id));
 	}
 
