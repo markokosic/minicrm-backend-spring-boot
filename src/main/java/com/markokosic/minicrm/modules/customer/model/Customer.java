@@ -1,6 +1,7 @@
 package com.markokosic.minicrm.modules.customer.model;
 
 
+import com.markokosic.minicrm.modules.address.model.Address;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -8,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -53,5 +56,7 @@ public class Customer {
 		this.updatedAt = LocalDateTime.now();
 	}
 
+	@OneToMany(mappedBy = "customer", orphanRemoval = true)
+	private List<Address> addresses = new ArrayList<>();
 
 }
