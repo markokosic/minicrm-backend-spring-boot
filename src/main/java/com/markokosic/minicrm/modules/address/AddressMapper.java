@@ -6,6 +6,7 @@ import com.markokosic.minicrm.modules.address.model.Address;
 import com.markokosic.minicrm.modules.customer.model.Customer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface AddressMapper {
@@ -15,5 +16,8 @@ public interface AddressMapper {
 	@Mapping(target = "customer", source = "customer")
 	Address toEntity(CreateAddressRequestDTO dto, Long tenantId, Customer customer);
 
-	AddressResponseDTO toDto(Address address);
+	AddressResponseDTO toResponseDto(Address address);
+
+	void updateEntityFromDto(CreateAddressRequestDTO dto, @MappingTarget Address address);
+
 }

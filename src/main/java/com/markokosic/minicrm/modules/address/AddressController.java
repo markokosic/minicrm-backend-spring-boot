@@ -6,6 +6,7 @@ import com.markokosic.minicrm.modules.address.dto.response.AddressResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,16 +34,25 @@ public class AddressController {
 	}
 
 
-//	@GetMapping("/{aId}")
-//	public ResponseEntity<ApiResponseDTO<AddressResponseDTO>> getAddressById(@PathVariable Long cId, @PathVariable Long aId) {
-//		List<AddressResponseDTO> address = addressService.getAddressById(cId, aId);
-//		return ResponseEntity.ok(new ApiResponseDTO<>(true, address, "Successfully added address to customer"));
-//	}
-//
-//	@PatchMapping("/{aid}")
-//	public ResponseEntity<ApiResponseDTO<AddressResponseDTO>> getAddressById(@PathVariable Long cId, @PathVariable Long aId) {
-//		List<AddressResponseDTO> address = addressService.getAddressById(cId, aId);
-//		return ResponseEntity.ok(new ApiResponseDTO<>(true, address, "Successfully added address to customer"));
-//	}
+	@GetMapping("/{addressId}")
+	public ResponseEntity<ApiResponseDTO<AddressResponseDTO>> getAddressById(@PathVariable Long customerId, @PathVariable Long addressId) {
+		AddressResponseDTO address = addressService.getAddressById(customerId, addressId);
+		return ResponseEntity.ok(new ApiResponseDTO<>(true, address, "Successfully fetched address"));
+	}
+
+	@PutMapping("/{addressId}")
+	public ResponseEntity<ApiResponseDTO<AddressResponseDTO>> updateAddress(@PathVariable Long customerId, @PathVariable Long addressId, @Valid @RequestBody CreateAddressRequestDTO request) {
+		AddressResponseDTO address = addressService.updateAddress(customerId, addressId, request);
+		return ResponseEntity.ok(new ApiResponseDTO<>(true, address, "Successfully updated address"));
+	}
+
+	@DeleteMapping("/{addressId}")
+	public ResponseEntity<ApiResponseDTO<AddressResponseDTO>> deleteAddress(
+			@PathVariable Long customerId,
+			@PathVariable Long addressId
+	) {
+		addressService.deleteAddress(customerId, addressId);
+		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, null, "Successfully deleted address"));
+	};
 
 }
