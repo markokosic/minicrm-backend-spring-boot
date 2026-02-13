@@ -1,4 +1,4 @@
-package com.markokosic.minicrm.service;
+package com.markokosic.minicrm.modules.auth.service;
 
 import com.markokosic.minicrm.modules.auth.service.AuthService;
 import com.markokosic.minicrm.modules.auth.service.JWTService;

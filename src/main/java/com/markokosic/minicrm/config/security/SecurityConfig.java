@@ -38,6 +38,8 @@ public class SecurityConfig {
                 .csrf(customizer -> customizer.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
+                        //ALLOW ALL PREFLIGHTS? - research more on this topic
+//                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh-token", "/error").permitAll()
                         .anyRequest().authenticated()).
         sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

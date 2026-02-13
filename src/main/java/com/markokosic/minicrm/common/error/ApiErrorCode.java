@@ -27,7 +27,10 @@ public enum ApiErrorCode {
 	USER_NOT_FOUND("user.not-found", "User not found"),
 
 	//Customer Errors
-	CUSTOMER_NOT_FOUND("customer.not-found","Customer not found");
+	CUSTOMER_NOT_FOUND("customer.not-found","Customer not found"),
+
+	//Address Errors
+	ADDRESS_NOT_FOUND("address.not-found","Address not found");
 
 
 	private final String key;

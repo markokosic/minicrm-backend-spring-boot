@@ -30,7 +30,7 @@ public class UserService {
     }
 
     public UserResponseDTO convertToUserResponseDto(User user) {
-        return userMapper.userToUserResponse(user);
+        return userMapper.userToUserResponseDTO(user);
     }
 
 
