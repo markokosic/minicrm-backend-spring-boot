@@ -60,7 +60,7 @@ class CustomerMapperTest {
 	}
 
 	@Test
-	@DisplayName("Sollte BusinessCustomer nur bei vorhandenen Werten updaten (NullValuePropertyMappingStrategy.IGNORE)")
+	@DisplayName("should only update partially")
 	void shouldUpdateBusinessCustomerIgnoringNulls() {
 		// Given
 		BusinessCustomer existingCustomer = new BusinessCustomer();

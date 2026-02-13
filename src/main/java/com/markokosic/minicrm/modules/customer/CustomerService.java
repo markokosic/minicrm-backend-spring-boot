@@ -25,8 +25,9 @@ public class CustomerService {
 	private final TenantService tenantService;
 	private final CustomerMapper customerMapper;
 	private final CustomerRepository customerRepository;
-	private final CustomerFactory customerFactory;
 	private final ObjectMapper objectMapper;
+	private final CustomerTenantValidator validator;
+
 
 	@Transactional
 	public CustomerResponseDTO createCustomer(CreateCustomerRequestDTO request ) {
@@ -41,14 +42,14 @@ public class CustomerService {
 		return getCustomersByTenant();
 	}
 
-	public  CustomerResponseDTO getCustomer(Long id ) {
-		return customerMapper.toDto(getCustomerByTenantAndIdOrThrow(id));
+	public  CustomerResponseDTO getCustomerById(Long id ) {
+		return customerMapper.toDto(validator.getCustomerByTenantAndIdOrThrow(id));
 	}
 
 	@Transactional
 	public CustomerResponseDTO updateCustomer(Long id, JsonNode requestBody) {
 
-		Customer customer = getCustomerByTenantAndIdOrThrow(id);
+		Customer customer = validator.getCustomerByTenantAndIdOrThrow(id);
 
 		if (customer instanceof BusinessCustomer) {
 			validateAllowedFieldsForBusinessCustomer(requestBody);
@@ -84,14 +85,14 @@ public class CustomerService {
 		JsonUtils.validateAllowedFields(requestBody, allowedFields);
 	}
 
-	 private Customer getCustomerByTenantAndIdOrThrow(Long id) {
-		 Long tenantId = tenantService.getTenantIdFromContextHolder();
-		return customerRepository.findByIdAndTenantId(id, tenantId)
-			.orElseThrow(() -> new NotFoundException(ApiErrorCode.CUSTOMER_NOT_FOUND));
-	}
+//	 private Customer getCustomerByTenantAndIdOrThrow(Long id) {
+//		 Long tenantId = tenantService.getTenantIdFromContextHolder();
+//		return customerRepository.findByIdAndTenantId(id, tenantId)
+//			.orElseThrow(() -> new NotFoundException(ApiErrorCode.CUSTOMER_NOT_FOUND));
+//	}
 
 	private Customer validateCustomerDeletion(Long id) {
-		Customer customer = getCustomerByTenantAndIdOrThrow(id);
+		Customer customer = validator.getCustomerByTenantAndIdOrThrow(id);
 
 		if (CustomerStatus.DELETED.equals(customer.getStatus())) {
 			throw new NotFoundException(ApiErrorCode.USER_NOT_FOUND);
