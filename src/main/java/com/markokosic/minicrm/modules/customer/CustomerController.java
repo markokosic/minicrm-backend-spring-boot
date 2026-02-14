@@ -1,17 +1,19 @@
 package com.markokosic.minicrm.modules.customer;
 
-import com.markokosic.minicrm.common.dto.response.ApiResponseDTO;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.markokosic.minicrm.common.dto.response.ApiResponseDTO;
+import com.markokosic.minicrm.common.dto.response.PageResponseDTO;
 import com.markokosic.minicrm.modules.customer.dto.request.CreateCustomerRequestDTO;
 import com.markokosic.minicrm.modules.customer.dto.response.CustomerResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -34,8 +36,8 @@ public class CustomerController {
 	};
 
 	@GetMapping
-	public ResponseEntity<ApiResponseDTO<List<CustomerResponseDTO>>> getAllCustomer(){
-		List<CustomerResponseDTO> customers = customerService.getAllCustomers();
+	public ResponseEntity<ApiResponseDTO<PageResponseDTO<CustomerResponseDTO>>> getAllCustomers(@PageableDefault(sort={"displayName", "id"}, direction = Sort.Direction.ASC) Pageable pageable){
+		PageResponseDTO<CustomerResponseDTO> customers = customerService.getAllCustomers(pageable);
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, customers, "Successfully fetched customers"));
 	};
 

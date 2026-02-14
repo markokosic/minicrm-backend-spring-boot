@@ -19,6 +19,7 @@ import lombok.Data;
 public class CustomerResponseDTO {
 private Long id;
 private CustomerType type;
+private String displayName;
 //private CustomerStatus status;
 private Long tenantId;
 }

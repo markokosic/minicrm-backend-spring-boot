@@ -22,4 +22,12 @@ public class ConsumerCustomer extends Customer {
 
 	@Column(name="phone")
 	private String phone;
+
+	@Override
+	protected String computeDisplayName() {
+		return (firstName != null ? firstName : "")
+				+ " "
+				+ (lastName != null ? lastName : "");
+	}
+
 }

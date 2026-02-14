@@ -2,6 +2,7 @@ package com.markokosic.minicrm.modules.customer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.markokosic.minicrm.common.dto.response.PageResponseDTO;
 import com.markokosic.minicrm.common.error.ApiErrorCode;
 import com.markokosic.minicrm.common.utils.JsonUtils;
 import com.markokosic.minicrm.exception.NotFoundException;
@@ -9,13 +10,17 @@ import com.markokosic.minicrm.modules.customer.dto.request.CreateCustomerRequest
 import com.markokosic.minicrm.modules.customer.dto.request.UpdateBusinessCustomerRequestDTO;
 import com.markokosic.minicrm.modules.customer.dto.request.UpdateConsumerCustomerRequestDTO;
 import com.markokosic.minicrm.modules.customer.dto.response.CustomerResponseDTO;
-import com.markokosic.minicrm.modules.customer.model.*;
+import com.markokosic.minicrm.modules.customer.model.BusinessCustomer;
+import com.markokosic.minicrm.modules.customer.model.ConsumerCustomer;
+import com.markokosic.minicrm.modules.customer.model.Customer;
+import com.markokosic.minicrm.modules.customer.model.CustomerStatus;
 import com.markokosic.minicrm.modules.tenant.TenantService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -35,11 +40,10 @@ public class CustomerService {
 		Customer customer = customerMapper.toEntity(request, tenantId);
 		customerRepository.save(customer);
 			return customerMapper.toDto(customer);
-
 	}
 
-	public  List<CustomerResponseDTO> getAllCustomers( ) {
-		return getCustomersByTenant();
+	public PageResponseDTO<CustomerResponseDTO> getAllCustomers(Pageable pageable ) {
+		return getCustomersByTenant(pageable);
 	}
 
 	public  CustomerResponseDTO getCustomerById(Long id ) {
@@ -106,9 +110,11 @@ public class CustomerService {
 	}
 
 
-	private List<CustomerResponseDTO> getCustomersByTenant() {
+	private PageResponseDTO<CustomerResponseDTO> getCustomersByTenant(Pageable pageable) {
 		Long tenantId = tenantService.getTenantIdFromContextHolder();
-		return  customerRepository.findAllByTenantIdAndStatus(tenantId, CustomerStatus.ACTIVE).stream().map(customerMapper::toDto).toList();
+		Page<CustomerResponseDTO> page = customerRepository.findAllByTenantIdAndStatus(tenantId, CustomerStatus.ACTIVE, pageable).map(customerMapper::toDto);
+
+		return PageResponseDTO.from(page);
 	}
 
 
