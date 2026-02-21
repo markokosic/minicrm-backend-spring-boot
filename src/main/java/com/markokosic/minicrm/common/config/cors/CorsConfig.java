@@ -1,4 +1,4 @@
-package com.markokosic.minicrm.config.cors;
+package com.markokosic.minicrm.common.config.cors;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

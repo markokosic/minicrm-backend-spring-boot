@@ -1,6 +1,6 @@
-package com.markokosic.minicrm.config.security;
+package com.markokosic.minicrm.common.config.security;
 
-import com.markokosic.minicrm.config.security.filter.JwtFilter;
+import com.markokosic.minicrm.common.config.security.filter.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

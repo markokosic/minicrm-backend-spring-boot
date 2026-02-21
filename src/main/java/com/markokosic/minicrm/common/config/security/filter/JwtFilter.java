@@ -1,4 +1,4 @@
-package com.markokosic.minicrm.config.security.filter;
+package com.markokosic.minicrm.common.config.security.filter;
 
 
 import com.markokosic.minicrm.common.error.ApiErrorCode;
