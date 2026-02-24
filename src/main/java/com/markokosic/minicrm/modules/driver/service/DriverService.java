@@ -41,13 +41,13 @@ public class DriverService {
 	}
 
 	public  DriverResponseDTO getDriverById(Long id ) {
-		return driverMapper.toDto(driverLookupService.findById(id));
+		return driverMapper.toDto(driverLookupService.validateDriverExistsOrThrow(id));
 	}
 
 	@Transactional
 	public DriverResponseDTO updateDriver(Long id, UpdateDriverRequestDTO requestBody) {
 
-		Driver driver = driverLookupService.findById(id);
+		Driver driver = driverLookupService.validateDriverExistsOrThrow(id);
 
 		driverMapper.updateEntityFromDto(requestBody, driver);
 
@@ -64,7 +64,7 @@ public class DriverService {
 
 
 	private Driver validateDriverDeletion(Long id) {
-		Driver driver = driverLookupService.findById(id);
+		Driver driver = driverLookupService.validateDriverExistsOrThrow(id);
 
 		if (DriverStatus.DELETED.equals(driver.getStatus())) {
 			throw new NotFoundException(ApiErrorCode.Driver_NOT_FOUND);

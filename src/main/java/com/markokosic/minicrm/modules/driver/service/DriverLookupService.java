@@ -8,14 +8,21 @@ import com.markokosic.minicrm.modules.tenant.TenantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class DriverLookupService {
 	private final DriverRepository driverRepository;
 	private final TenantService tenantService;
 
-	public Driver findById(Long id) {
+	public Driver validateDriverExistsOrThrow(Long id) {
 		Long tenantId = tenantService.getTenantIdFromContextHolder();
 		return driverRepository.findByIdAndTenantId(id, tenantId).orElseThrow(() -> new NotFoundException(ApiErrorCode.Driver_NOT_FOUND));
+	}
+
+	public List<Driver> validateAllExistOrThrow(List<Long> ids){
+		Long tenantId = tenantService.getTenantIdFromContextHolder();
+		return driverRepository.findAllByTenantIdAndIdIn(tenantId, ids).orElseThrow(() -> new NotFoundException(ApiErrorCode.Driver_NOT_FOUND));
 	}
 }
