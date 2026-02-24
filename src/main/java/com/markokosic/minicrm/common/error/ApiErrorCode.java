@@ -29,6 +29,10 @@ public enum ApiErrorCode {
 	//Customer Errors
 	CUSTOMER_NOT_FOUND("customer.not-found","Customer not found"),
 
+	//Driver Errors
+	Driver_NOT_FOUND("driver.not-found","Driver not found"),
+
+
 	//Address Errors
 	ADDRESS_NOT_FOUND("address.not-found","Address not found");
 

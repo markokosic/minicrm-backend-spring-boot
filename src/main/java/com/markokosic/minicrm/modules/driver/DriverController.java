@@ -1,9 +1,12 @@
-package com.markokosic.minicrm.modules.drivers;
+package com.markokosic.minicrm.modules.driver;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.markokosic.minicrm.common.I18nService;
 import com.markokosic.minicrm.common.dto.response.ApiResponseDTO;
 import com.markokosic.minicrm.common.dto.response.PageResponseDTO;
+import com.markokosic.minicrm.modules.driver.dto.request.CreateDriverRequestDTO;
+import com.markokosic.minicrm.modules.driver.dto.request.UpdateDriverRequestDTO;
+import com.markokosic.minicrm.modules.driver.dto.response.DriverResponseDTO;
+import com.markokosic.minicrm.modules.driver.service.DriverService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class DriverController {
 
-	private final DriverService driverSerivce;
+	private final DriverService driverService;
 	private final I18nService i18n;
 
 	@PostMapping
@@ -44,7 +47,7 @@ public class DriverController {
 	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponseDTO<DriverResponseDTO>> updateDriver(
 			@PathVariable Long id,
-			@RequestBody JsonNode request
+			@RequestBody UpdateDriverRequestDTO request
 	) {
 		DriverResponseDTO updatedCustomer = driverService.updateDriver(id, request);
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, updatedCustomer, i18n.getMessage("success.updated")));
@@ -55,5 +58,10 @@ public class DriverController {
 			@PathVariable Long id
 	) {
 		driverService.deleteDriver(id);
-		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, null, i18n.getMessage("success.deleted")));
-	};
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ApiResponseDTO<>(true, null, i18n.getMessage("success.deleted")));
+	}}
+
+//@PostMapping(/{id}/remuneration-configs)
+//public ResponseEntity<ApiResponseDTO<DriverResponseDTO>> createDriver(@Valid @RequestBody CreateDriverRequestDTO request){
+//	DriverResponseDTO newDriver = driverService.createDriver(request);
+//	return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO<>(true, newDriver, i18n.getMessage("success.created")));};

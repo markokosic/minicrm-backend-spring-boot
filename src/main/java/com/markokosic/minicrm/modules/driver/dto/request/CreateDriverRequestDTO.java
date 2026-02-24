@@ -1,9 +1,10 @@
-package com.markokosic.minicrm.modules.drivers;
+package com.markokosic.minicrm.modules.driver.dto.request;
 
-import jakarta.validation.constraints.*;
+import com.markokosic.minicrm.modules.driver.model.DriverRemunerationConfig;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
 
-@Schema(description = "Request-Objekt zur Erstellung eines neuen Fahrers")
+@Schema(description = "Request object for creating a new driver")
 public record CreateDriverRequestDTO(
 
 		@NotBlank(message = "{validation.notBlank}")
@@ -27,5 +28,5 @@ public record CreateDriverRequestDTO(
 
 		@NotNull(message = "{driver.remunerationModel.notNull}")
 		@Schema(description = "The internal remuneration model assigned to the driver")
-		RemunerationModel remunerationModel
+		DriverRemunerationConfig remunerationConfig
 ) {}

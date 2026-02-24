@@ -1,7 +1,8 @@
-package com.markokosic.minicrm.modules.drivers;
+package com.markokosic.minicrm.modules.driver.dto.response;
 
-package com.markokosic.minicrm.modules.drivers;
 
+import com.markokosic.minicrm.modules.driver.model.DriverStatus;
+import com.markokosic.minicrm.modules.remuneration.RemunerationModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 

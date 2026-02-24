@@ -1,6 +1,8 @@
-package com.markokosic.minicrm.modules.drivers;
+package com.markokosic.minicrm.modules.driver.repository;
 
 
+import com.markokosic.minicrm.modules.driver.model.Driver;
+import com.markokosic.minicrm.modules.driver.model.DriverStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
