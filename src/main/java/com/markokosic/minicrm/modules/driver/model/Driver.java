@@ -1,6 +1,5 @@
 package com.markokosic.minicrm.modules.driver.model;
 
-import com.markokosic.minicrm.modules.remuneration.RemunerationModelType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -8,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -38,17 +35,17 @@ public class Driver {
 	@Column(name="phone")
 	private String phone;
 
-	@NotNull
-	@Column(name="remuneration_model", nullable = false)
-	@Enumerated(EnumType.STRING)
-	private RemunerationModelType remunerationModelType;
-
-	@OneToMany(
-			mappedBy = "driver",
-			cascade = CascadeType.ALL,
-			orphanRemoval = true
-	)
-	private List<DriverRemunerationConfig> remunerationConfigs = new ArrayList<>();
+//	@NotNull
+//	@Column(name="remuneration_model", nullable = false)
+//	@Enumerated(EnumType.STRING)
+//	private RemunerationModelType remunerationModelType;
+//
+//	@OneToMany(
+//			mappedBy = "driver",
+//			cascade = CascadeType.ALL,
+//			orphanRemoval = true
+//	)
+//	private List<DriverRemunerationConfig> remunerationConfigs = new ArrayList<>();
 
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;

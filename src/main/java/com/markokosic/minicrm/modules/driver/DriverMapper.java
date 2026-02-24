@@ -4,10 +4,7 @@ import com.markokosic.minicrm.modules.driver.dto.request.CreateDriverRequestDTO;
 import com.markokosic.minicrm.modules.driver.dto.request.UpdateDriverRequestDTO;
 import com.markokosic.minicrm.modules.driver.dto.response.DriverResponseDTO;
 import com.markokosic.minicrm.modules.driver.model.Driver;
-import org.mapstruct.Context;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface DriverMapper {
@@ -20,6 +17,7 @@ public interface DriverMapper {
 	@Mapping(target = "status", ignore = true)
 	Driver toEntity(CreateDriverRequestDTO dto, @Context Long tenantId);
 
+	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 	void updateEntityFromDto(UpdateDriverRequestDTO dto, @MappingTarget Driver driver);
 
 }

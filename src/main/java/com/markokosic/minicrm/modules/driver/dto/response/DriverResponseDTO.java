@@ -2,7 +2,6 @@ package com.markokosic.minicrm.modules.driver.dto.response;
 
 
 import com.markokosic.minicrm.modules.driver.model.DriverStatus;
-import com.markokosic.minicrm.modules.remuneration.RemunerationModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
@@ -27,8 +26,8 @@ public record DriverResponseDTO(
 		@Schema(description = "Current employment status")
 		DriverStatus status,
 
-		@Schema(description = "Selected remuneration model")
-		RemunerationModel remunerationModel,
+//		@Schema(description = "Selected remuneration model")
+//		RemunerationModel remunerationModel,
 
 		@Schema(description = "Timestamp when the driver was created")
 		LocalDateTime createdAt,

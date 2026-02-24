@@ -1,6 +1,5 @@
 package com.markokosic.minicrm.modules.driver.dto.request;
 
-import com.markokosic.minicrm.modules.remuneration.RemunerationModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
@@ -21,8 +20,8 @@ public record UpdateDriverRequestDTO(
 
 		@Pattern(regexp = "^\\+?[0-9\\s\\-]{7,20}$", message = "{driver.phone.invalid}")
 		@Schema(description = "International phone number format (optional)", example = "+43 660 1234567", nullable = true)
-		String phone,
+		String phone
 
-		@Schema(description = "The internal remuneration model assigned to the driver (optional)", nullable = true)
-		RemunerationModel remunerationModel
+//		@Schema(description = "The internal remuneration model assigned to the driver (optional)", nullable = true)
+//		RemunerationModel remunerationModel
 ) {}

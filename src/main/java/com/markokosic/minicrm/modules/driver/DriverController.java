@@ -39,7 +39,7 @@ public class DriverController {
 
 
 	@GetMapping
-	public ResponseEntity<ApiResponseDTO<PageResponseDTO<DriverResponseDTO>>> getAllDrivers(@PageableDefault(sort={"displayName", "id"}, direction = Sort.Direction.ASC) Pageable pageable){
+	public ResponseEntity<ApiResponseDTO<PageResponseDTO<DriverResponseDTO>>> getAllDrivers(@PageableDefault(sort={"lastName", "id"}, direction = Sort.Direction.ASC) Pageable pageable){
 		PageResponseDTO<DriverResponseDTO> drivers = driverService.getAllDrivers(pageable);
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, drivers, i18n.getMessage("success.fetched")));
 	};
@@ -47,7 +47,7 @@ public class DriverController {
 	@PatchMapping("/{id}")
 	public ResponseEntity<ApiResponseDTO<DriverResponseDTO>> updateDriver(
 			@PathVariable Long id,
-			@RequestBody UpdateDriverRequestDTO request
+			@RequestBody @Valid UpdateDriverRequestDTO request
 	) {
 		DriverResponseDTO updatedCustomer = driverService.updateDriver(id, request);
 		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, updatedCustomer, i18n.getMessage("success.updated")));

@@ -1,6 +1,5 @@
 package com.markokosic.minicrm.modules.driver.model;
 
-import com.markokosic.minicrm.modules.remuneration.RemunerationModelType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -21,17 +20,17 @@ public class DriverRemunerationConfig {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "driver_id", nullable = false)
-	private Driver driver;
+//	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+//	@JoinColumn(name = "driver_id", nullable = false)
+//	private Driver driver;
 
 	@Column(name = "tenant_id", nullable = false)
 	@NotNull
 	private Long tenantId;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "remuneration_model_type", nullable = false)
-	private RemunerationModelType remunerationModelType;
+//	@Enumerated(EnumType.STRING)
+//	@Column(name = "remuneration_model_type", nullable = false)
+//	private RemunerationModelType remunerationModelType;
 
 	@Column(name = "percentage", precision = 5, scale = 2)
 	private BigDecimal percentage;

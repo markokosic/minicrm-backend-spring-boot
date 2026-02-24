@@ -1,6 +1,6 @@
 package com.markokosic.minicrm.modules.remuneration;
 
-public class PercentageRemuneration implements IRemunerationCalculator {
+public class PercentageRemunerationCalculator implements IRemunerationCalculator {
 
 	@Override
 	public double calculateRemuneration(int sumOfAllRides) {
