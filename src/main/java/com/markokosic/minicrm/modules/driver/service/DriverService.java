@@ -5,10 +5,12 @@ import com.markokosic.minicrm.common.dto.response.PageResponseDTO;
 import com.markokosic.minicrm.common.error.ApiErrorCode;
 import com.markokosic.minicrm.exception.NotFoundException;
 import com.markokosic.minicrm.modules.driver.DriverMapper;
+import com.markokosic.minicrm.modules.driver.RemunerationConfigMapper;
 import com.markokosic.minicrm.modules.driver.dto.request.CreateDriverRequestDTO;
 import com.markokosic.minicrm.modules.driver.dto.request.UpdateDriverRequestDTO;
 import com.markokosic.minicrm.modules.driver.dto.response.DriverResponseDTO;
 import com.markokosic.minicrm.modules.driver.model.Driver;
+import com.markokosic.minicrm.modules.driver.model.DriverRemunerationConfig;
 import com.markokosic.minicrm.modules.driver.model.DriverStatus;
 import com.markokosic.minicrm.modules.driver.repository.DriverRepository;
 import com.markokosic.minicrm.modules.tenant.TenantService;
@@ -26,14 +28,25 @@ public class DriverService {
 	private final DriverMapper driverMapper;
 	private final DriverRepository driverRepository;
 	private final ObjectMapper objectMapper;
+	private final RemunerationConfigMapper configMapper;
 	private final DriverLookupService driverLookupService;
+	private final DriverRemunerationConfigService driverRemunerationConfigService;
 
 	@Transactional
 	public DriverResponseDTO createDriver(CreateDriverRequestDTO request ) {
 		Long tenantId = tenantService.getTenantIdFromContextHolder();
-		Driver customer = driverMapper.toEntity(request, tenantId);
-		driverRepository.save(customer);
-		return driverMapper.toDto(customer);
+		Driver driver = driverMapper.toEntity(request, tenantId);
+		DriverRemunerationConfig config = configMapper.toEntity(
+				request.remunerationConfig(),
+				tenantId,
+				driver
+		);
+
+		driver.initializeWithRemuneration(config);
+
+		driverRepository.save(driver);
+
+		return driverMapper.toDto(driver);
 	}
 
 	public PageResponseDTO<DriverResponseDTO> getAllDrivers(Pageable pageable ) {
