@@ -1,5 +1,6 @@
 package com.markokosic.minicrm.modules.driver.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.markokosic.minicrm.modules.remuneration.RemunerationModelType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -16,9 +17,11 @@ public record CreatePercentageShareRemunerationConfigDTO(
 	@Enumerated(EnumType.STRING)
 	RemunerationModelType remunerationModelType,
 
+	@JsonFormat(shape = JsonFormat.Shape.NUMBER)
 	@PositiveOrZero(message = "{driver.dailyMinPayout.invalid}")
 	Integer minPayout,
 
+	@JsonFormat(shape = JsonFormat.Shape.NUMBER)
 	@DecimalMin(value = "0.0", inclusive = false, message = "{driver.percentage.invalid}")
 	@DecimalMax(value = "100.0", message = "{driver.percentage.invalid}")
 	BigDecimal percentage

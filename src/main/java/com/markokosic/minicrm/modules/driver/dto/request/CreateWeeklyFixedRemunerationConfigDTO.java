@@ -1,5 +1,6 @@
 package com.markokosic.minicrm.modules.driver.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.markokosic.minicrm.modules.remuneration.RemunerationModelType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,6 +14,7 @@ public record CreateWeeklyFixedRemunerationConfigDTO(
 		@Enumerated(EnumType.STRING)
 		RemunerationModelType remunerationModelType,
 
+		@JsonFormat(shape = JsonFormat.Shape.NUMBER)
 		BigDecimal weeklyRate
 
 

@@ -42,4 +42,7 @@ public class DailyRevenue {
 	@Column(name="revenue", nullable = false)
 	private BigDecimal revenue;
 
+	@Column(name="remuneration_version_id", nullable = false)
+	private Long remunerationVersionId;
+
 }
