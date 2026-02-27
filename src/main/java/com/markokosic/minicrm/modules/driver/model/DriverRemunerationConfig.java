@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Setter
 @Table(name="driver_remuneration_configs")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "config_type")
+@DiscriminatorColumn(name = "config_type", discriminatorType = DiscriminatorType.STRING)
 public abstract class DriverRemunerationConfig {
 
 	@Id

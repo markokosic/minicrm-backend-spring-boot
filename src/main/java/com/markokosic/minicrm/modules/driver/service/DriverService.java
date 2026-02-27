@@ -28,7 +28,7 @@ public class DriverService {
 	private final DriverMapper driverMapper;
 	private final DriverRepository driverRepository;
 	private final ObjectMapper objectMapper;
-	private final RemunerationConfigMapper configMapper;
+	private final RemunerationConfigMapper remunerationConfigMapper;
 	private final DriverLookupService driverLookupService;
 	private final DriverRemunerationConfigService driverRemunerationConfigService;
 
@@ -36,7 +36,7 @@ public class DriverService {
 	public DriverResponseDTO createDriver(CreateDriverRequestDTO request ) {
 		Long tenantId = tenantService.getTenantIdFromContextHolder();
 		Driver driver = driverMapper.toEntity(request, tenantId);
-		DriverRemunerationConfig config = configMapper.toEntity(
+		DriverRemunerationConfig config = remunerationConfigMapper.toEntity(
 				request.remunerationConfig(),
 				tenantId,
 				driver
