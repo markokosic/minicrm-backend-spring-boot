@@ -26,7 +26,7 @@ public abstract class DriverRemunerationConfig {
 	private Long tenantId;
 
 	@Column(name = "is_current_remuneration", nullable = false)
-	private boolean isCurrent;
+	private boolean current;
 
 	@Column(name = "valid_from", nullable = false)
 	private LocalDate validFrom;
@@ -35,14 +35,15 @@ public abstract class DriverRemunerationConfig {
 	private LocalDate validUntil;
 
 	public void activate(LocalDate from) {
-		this.isCurrent = true;
+		this.current = true;
 		this.validFrom = from;
 		this.validUntil = null;
 	}
 
 	public void deactivate(LocalDate until) {
-		this.isCurrent = false;
+		this.current = false;
 		this.validUntil = until;
 	}
+
 
 }

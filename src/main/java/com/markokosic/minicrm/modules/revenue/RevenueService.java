@@ -1,6 +1,7 @@
 package com.markokosic.minicrm.modules.revenue;
 
 import com.markokosic.minicrm.modules.driver.model.Driver;
+import com.markokosic.minicrm.modules.driver.model.DriverRemunerationConfig;
 import com.markokosic.minicrm.modules.driver.repository.DriverRepository;
 import com.markokosic.minicrm.modules.driver.service.DriverLookupService;
 import com.markokosic.minicrm.modules.tenant.TenantService;
@@ -24,10 +25,13 @@ public class RevenueService {
 
 	@Transactional
 	public void createDailyRevenue(CreateDailyRevenueRequestDTO request){
-		driverLookupService.validateDriverExistsOrThrow(request.driverId());
+		Driver driver = driverLookupService.validateDriverExistsOrThrow(request.driverId());
 		Long tenantId = tenantService.getTenantIdFromContextHolder();
-		Driver driverProxy = driverRepository.getReferenceById(request.driverId());
-		DailyRevenue dailyRevenue = revenueMapper.toEntity(request, tenantId, driverProxy);
+		DriverRemunerationConfig currentConfig = driver.getRemunerationConfigs().stream()
+				.filter(DriverRemunerationConfig::isCurrent)
+				.findFirst()
+				.orElseThrow(() -> new IllegalStateException("No current remuneration config found"));
+		DailyRevenue dailyRevenue = revenueMapper.toEntity(request, tenantId, driver, currentConfig);
 		revenueRepository.save(dailyRevenue);
 	}
 
@@ -38,17 +42,17 @@ public class RevenueService {
 		Set<Long> driverIds = request.stream().map(CreateDailyRevenueRequestDTO::driverId).collect(Collectors.toSet());
 		driverLookupService.validateAllExistOrThrow(driverIds);
 
-		List<DailyRevenue> entities = request.stream()
-				.map(dto ->
-						{
-							Driver driverProxy = driverRepository.getReferenceById(dto.driverId());
-							return revenueMapper.toEntity(dto, tenantId, driverProxy);
-						}
+//		List<DailyRevenue> entities = request.stream()
+//				.map(dto ->
+//						{
+//							Driver driverProxy = driverRepository.getReferenceById(dto.driverId());
+//							return revenueMapper.toEntity(dto, tenantId, driverProxy);
+//						}
+//
+//				)
+//				.toList();
 
-				)
-				.toList();
-
-		revenueRepository.saveAll(entities);
+//		revenueRepository.saveAll(entities);
 	}
 
 }

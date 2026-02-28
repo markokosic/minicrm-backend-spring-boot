@@ -49,7 +49,7 @@ public class Driver {
 		LocalDate today = LocalDate.now();
 
 		this.remunerationConfigs.stream()
-				.filter(DriverRemunerationConfig::isIsCurrent)
+//				.filter(DriverRemunerationConfig::isIsCurrent)
 				.forEach(config -> {
 					config.deactivate(today.minusDays(1));
 				});
@@ -63,7 +63,7 @@ public class Driver {
 	public void initializeWithRemuneration(DriverRemunerationConfig config) {
 		LocalDate today = LocalDate.now();
 		this.remunerationConfigs.stream()
-				.filter(DriverRemunerationConfig::isIsCurrent)
+//				.filter(DriverRemunerationConfig::current)
 				.forEach(c -> c.deactivate(today.minusDays(1)));
 
 		config.activate(today);
