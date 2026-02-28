@@ -6,6 +6,8 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.math.BigDecimal;
+
 @Mapper(componentModel = "spring")
 public interface RevenueMapper {
 
@@ -14,10 +16,14 @@ public interface RevenueMapper {
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "driver", source = "driver")
 	@Mapping(target = "remunerationConfig", source = "remunerationConfig")
+	@Mapping(target= "companyRemuneration", source="companyRemuneration")
+	@Mapping(target= "driverRemuneration", source="driverRemuneration")
 	DailyRevenue toEntity(
 			CreateDailyRevenueRequestDTO dto,
 			@Context Long tenantId,
 			Driver driver,
-			DriverRemunerationConfig remunerationConfig
+			DriverRemunerationConfig remunerationConfig,
+			BigDecimal companyRemuneration,
+			BigDecimal driverRemuneration
 	);
 }

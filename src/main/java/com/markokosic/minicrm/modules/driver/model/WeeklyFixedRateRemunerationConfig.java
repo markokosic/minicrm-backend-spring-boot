@@ -1,5 +1,6 @@
 package com.markokosic.minicrm.modules.driver.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.Getter;
@@ -12,11 +13,9 @@ import java.math.BigDecimal;
 @Setter
 @DiscriminatorValue("WEEKLY_FIXED_RATE")
 public class WeeklyFixedRateRemunerationConfig extends DriverRemunerationConfig {
+
+	@Column(name="weekly_fixed_rate")
 	private BigDecimal weeklyFixedRate;
-
-//	@PrePersist
-//	protected void onCreate() {
-//		this.setRemunerationModelType(RemunerationModelType.WEEKLY_FIXED_RATE);
-//	}
-
 }
+
+

@@ -14,17 +14,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface RemunerationConfigMapper {
 
-	//	@SubclassMapping(source = PercentageShareRemunerationConfig.class, target = CreatePercentageShareRemunerationConfigDTO.class)
-	//	@SubclassMapping(source = WeeklyFixedRateRemunerationConfig.class, target = CreateWeeklyFixedRemunerationConfigDTO.class)
-	//	void toDto(DriverRemunerationConfig remunerationConfig);
-
-//	@SubclassMapping(source = PercentageShareRemunerationConfig.class, target = CreatePercentageShareRemunerationConfigDTO.class)
-//	@SubclassMapping(source = WeeklyFixedRateRemunerationConfig.class, target = CreateWeeklyFixedRemunerationConfigDTO.class)
-//	@SubclassMapping(source = CreatePercentageShareRemunerationConfigDTO.class, target = PercentageShareRemunerationConfig.class)
-//	@SubclassMapping(source = CreateWeeklyFixedRemunerationConfigDTO.class, target = WeeklyFixedRateRemunerationConfig.class)
-//	@Mapping(target = "id", ignore = true)
-//	DriverRemunerationConfig toEntity(CreateRemunerationRequestDTO dto, Long tenantId, Driver driver);
-
 
 	default DriverRemunerationConfig toEntity(
 			CreateRemunerationRequestDTO dto,
@@ -46,7 +35,7 @@ public interface RemunerationConfigMapper {
 	@Mapping(target = "validFrom", ignore = true)
 	@Mapping(target = "validUntil", ignore = true)
 	@Mapping(target = "revenueSharePercentage", source = "percentage")
-	@Mapping(target = "minPayout", source = "minPayout")
+	@Mapping(target = "minDriverPayout", source = "minPayout")
 	PercentageShareRemunerationConfig toPercentageShareEntity(
 			CreatePercentageShareRemunerationConfigDTO dto,
 			@Context Long tenantId,
@@ -59,7 +48,7 @@ public interface RemunerationConfigMapper {
 	@Mapping(target = "current", ignore = true)
 	@Mapping(target = "validFrom", ignore = true)
 	@Mapping(target = "validUntil", ignore = true)
-	@Mapping(target = "weeklyFixedRate", source = "weeklyRate")
+	@Mapping(target = "weeklyFixedRate", source = "weeklyFixedRate")
 	WeeklyFixedRateRemunerationConfig toWeeklyFixedEntity(
 			CreateWeeklyFixedRemunerationConfigDTO dto,
 			@Context Long tenantId,

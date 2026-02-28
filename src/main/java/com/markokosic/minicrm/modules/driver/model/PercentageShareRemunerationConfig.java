@@ -19,7 +19,7 @@ public class PercentageShareRemunerationConfig extends DriverRemunerationConfig 
 	@DecimalMax(value = "100.0", message = "{driver.percentage.invalid}")
 	private BigDecimal revenueSharePercentage;
 
-	private BigDecimal minPayout;
+	private BigDecimal minDriverPayout;
 
 //	@PrePersist
 //	protected void onCreate() {

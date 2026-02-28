@@ -43,6 +43,12 @@ public class DailyRevenue {
 	@Column(name="revenue", nullable = false)
 	private BigDecimal revenue;
 
+	@Column(name="companyRemuneration", nullable = false)
+	private BigDecimal companyRemuneration;
+
+	@Column(name="driverRemuneration", nullable = false)
+	private BigDecimal driverRemuneration;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "remuneration_version_id", nullable = false)
 	private DriverRemunerationConfig remunerationConfig;

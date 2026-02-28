@@ -15,7 +15,7 @@ public record CreateWeeklyFixedRemunerationConfigDTO(
 		RemunerationModelType remunerationModelType,
 
 		@JsonFormat(shape = JsonFormat.Shape.NUMBER)
-		BigDecimal weeklyRate
+		BigDecimal weeklyFixedRate
 
 
 ) implements CreateRemunerationRequestDTO {
