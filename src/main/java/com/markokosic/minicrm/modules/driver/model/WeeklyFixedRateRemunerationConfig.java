@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @DiscriminatorValue("WEEKLY_FIXED_RATE")
 public class WeeklyFixedRateRemunerationConfig extends DriverRemunerationConfig {
 
-	@Column(name="weekly_fixed_rate")
+	@Column(name="weekly_fixed_rate", precision = 10, scale = 2)
 	private BigDecimal weeklyFixedRate;
 }
 
