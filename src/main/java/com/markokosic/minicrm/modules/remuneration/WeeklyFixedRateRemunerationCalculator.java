@@ -34,6 +34,16 @@ public non-sealed class WeeklyFixedRateRemunerationCalculator  implements IRemun
 //
  		//backend muss dafür DriverRemuneartionConfig mitsenden im DriverDTO
 
+//		Im Taxi-Business (und in deiner App) passiert folgendes:
+//
+//		Der Fahrer kommt rein.
+//
+//		Der Kunde (dein User/Chef) fragt: "Hast du die Miete für diese Woche dabei?"
+//
+//		Der Fahrer sagt: "Ja, hier sind die 600 €."
+//
+//		Der Kunde trägt den Umsatz ein, setzt den Haken (oder gibt den Betrag ein) und dokumentiert damit den Cashflow.
+//
 		return new RemunerationSplit(revenue, revenue);
 	}
 }
