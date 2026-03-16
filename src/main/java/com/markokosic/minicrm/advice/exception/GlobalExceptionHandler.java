@@ -1,11 +1,13 @@
 package com.markokosic.minicrm.advice.exception;
 
-import com.markokosic.minicrm.common.error.ApiErrorCode;
+import com.markokosic.minicrm.common.I18nService;
 import com.markokosic.minicrm.common.dto.response.ErrorResponseDTO;
+import com.markokosic.minicrm.common.error.ApiErrorCode;
 import com.markokosic.minicrm.exception.ApiException;
 import com.markokosic.minicrm.exception.AuthException;
 import com.markokosic.minicrm.exception.BusinessException;
 import com.markokosic.minicrm.exception.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +18,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.time.Instant;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-
+	private final I18nService i18n;
 
 	@ExceptionHandler(ApiException.class)
 	public ResponseEntity<ErrorResponseDTO> handleApiException(ApiException ex) {
@@ -48,7 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	private ResponseEntity<ErrorResponseDTO> buildError(ApiErrorCode code, HttpStatusCode status) {
 		ErrorResponseDTO error = ErrorResponseDTO.builder()
 				.statusCode(status)
-				.message(code.getMessage())
+				.message(i18n.getMessage(code.getKey()))
 				.errorKey(code.getKey())
 				.timestamp(Instant.now())
 				.build();

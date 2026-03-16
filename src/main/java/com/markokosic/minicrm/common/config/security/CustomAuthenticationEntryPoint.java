@@ -1,4 +1,4 @@
-package com.markokosic.minicrm.config.security;
+package com.markokosic.minicrm.common.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.markokosic.minicrm.common.error.ApiErrorCode;
