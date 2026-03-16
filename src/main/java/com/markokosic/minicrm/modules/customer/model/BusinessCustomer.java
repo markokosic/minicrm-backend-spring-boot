@@ -28,6 +28,11 @@ public class BusinessCustomer extends Customer{
 	@Column(name="website")
 	private String website;
 
+	@Override
+	protected String computeDisplayName() {
+		return companyName;
+	}
+
 }
 
 

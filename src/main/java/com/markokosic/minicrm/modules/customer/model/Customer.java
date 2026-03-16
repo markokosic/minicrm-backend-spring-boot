@@ -30,6 +30,10 @@ public class Customer {
 	@NotNull
 	private Long tenantId;
 
+	@Column(name="display_name", nullable = false)
+	@NotNull
+	private String displayName;
+
 	@Column(name="status", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private CustomerStatus status;
@@ -49,14 +53,22 @@ public class Customer {
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
 		this.status = CustomerStatus.ACTIVE;
+		this.displayName = computeDisplayName();
 	}
 
 	@PreUpdate
 	protected void onUpdate() {
 		this.updatedAt = LocalDateTime.now();
+		this.displayName = computeDisplayName();
 	}
 
 	@OneToMany(mappedBy = "customer", orphanRemoval = true)
 	private List<Address> addresses = new ArrayList<>();
+
+	protected String computeDisplayName(
+	) {
+		//TODO REFACTOR CUSTOMER TO ABSTRACT CLASS
+		throw new UnsupportedOperationException("Not implemented");
+	}
 
 }
