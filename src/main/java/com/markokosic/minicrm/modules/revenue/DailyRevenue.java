@@ -1,6 +1,7 @@
 package com.markokosic.minicrm.modules.revenue;
 
 import com.markokosic.minicrm.modules.driver.model.Driver;
+import com.markokosic.minicrm.modules.driver.model.DriverRemunerationConfig;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -41,5 +42,15 @@ public class DailyRevenue {
 
 	@Column(name="revenue", nullable = false)
 	private BigDecimal revenue;
+
+	@Column(name="companyRemuneration", nullable = false)
+	private BigDecimal companyRemuneration;
+
+	@Column(name="driverRemuneration", nullable = false)
+	private BigDecimal driverRemuneration;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "remuneration_version_id", nullable = false)
+	private DriverRemunerationConfig remunerationConfig;
 
 }
