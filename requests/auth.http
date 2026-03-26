@@ -1,0 +1,43 @@
+### Global Variables
+@host = http://localhost:8080
+@api = /api/auth
+
+### 1. Register a new Tenant and User
+POST {{host}}{{api}}/register
+Content-Type: application/json
+
+{
+  "tenantName": "mycompany",
+  "firstName": "Max",
+  "lastName": "Mustermann",
+  "email": "max@mustermann.de",
+  "password": "securePassword123"
+}
+
+### 2. Login
+# Authenticates and sets 'accessToken' and 'refreshToken' cookies.
+# We also capture the tokens into global variables for use in IntelliJ.
+POST {{host}}{{api}}/login
+Content-Type: application/json
+
+{
+  "email": "max@mustermann.de",
+  "password": "securePassword123"
+}
+
+> {%
+    client.global.set("accessToken", response.body.data.accessToken);
+    client.global.set("refreshToken", response.body.data.refreshToken);
+%}
+
+### 3. Get Current User Info (Me)
+# If cookies are blocked by Secure=true on HTTP, we send it manually here:
+GET {{host}}{{api}}/me
+Cookie: accessToken={{accessToken}}
+
+### 4. Refresh Access Token
+GET {{host}}{{api}}/refresh-token
+Cookie: refreshToken={{refreshToken}}
+
+### 5. Logout
+POST {{host}}{{api}}/logout
