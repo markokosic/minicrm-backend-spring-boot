@@ -1,16 +1,17 @@
 package com.markokosic.minicrm.modules.revenue;
 
 import com.markokosic.minicrm.modules.driver.model.Driver;
+import com.markokosic.minicrm.modules.driver.model.DriverRemunerationConfig;
 import com.markokosic.minicrm.modules.driver.repository.DriverRepository;
 import com.markokosic.minicrm.modules.driver.service.DriverLookupService;
+import com.markokosic.minicrm.modules.remuneration.RemunerationService;
+import com.markokosic.minicrm.modules.remuneration.RemunerationSplit;
 import com.markokosic.minicrm.modules.tenant.TenantService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,34 +22,49 @@ public class RevenueService {
 	private final RevenueMapper revenueMapper;
 	private final TenantService tenantService;
 	private final DriverRepository driverRepository;
+	private final RemunerationService remunerationService;
 
 	@Transactional
 	public void createDailyRevenue(CreateDailyRevenueRequestDTO request){
-		driverLookupService.validateDriverExistsOrThrow(request.driverId());
+		Driver driver = driverLookupService.validateDriverExistsOrThrow(request.driverId());
 		Long tenantId = tenantService.getTenantIdFromContextHolder();
-		Driver driverProxy = driverRepository.getReferenceById(request.driverId());
-		DailyRevenue dailyRevenue = revenueMapper.toEntity(request, tenantId, driverProxy);
+
+		//save remunerationConfig to dailyRevenue
+		DriverRemunerationConfig currentConfig = driver.getRemunerationConfigs().stream()
+				.filter(DriverRemunerationConfig::isCurrent)
+				.findFirst()
+				.orElseThrow(() -> new IllegalStateException("No current remuneration config found"));
+
+		//calculate remuneration splits for company & driver
+		RemunerationSplit remunerationSplit = remunerationService.calculateDailyRevenueShare(request.revenue(), currentConfig);
+
+		DailyRevenue dailyRevenue = revenueMapper.toEntity(request, tenantId, driver, currentConfig, remunerationSplit.companyRemuneration(), remunerationSplit.driverRemuneration());
 		revenueRepository.save(dailyRevenue);
 	}
 
 	@Transactional
 	public void createDailyRevenuesBulk(List<CreateDailyRevenueRequestDTO> request){
-		Long tenantId = tenantService.getTenantIdFromContextHolder();
+//		Long tenantId = tenantService.getTenantIdFromContextHolder();
+//
+//		Set<Long> driverIds = request.stream().map(CreateDailyRevenueRequestDTO::driverId).collect(Collectors.toSet());
+//		 driverLookupService.validateAllExistOrThrow(driverIds);
+//
+//		List<DailyRevenue> dailyRevenues = request.stream()
+//				.map(dto ->
+//						{
+//							Driver driverProxy = driverRepository.getReferenceById(dto.driverId());
+//							DriverRemunerationConfig driverRemunerationConfig = driverProxy.getRemunerationConfigs().stream()
+//									.filter(DriverRemunerationConfig::isCurrent)
+//									.findFirst()
+//									.orElseThrow(() -> new IllegalStateException("No current remuneration config found"));
+//							return revenueMapper.toEntity(dto, tenantId, driverProxy, driverRemunerationConfig);
+//						}
+//
+//				)
+//				.toList();
+//
+//		revenueRepository.saveAll(dailyRevenues);
 
-		Set<Long> driverIds = request.stream().map(CreateDailyRevenueRequestDTO::driverId).collect(Collectors.toSet());
-		driverLookupService.validateAllExistOrThrow(driverIds);
-
-		List<DailyRevenue> entities = request.stream()
-				.map(dto ->
-						{
-							Driver driverProxy = driverRepository.getReferenceById(dto.driverId());
-							return revenueMapper.toEntity(dto, tenantId, driverProxy);
-						}
-
-				)
-				.toList();
-
-		revenueRepository.saveAll(entities);
 	}
 
 }

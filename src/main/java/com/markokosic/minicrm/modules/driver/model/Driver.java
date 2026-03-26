@@ -6,7 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,17 +38,38 @@ public class Driver {
 	@Column(name="phone")
 	private String phone;
 
-//	@NotNull
-//	@Column(name="remuneration_model", nullable = false)
-//	@Enumerated(EnumType.STRING)
-//	private RemunerationModelType remunerationModelType;
-//
-//	@OneToMany(
-//			mappedBy = "driver",
-//			cascade = CascadeType.ALL,
-//			orphanRemoval = true
-//	)
-//	private List<DriverRemunerationConfig> remunerationConfigs = new ArrayList<>();
+	@OneToMany(
+			mappedBy = "driver",
+			cascade = CascadeType.ALL,
+			orphanRemoval = true
+	)
+	private List<DriverRemunerationConfig> remunerationConfigs = new ArrayList<>();
+
+	public void activateNewRemuneration(DriverRemunerationConfig newConfig) {
+		LocalDate today = LocalDate.now();
+
+		this.remunerationConfigs.stream()
+//				.filter(DriverRemunerationConfig::isIsCurrent)
+				.forEach(config -> {
+					config.deactivate(today.minusDays(1));
+				});
+
+		newConfig.activate(today);
+		newConfig.setDriver(this);
+
+		this.remunerationConfigs.add(newConfig);
+	}
+
+	public void initializeWithRemuneration(DriverRemunerationConfig config) {
+		LocalDate today = LocalDate.now();
+		this.remunerationConfigs.stream()
+//				.filter(DriverRemunerationConfig::current)
+				.forEach(c -> c.deactivate(today.minusDays(1)));
+
+		config.activate(today);
+		config.setDriver(this);
+		this.remunerationConfigs.add(config);
+	}
 
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;

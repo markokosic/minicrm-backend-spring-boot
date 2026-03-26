@@ -1,29 +1,30 @@
 package com.markokosic.minicrm.modules.driver.service;
 
+import com.markokosic.minicrm.modules.driver.RemunerationConfigMapper;
+import com.markokosic.minicrm.modules.driver.dto.request.CreateRemunerationRequestDTO;
+import com.markokosic.minicrm.modules.driver.model.Driver;
 import com.markokosic.minicrm.modules.driver.model.DriverRemunerationConfig;
-import com.markokosic.minicrm.modules.remuneration.RemunerationModelType;
+import com.markokosic.minicrm.modules.driver.repository.DriverRemunerationConfigRepository;
+import com.markokosic.minicrm.modules.tenant.TenantService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
 public class DriverRemunerationConfigService {
+	private final TenantService tenantService;
+	private final RemunerationConfigMapper configMapper;
+	private final DriverRemunerationConfigRepository configRepository;
+private final DriverLookupService driverLookupService;
 
+	@Transactional
+	public DriverRemunerationConfig createRemunerationConfig(CreateRemunerationRequestDTO dto, Long driverId) {
+		Driver driver = driverLookupService.validateDriverExistsOrThrow(driverId);
 
-
-	class CreateDriverRemunerationConfigDTO {
-		private RemunerationModelType remunerationModelType;
-		private BigDecimal percentage;
-		private BigDecimal fixedAmount;
-		private BigDecimal guaranteeAmountPerWeek;
-		private LocalDate validFrom;             // default today
-	}
-
-	public DriverRemunerationConfig createRemunerationConfig(DriverRemunerationConfig config) {
-		return config;
+		Long tenantId = tenantService.getTenantIdFromContextHolder();
+		DriverRemunerationConfig newConfig = configMapper.toEntity(dto, tenantId, driver);
+		return configRepository.save(newConfig);
 	}
 
 }

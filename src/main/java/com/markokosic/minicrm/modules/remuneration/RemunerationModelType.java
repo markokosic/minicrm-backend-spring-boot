@@ -1,5 +1,5 @@
 package com.markokosic.minicrm.modules.remuneration;
 
 public enum RemunerationModelType {
-	PERCENTAGE, FIXED, GUARANTEE_PERCENTAGE
+	PERCENTAGE_SHARE, WEEKLY_FIXED_RATE
 }
