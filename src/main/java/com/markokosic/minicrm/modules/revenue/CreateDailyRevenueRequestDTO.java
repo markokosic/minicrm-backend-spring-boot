@@ -23,7 +23,10 @@ public record CreateDailyRevenueRequestDTO(
 		BigDecimal kilometersDriven,
 
 		@NotNull
-		BigDecimal revenue
+		BigDecimal revenue,
+
+
+		BigDecimal companyRemuneration
 
 
 ) {

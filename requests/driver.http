@@ -32,6 +32,22 @@ Cookie: accessToken={{accessToken}}
   }
 }
 
+### Create a new Driver with WEEKLY_FIXED_RATE CONFIG
+POST {{host}}{{api}}
+Content-Type: application/json
+Cookie: accessToken={{accessToken}}
+
+{
+  "firstName": "John",
+  "lastName": "Weekly",
+  "email": "john.doe@example.com",
+  "phone": "+43 664 1234567",
+  "remunerationConfig": {
+    "remunerationModelType": "WEEKLY_FIXED_RATE",
+    "weeklyFixedRate": "600"
+  }
+}
+
 ### 2. Get All Drivers (Paginated)
 GET {{host}}{{api}}?page=0&size=10
 Cookie: accessToken={{accessToken}}

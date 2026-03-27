@@ -15,7 +15,7 @@ Content-Type: application/json
     client.global.set("accessToken", response.body.data.accessToken);
 %}
 
-### 1. Create Daily Revenue
+### 1. Create Daily Percentage Share Revenue
 POST {{host}}{{api}}
 Content-Type: application/json
 Cookie: accessToken={{accessToken}}
