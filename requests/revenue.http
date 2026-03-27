@@ -21,11 +21,11 @@ Content-Type: application/json
 Cookie: accessToken={{accessToken}}
 
 {
-  "driverId": 1,
+  "driverId": 3,
   "licencePlate": "W-12345AB",
   "date": "2026-03-26",
-  "kilometersDriven": 150.5,
-  "revenue": 450.00
+  "kilometersDriven": 150,
+  "revenue": 450
 }
 
 ### 2. Create Daily Revenues Bulk

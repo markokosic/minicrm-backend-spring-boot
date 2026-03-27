@@ -15,7 +15,7 @@ Content-Type: application/json
     client.global.set("accessToken", response.body.data.accessToken);
 %}
 
-### 1. Create a new Driver
+### 1. Create a new Driver with PERCENTAGE_SHARE CONFIG
 POST {{host}}{{api}}
 Content-Type: application/json
 Cookie: accessToken={{accessToken}}
@@ -24,7 +24,12 @@ Cookie: accessToken={{accessToken}}
   "firstName": "John",
   "lastName": "Doe",
   "email": "john.doe@example.com",
-  "phone": "+43 664 1234567"
+  "phone": "+43 664 1234567",
+  "remunerationConfig": {
+    "remunerationModelType": "PERCENTAGE_SHARE",
+    "minDriverPayout": "60",
+    "driverRevenueSharePercentage": "60"
+  }
 }
 
 ### 2. Get All Drivers (Paginated)

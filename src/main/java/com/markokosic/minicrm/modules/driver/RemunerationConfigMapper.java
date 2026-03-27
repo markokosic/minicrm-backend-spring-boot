@@ -34,8 +34,8 @@ public interface RemunerationConfigMapper {
 	@Mapping(target = "current", ignore = true)
 	@Mapping(target = "validFrom", ignore = true)
 	@Mapping(target = "validUntil", ignore = true)
-	@Mapping(target = "revenueSharePercentage", source = "percentage")
-	@Mapping(target = "minDriverPayout", source = "minPayout")
+	@Mapping(target = "driverRevenueSharePercentage", source = "driverRevenueSharePercentage")
+	@Mapping(target = "minDriverPayout", source = "minDriverPayout")
 	PercentageShareRemunerationConfig toPercentageShareEntity(
 			CreatePercentageShareRemunerationConfigDTO dto,
 			@Context Long tenantId,
