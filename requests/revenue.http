@@ -1,0 +1,51 @@
+### Global Variables
+@host = http://localhost:8080
+@api = /api/revenues
+
+### 0. Login (to get accessToken)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "max@mustermann.de",
+  "password": "securePassword123"
+}
+
+> {%
+    client.global.set("accessToken", response.body.data.accessToken);
+%}
+
+### 1. Create Daily Revenue
+POST {{host}}{{api}}
+Content-Type: application/json
+Cookie: accessToken={{accessToken}}
+
+{
+  "driverId": 1,
+  "licencePlate": "W-12345AB",
+  "date": "2026-03-26",
+  "kilometersDriven": 150.5,
+  "revenue": 450.00
+}
+
+### 2. Create Daily Revenues Bulk
+POST {{host}}{{api}}/bulk
+Content-Type: application/json
+Cookie: accessToken={{accessToken}}
+
+[
+  {
+    "driverId": 1,
+    "licencePlate": "W-12345AB",
+    "date": "2026-03-25",
+    "kilometersDriven": 120.0,
+    "revenue": 380.00
+  },
+  {
+    "driverId": 1,
+    "licencePlate": "W-12345AB",
+    "date": "2026-03-24",
+    "kilometersDriven": 200.0,
+    "revenue": 550.00
+  }
+]
