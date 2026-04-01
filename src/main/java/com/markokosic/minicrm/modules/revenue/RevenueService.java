@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -29,21 +30,20 @@ public class RevenueService {
 		Driver driver = driverLookupService.validateDriverExistsOrThrow(request.driverId());
 		Long tenantId = tenantService.getTenantIdFromContextHolder();
 
-		//save remunerationConfig to dailyRevenue
 		DriverRemunerationConfig currentConfig = driver.getRemunerationConfigs().stream()
 				.filter(DriverRemunerationConfig::isCurrent)
 				.findFirst()
 				.orElseThrow(() -> new IllegalStateException("No current remuneration config found"));
 
-		//calculate remuneration splits for company & driver
-		RemunerationSplit remunerationSplit = remunerationService.calculateDailyRevenueShare(request.revenue(), currentConfig);
+
+		RemunerationSplit remunerationSplit = remunerationService.calculateRemunerationSplitFromDailyRevenue(request.revenue(), currentConfig, request.companyRemuneration());
 
 		DailyRevenue dailyRevenue = revenueMapper.toEntity(request, tenantId, driver, currentConfig, remunerationSplit.companyRemuneration(), remunerationSplit.driverRemuneration());
 		revenueRepository.save(dailyRevenue);
 	}
 
-	@Transactional
-	public void createDailyRevenuesBulk(List<CreateDailyRevenueRequestDTO> request){
+
+//	public void createDailyRevenuesBulk(List<CreateDailyRevenueRequestDTO> request){
 //		Long tenantId = tenantService.getTenantIdFromContextHolder();
 //
 //		Set<Long> driverIds = request.stream().map(CreateDailyRevenueRequestDTO::driverId).collect(Collectors.toSet());
@@ -65,6 +65,5 @@ public class RevenueService {
 //
 //		revenueRepository.saveAll(dailyRevenues);
 
-	}
 
 }

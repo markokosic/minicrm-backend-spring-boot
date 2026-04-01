@@ -12,7 +12,12 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class RemunerationService {
 
-	public RemunerationSplit calculateDailyRevenueShare(BigDecimal dailyRevenue, DriverRemunerationConfig config) {
+	public RemunerationSplit calculateRemunerationSplitFromDailyRevenue(BigDecimal dailyRevenue, DriverRemunerationConfig config, BigDecimal manualCompanyRemuneration) {
+
+		if (manualCompanyRemuneration != null) {
+			BigDecimal driverShare = dailyRevenue.subtract(manualCompanyRemuneration);
+			return new RemunerationSplit(manualCompanyRemuneration, driverShare);
+		}
 
 		IRemunerationCalculator calculator = switch (config) {
 			case WeeklyFixedRateRemunerationConfig c -> new WeeklyFixedRateRemunerationCalculator();

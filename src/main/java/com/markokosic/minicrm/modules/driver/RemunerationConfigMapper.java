@@ -48,7 +48,7 @@ public interface RemunerationConfigMapper {
 	@Mapping(target = "current", ignore = true)
 	@Mapping(target = "validFrom", ignore = true)
 	@Mapping(target = "validUntil", ignore = true)
-	@Mapping(target = "weeklyFixedRate", source = "weeklyFixedRate")
+	@Mapping(target = "weeklyFixedCompanySettlement", source = "weeklyFixedCompanySettlement")
 	WeeklyFixedRateRemunerationConfig toWeeklyFixedEntity(
 			CreateWeeklyFixedRemunerationConfigDTO dto,
 			@Context Long tenantId,

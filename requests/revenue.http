@@ -28,6 +28,35 @@ Cookie: accessToken={{accessToken}}
   "revenue": 450
 }
 
+
+
+### Create Daily WEEKLY_FIXED_RATE without SETTLEMENT Revenue
+POST {{host}}{{api}}
+Content-Type: application/json
+Cookie: accessToken={{accessToken}}
+
+{
+  "driverId": 10,
+  "licencePlate": "W-WEEKLY",
+  "date": "2026-03-26",
+  "kilometersDriven": 150,
+  "revenue": 350
+}
+
+### Create Daily WEEKLY_FIXED_RATE WITH SETTLEMENT Revenue
+POST {{host}}{{api}}
+Content-Type: application/json
+Cookie: accessToken={{accessToken}}
+
+{
+  "driverId": 10,
+  "licencePlate": "W-WEEKLY",
+  "date": "2026-03-26",
+  "kilometersDriven": 150,
+  "revenue": 350,
+  "companyRemuneration": 600
+}
+
 ### 2. Create Daily Revenues Bulk
 POST {{host}}{{api}}/bulk
 Content-Type: application/json

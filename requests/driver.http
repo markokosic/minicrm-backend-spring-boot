@@ -44,7 +44,8 @@ Cookie: accessToken={{accessToken}}
   "phone": "+43 664 1234567",
   "remunerationConfig": {
     "remunerationModelType": "WEEKLY_FIXED_RATE",
-    "weeklyFixedRate": "600"
+    "weeklyFixedCompanySettlement": "600",
+    "settlementDay": 3
   }
 }
 

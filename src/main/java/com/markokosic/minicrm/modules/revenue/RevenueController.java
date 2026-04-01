@@ -30,10 +30,10 @@ public class RevenueController {
 		 revenueService.createDailyRevenue(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO<>(true, null, i18n.getMessage("success.added")));};
 
-	@PostMapping("/bulk")
-	public ResponseEntity<ApiResponseDTO<Void>> createDailyRevenuesBulk(@Valid @RequestBody List<CreateDailyRevenueRequestDTO> request){
-		revenueService.createDailyRevenuesBulk(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO<>(true, null, i18n.getMessage("success.added")));};
+//	@PostMapping("/bulk")
+//	public ResponseEntity<ApiResponseDTO<Void>> createDailyRevenuesBulk(@Valid @RequestBody List<CreateDailyRevenueRequestDTO> request){
+//		revenueService.createDailyRevenuesBulk(request);
+//		return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO<>(true, null, i18n.getMessage("success.added")));};
 
 
 }

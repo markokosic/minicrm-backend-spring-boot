@@ -25,9 +25,7 @@ public record CreateDailyRevenueRequestDTO(
 		@NotNull
 		BigDecimal revenue,
 
-
 		BigDecimal companyRemuneration
-
 
 ) {
 }
