@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/api/revenues")
 @Slf4j
 @RequiredArgsConstructor
-@Validated //Annotation or wrapper for List? Not sure which one to use
+@Validated
 public class RevenueController {
 
 	private final RevenueService revenueService;
@@ -30,10 +30,10 @@ public class RevenueController {
 		 revenueService.createDailyRevenue(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO<>(true, null, i18n.getMessage("success.added")));};
 
-//	@PostMapping("/bulk")
-//	public ResponseEntity<ApiResponseDTO<Void>> createDailyRevenuesBulk(@Valid @RequestBody List<CreateDailyRevenueRequestDTO> request){
-//		revenueService.createDailyRevenuesBulk(request);
-//		return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO<>(true, null, i18n.getMessage("success.added")));};
+	@PostMapping("/bulk")
+	public ResponseEntity<ApiResponseDTO<Void>> createDailyRevenuesBulk(@Valid @RequestBody List<CreateDailyRevenueRequestDTO> request){
+		revenueService.createDailyRevenuesBulk(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO<>(true, null, i18n.getMessage("success.added")));};
 
 
 }

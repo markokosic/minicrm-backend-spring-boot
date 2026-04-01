@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,28 +46,41 @@ public class RevenueService {
 		revenueRepository.save(dailyRevenue);
 	}
 
+	@Transactional
+	public void createDailyRevenuesBulk(List<CreateDailyRevenueRequestDTO> request) {
+		Long tenantId = tenantService.getTenantIdFromContextHolder();
 
-//	public void createDailyRevenuesBulk(List<CreateDailyRevenueRequestDTO> request){
-//		Long tenantId = tenantService.getTenantIdFromContextHolder();
-//
-//		Set<Long> driverIds = request.stream().map(CreateDailyRevenueRequestDTO::driverId).collect(Collectors.toSet());
-//		 driverLookupService.validateAllExistOrThrow(driverIds);
-//
-//		List<DailyRevenue> dailyRevenues = request.stream()
-//				.map(dto ->
-//						{
-//							Driver driverProxy = driverRepository.getReferenceById(dto.driverId());
-//							DriverRemunerationConfig driverRemunerationConfig = driverProxy.getRemunerationConfigs().stream()
-//									.filter(DriverRemunerationConfig::isCurrent)
-//									.findFirst()
-//									.orElseThrow(() -> new IllegalStateException("No current remuneration config found"));
-//							return revenueMapper.toEntity(dto, tenantId, driverProxy, driverRemunerationConfig);
-//						}
-//
-//				)
-//				.toList();
-//
-//		revenueRepository.saveAll(dailyRevenues);
+		Set<Long> driverIds = request.stream().map(CreateDailyRevenueRequestDTO::driverId).collect(Collectors.toSet());
+		driverLookupService.validateAllExistOrThrow(driverIds);
+
+		List<Driver> drivers = driverRepository.findAllByTenantIdAndIdIn(tenantId, driverIds)
+				.orElseThrow(() -> new IllegalStateException("Drivers not found"));
+
+		Map<Long, Driver> driversMap = drivers.stream()
+				.collect(Collectors.toMap(Driver::getId, d -> d));
+
+		List<DailyRevenue> dailyRevenues = request.stream()
+				.map(dto -> {
+					Driver driver = driversMap.get(dto.driverId());
+					if (driver == null) {
+						throw new IllegalStateException("Driver not found in map: " + dto.driverId());
+					}
+
+					DriverRemunerationConfig currentConfig = driver.getRemunerationConfigs().stream()
+							.filter(DriverRemunerationConfig::isCurrent)
+							.findFirst()
+							.orElseThrow(() -> new IllegalStateException("No current remuneration config found for driver: " + dto.driverId()));
+
+					RemunerationSplit remunerationSplit = remunerationService.calculateRemunerationSplitFromDailyRevenue(
+							dto.revenue(), currentConfig, dto.companyRemuneration());
+
+					return revenueMapper.toEntity(dto, tenantId, driver, currentConfig,
+							remunerationSplit.companyRemuneration(), remunerationSplit.driverRemuneration());
+				})
+				.toList();
+
+		revenueRepository.saveAll(dailyRevenues);
+	}
 
 
 }

@@ -57,24 +57,32 @@ Cookie: accessToken={{accessToken}}
   "companyRemuneration": 600
 }
 
-### 2. Create Daily Revenues Bulk
+### 2. Create Daily Revenues Bulk (Covers all use cases)
 POST {{host}}{{api}}/bulk
 Content-Type: application/json
 Cookie: accessToken={{accessToken}}
 
 [
   {
-    "driverId": 1,
-    "licencePlate": "W-12345AB",
-    "date": "2026-03-25",
+    "driverId": 3,
+    "licencePlate": "W-PERCENT",
+    "date": "2026-03-27",
+    "kilometersDriven": 150.0,
+    "revenue": 450.00
+  },
+  {
+    "driverId": 10,
+    "licencePlate": "W-WEEKLY",
+    "date": "2026-03-27",
     "kilometersDriven": 120.0,
     "revenue": 380.00
   },
   {
-    "driverId": 1,
-    "licencePlate": "W-12345AB",
-    "date": "2026-03-24",
-    "kilometersDriven": 200.0,
-    "revenue": 550.00
+    "driverId": 10,
+    "licencePlate": "W-WEEKLY",
+    "date": "2026-03-26",
+    "kilometersDriven": 180.0,
+    "revenue": 550.00,
+    "companyRemuneration": 600.00
   }
 ]
