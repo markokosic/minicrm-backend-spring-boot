@@ -81,6 +81,13 @@ public class Driver {
 	@Enumerated(EnumType.STRING)
 	private DriverStatus status;
 
+	public DriverRemunerationConfig getCurrentRemunerationConfig() {
+		return this.remunerationConfigs.stream()
+				.filter(DriverRemunerationConfig::isCurrentRemuneration)
+				.findFirst()
+				.orElse(null);
+	}
+
 	@PrePersist
 	protected void onCreate() {
 		this.createdAt = LocalDateTime.now();

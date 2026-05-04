@@ -35,7 +35,7 @@ public class RevenueService {
 		Long tenantId = tenantService.getTenantIdFromContextHolder();
 
 		DriverRemunerationConfig currentConfig = driver.getRemunerationConfigs().stream()
-				.filter(DriverRemunerationConfig::isCurrent)
+				.filter(DriverRemunerationConfig::isCurrentRemuneration)
 				.findFirst()
 				.orElseThrow(() -> new IllegalStateException("No current remuneration config found"));
 
@@ -67,7 +67,7 @@ public class RevenueService {
 					}
 
 					DriverRemunerationConfig currentConfig = driver.getRemunerationConfigs().stream()
-							.filter(DriverRemunerationConfig::isCurrent)
+							.filter(DriverRemunerationConfig::isCurrentRemuneration)
 							.findFirst()
 							.orElseThrow(() -> new IllegalStateException("No current remuneration config found for driver: " + dto.driverId()));
 

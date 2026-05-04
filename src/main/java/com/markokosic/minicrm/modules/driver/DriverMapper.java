@@ -6,8 +6,10 @@ import com.markokosic.minicrm.modules.driver.dto.response.DriverResponseDTO;
 import com.markokosic.minicrm.modules.driver.model.Driver;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {RemunerationConfigMapper.class})
 public interface DriverMapper {
+
+	@Mapping(target = "currentRemuneration", source = "currentRemunerationConfig")
 	DriverResponseDTO toDto(Driver driver);
 
 	@Mapping(target = "tenantId", expression = "java(tenantId)")

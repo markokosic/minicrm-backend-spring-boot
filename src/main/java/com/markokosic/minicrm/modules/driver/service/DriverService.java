@@ -12,6 +12,7 @@ import com.markokosic.minicrm.modules.driver.dto.response.DriverResponseDTO;
 import com.markokosic.minicrm.modules.driver.model.Driver;
 import com.markokosic.minicrm.modules.driver.model.DriverRemunerationConfig;
 import com.markokosic.minicrm.modules.driver.model.DriverStatus;
+import com.markokosic.minicrm.modules.driver.repository.DriverRemunerationConfigRepository;
 import com.markokosic.minicrm.modules.driver.repository.DriverRepository;
 import com.markokosic.minicrm.modules.tenant.TenantService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class DriverService {
 	private final ObjectMapper objectMapper;
 	private final RemunerationConfigMapper remunerationConfigMapper;
 	private final DriverLookupService driverLookupService;
-	private final DriverRemunerationConfigService driverRemunerationConfigService;
+	private final DriverRemunerationConfigRepository driverRemunerationConfigRepository;
 
 	@Transactional
 	public DriverResponseDTO createDriver(CreateDriverRequestDTO request ) {
@@ -49,12 +50,17 @@ public class DriverService {
 		return driverMapper.toDto(driver);
 	}
 
+	@Transactional(readOnly = true)
 	public PageResponseDTO<DriverResponseDTO> getAllDrivers(Pageable pageable ) {
 		return getDriversByTenant(pageable);
 	}
 
+	@Transactional(readOnly = true)
 	public  DriverResponseDTO getDriverById(Long id ) {
-		return driverMapper.toDto(driverLookupService.validateDriverExistsOrThrow(id));
+		Driver driver = driverLookupService.validateDriverExistsOrThrow(id);
+
+
+		return driverMapper.toDto(driver);
 	}
 
 	@Transactional
@@ -90,11 +96,15 @@ public class DriverService {
 		return driver;
 	}
 
+	public DriverRemunerationConfig getActiveConfigByDriverId(Long id){
+		Long tenantId = tenantService.getTenantIdFromContextHolder();
+		return driverRemunerationConfigRepository.findByTenantIdAndDriverIdAndCurrentRemunerationTrue(tenantId, id);
+	}
+
 
 	private PageResponseDTO<DriverResponseDTO> getDriversByTenant(Pageable pageable) {
 		Long tenantId = tenantService.getTenantIdFromContextHolder();
 		Page<DriverResponseDTO> page = driverRepository.findAllByTenantIdAndStatus(tenantId, DriverStatus.ACTIVE, pageable).map(driverMapper::toDto);
-
 		return PageResponseDTO.from(page);
 	}
 
