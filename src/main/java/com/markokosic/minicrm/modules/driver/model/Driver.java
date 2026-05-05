@@ -38,12 +38,14 @@ public class Driver {
 	@Column(name="phone")
 	private String phone;
 
+
 	@OneToMany(
 			mappedBy = "driver",
 			cascade = CascadeType.ALL,
 			orphanRemoval = true
 	)
 	private List<DriverRemunerationConfig> remunerationConfigs = new ArrayList<>();
+
 
 	public void activateNewRemuneration(DriverRemunerationConfig newConfig) {
 		LocalDate today = LocalDate.now();
@@ -83,7 +85,7 @@ public class Driver {
 
 	public DriverRemunerationConfig getCurrentRemunerationConfig() {
 		return this.remunerationConfigs.stream()
-				.filter(DriverRemunerationConfig::isCurrentRemuneration)
+				.filter(DriverRemunerationConfig::isCurrent)
 				.findFirst()
 				.orElse(null);
 	}

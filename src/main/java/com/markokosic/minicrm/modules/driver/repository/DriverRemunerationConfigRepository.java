@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface DriverRemunerationConfigRepository extends JpaRepository<DriverRemunerationConfig, Long> {
 
-	DriverRemunerationConfig findByTenantIdAndDriverIdAndCurrentRemunerationTrue(
+	DriverRemunerationConfig findByTenantIdAndDriverIdAndCurrentTrue(
 			Long tenantId,
 			Long driverId
 	);

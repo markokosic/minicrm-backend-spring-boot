@@ -9,7 +9,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", uses = {RemunerationConfigMapper.class})
 public interface DriverMapper {
 
-	@Mapping(target = "currentRemuneration", source = "currentRemunerationConfig")
+	@Mapping(target = "currentRemunerationConfig", source = "currentRemunerationConfig")
 	DriverResponseDTO toDto(Driver driver);
 
 	@Mapping(target = "tenantId", expression = "java(tenantId)")

@@ -98,7 +98,7 @@ public class DriverService {
 
 	public DriverRemunerationConfig getActiveConfigByDriverId(Long id){
 		Long tenantId = tenantService.getTenantIdFromContextHolder();
-		return driverRemunerationConfigRepository.findByTenantIdAndDriverIdAndCurrentRemunerationTrue(tenantId, id);
+		return driverRemunerationConfigRepository.findByTenantIdAndDriverIdAndCurrentTrue(tenantId, id);
 	}
 
 

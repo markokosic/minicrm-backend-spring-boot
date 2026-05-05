@@ -27,7 +27,7 @@ public record DriverResponseDTO(
 		DriverStatus status,
 
 		@Schema(description = "Current remuneration configuration")
-		RemunerationConfigResponseDTO currentRemuneration,
+		RemunerationConfigResponseDTO currentRemunerationConfig,
 
 		@Schema(description = "Timestamp when the driver was created")
 		LocalDateTime createdAt,
