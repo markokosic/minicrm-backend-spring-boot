@@ -20,7 +20,7 @@ public record CreateWeeklyFixedRemunerationConfigDTO(
 		@NotNull
 		BigDecimal weeklyFixedCompanySettlement,
 
-		@Min(1)
+		@Min(1) //Monday
 		@Max(7)
 		@NotNull
 		Integer settlementDay

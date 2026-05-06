@@ -20,6 +20,7 @@ public interface DriverMapper {
 	Driver toEntity(CreateDriverRequestDTO dto, @Context Long tenantId);
 
 	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+	@Mapping(target ="remunerationConfigs", ignore = true)
 	void updateEntityFromDto(UpdateDriverRequestDTO dto, @MappingTarget Driver driver);
 
 }

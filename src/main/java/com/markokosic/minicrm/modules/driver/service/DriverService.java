@@ -64,11 +64,21 @@ public class DriverService {
 	}
 
 	@Transactional
-	public DriverResponseDTO updateDriver(Long id, UpdateDriverRequestDTO requestBody) {
+	public DriverResponseDTO updateDriver(Long id, UpdateDriverRequestDTO request) {
+		Long tenantId = tenantService.getTenantIdFromContextHolder();
 
 		Driver driver = driverLookupService.validateDriverExistsOrThrow(id);
 
-		driverMapper.updateEntityFromDto(requestBody, driver);
+		driverMapper.updateEntityFromDto(request, driver);
+
+		if(request.remunerationConfig() != null){
+			DriverRemunerationConfig config = remunerationConfigMapper.toEntity(
+					request.remunerationConfig(),
+					tenantId,
+					driver
+			);
+			driver.activateNewRemuneration(config);
+		}
 
 		driverRepository.save(driver);
 		return driverMapper.toDto(driver);
@@ -96,10 +106,6 @@ public class DriverService {
 		return driver;
 	}
 
-	public DriverRemunerationConfig getActiveConfigByDriverId(Long id){
-		Long tenantId = tenantService.getTenantIdFromContextHolder();
-		return driverRemunerationConfigRepository.findByTenantIdAndDriverIdAndCurrentTrue(tenantId, id);
-	}
 
 
 	private PageResponseDTO<DriverResponseDTO> getDriversByTenant(Pageable pageable) {
