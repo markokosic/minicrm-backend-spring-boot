@@ -11,6 +11,7 @@ public record CreateDailyRevenueRequestDTO(
 		@NotNull
 		Long driverId,
 
+		//TODO change to licensePlate
 		@NotNull
 		String licencePlate,
 
