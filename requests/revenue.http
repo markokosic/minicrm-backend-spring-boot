@@ -22,7 +22,7 @@ Cookie: accessToken={{accessToken}}
 
 {
   "driverId": 3,
-  "licencePlate": "W-12345AB",
+  "carId": 1,
   "date": "2026-03-26",
   "kilometersDriven": 150,
   "revenue": 450
@@ -37,7 +37,7 @@ Cookie: accessToken={{accessToken}}
 
 {
   "driverId": 10,
-  "licencePlate": "W-WEEKLY",
+  "carId": 1,
   "date": "2026-03-26",
   "kilometersDriven": 150,
   "revenue": 350
@@ -50,7 +50,7 @@ Cookie: accessToken={{accessToken}}
 
 {
   "driverId": 10,
-  "licencePlate": "W-WEEKLY",
+  "carId": 1,
   "date": "2026-03-26",
   "kilometersDriven": 150,
   "revenue": 350,
@@ -65,21 +65,21 @@ Cookie: accessToken={{accessToken}}
 [
   {
     "driverId": 3,
-    "licencePlate": "W-PERCENT",
+    "carId": 1,
     "date": "2026-03-27",
     "kilometersDriven": 150.0,
     "revenue": 450.00
   },
   {
     "driverId": 10,
-    "licencePlate": "W-WEEKLY",
+    "carId": 1,
     "date": "2026-03-27",
     "kilometersDriven": 120.0,
     "revenue": 380.00
   },
   {
     "driverId": 10,
-    "licencePlate": "W-WEEKLY",
+    "carId": 1,
     "date": "2026-03-26",
     "kilometersDriven": 180.0,
     "revenue": 550.00,
