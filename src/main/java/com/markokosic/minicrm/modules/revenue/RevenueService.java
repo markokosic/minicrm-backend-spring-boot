@@ -11,10 +11,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,7 +21,7 @@ import java.util.stream.Collectors;
 public class RevenueService {
 
 	private final DriverLookupService driverLookupService;
-	private final RevenueRepository revenueRepository;
+	private final DailyRevenueRepository dailyRevenueRepository;
 	private final RevenueMapper revenueMapper;
 	private final TenantService tenantService;
 	private final DriverRepository driverRepository;
@@ -43,7 +41,7 @@ public class RevenueService {
 		RemunerationSplit remunerationSplit = remunerationService.calculateRemunerationSplitFromDailyRevenue(request.revenue(), currentConfig, request.companyRemuneration());
 
 		DailyRevenue dailyRevenue = revenueMapper.toEntity(request, tenantId, driver, currentConfig, remunerationSplit.companyRemuneration(), remunerationSplit.driverRemuneration());
-		revenueRepository.save(dailyRevenue);
+		dailyRevenueRepository.save(dailyRevenue);
 	}
 
 	@Transactional
@@ -79,7 +77,7 @@ public class RevenueService {
 				})
 				.toList();
 
-		revenueRepository.saveAll(dailyRevenues);
+		dailyRevenueRepository.saveAll(dailyRevenues);
 	}
 
 

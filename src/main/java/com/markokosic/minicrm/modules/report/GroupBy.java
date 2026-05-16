@@ -1,5 +1,5 @@
 package com.markokosic.minicrm.modules.report;
 
 public enum GroupBy {
-	DAY, MONTH, YEAR, DRIVER, CAR
+	NONE, DAY, MONTH, YEAR, DRIVER, CAR
 }

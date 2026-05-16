@@ -2,10 +2,6 @@ package com.markokosic.minicrm.modules.report;
 
 import com.markokosic.minicrm.common.I18nService;
 import com.markokosic.minicrm.common.dto.response.ApiResponseDTO;
-import com.markokosic.minicrm.common.dto.response.PageResponseDTO;
-import com.markokosic.minicrm.modules.driver.dto.response.DriverResponseDTO;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,25 +20,30 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class ReportController {
 
-	private final ReportService reportSerivce;
+	private final ReportService reportService;
 	private final I18nService i18n;
 
-	//Endpoint welcher mir einen Report generiert anhand Parameter (driverId, carId, dateFrom, dateTo, groupBy MONTH DAY YEAR DRIVER CAR,
-	//gib mir in Abhängigkeit meiner Filter immer verschiedene Datensätze zurück
-	@GetMapping("/revenue-details")
-	public ResponseEntity<ApiResponseDTO<XXXXX>> getRevenueDetails(
+	@GetMapping("/revenue")
+	public ResponseEntity<ApiResponseDTO<RevenueReportResponseDTO>> getRevenueReport(
 			@RequestParam
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 			LocalDate dateFrom,
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 			LocalDate dateTo,
 			@RequestParam (required = false) Long driverId,
-			@RequestParam (required = false) Long carId,
-			@RequestParam GroupBy groupBy
+//			@RequestParam (required = false) long vehicleId,
+			@RequestParam (required = false) GroupBy groupBy
 	) {
-		DetailedReportResponseDTO detailedReport = reportService.generateReport(dateFrom, dateTo, driverId, carId, groupBy);
-		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, detailedReport, i18n.getMessage("success.fetched")));
+		RevenueReportResponseDTO revenueReport = reportService.generateRevenueReport(dateFrom, dateTo, driverId, groupBy);
+		return ResponseEntity.status(HttpStatus.OK).body(new ApiResponseDTO<>(true, revenueReport, i18n.getMessage("success.fetched")));
 
+
+		//dateFrom, dateTo, -> holt alle Einträge von daily_revenues im Datumsbereich
+		//dateFrom, dateTo, groupBy = DAY, MONTH, YEAR, -> alle Einträge im Datumsbereich UND DAY: alle Einträge vom Tag (N), ODER MONTH: aggregierte Einträge pro Tag (max. 31), ODER YEAR: aggregierte Einträge pro Monat (12)
+		//dateFrom, dateTo, driverId, groupBy = NONE, DAY, MONTH, YEAR, -> alle Einträge im Datumsbereich, aggregiert wie oben, bei NONE einfach alle Einträge
+		//dateFrom, dateTo, vehicleId, groupBy = NONE, DAY, MONTH, YEAR,
+		//jeder Report gibt aber noch folgendes mit: groupedBy, totalRevenue, totalCompanyShare, totalKm, entryCount, entries (kann man besseres Vokabel für finden)
+		//jeder entry? hat  driverName, driverId, vehicleModel, vehicleLicencePlate, revenue, companyShare, km, datum
 	}
 
 }

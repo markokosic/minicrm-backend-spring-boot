@@ -1,5 +1,6 @@
 package com.markokosic.minicrm.modules.revenue;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.markokosic.minicrm.modules.driver.model.Driver;
 import com.markokosic.minicrm.modules.driver.model.DriverRemunerationConfig;
 import jakarta.persistence.*;
@@ -26,7 +27,6 @@ public class DailyRevenue {
 	@NotNull
 	private Long tenantId;
 
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "driver_id", nullable = false)
 	private Driver driver;
@@ -35,6 +35,7 @@ public class DailyRevenue {
 	private String licencePlate;
 
 	@Column(name="date", nullable = false)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate date;
 
 	@Column(name="kilometers_driven", nullable = false)
