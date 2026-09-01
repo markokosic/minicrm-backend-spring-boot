@@ -52,6 +52,19 @@ public class ShiftController {
 		return ResponseEntity.ok(new ApiResponseDTO<>(true, shifts, i18n.getMessage("success.fetched")));
 	}
 
+	@GetMapping(value = "/my/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Get my shift by ID", description = "Fetches details of a specific shift belonging to the currently authenticated driver.")
+	@ApiResponse(responseCode = "200", description = "Shift fetched successfully")
+	@ApiResponse(responseCode = "404", description = "Shift not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+	@PreAuthorize("hasAnyRole(T(com.markokosic.minicrm.modules.role.dto.Roles).DRIVER.name(), T(com.markokosic.minicrm.modules.role.dto.Roles).ADMIN.name(), T(com.markokosic.minicrm.modules.role.dto.Roles).OWNER.name())")
+	public ResponseEntity<ApiResponseDTO<ShiftResponseDTO>> getMyShiftById(
+			@PathVariable Long id,
+			@AuthenticationPrincipal UserPrincipal principal
+	) {
+		ShiftResponseDTO shift = shiftService.getMyShiftById(principal.getId(), id);
+		return ResponseEntity.ok(new ApiResponseDTO<>(true, shift, i18n.getMessage("success.fetched")));
+	}
+
 	@PostMapping(value = "/my", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "Create my shift", description = "Logs a new shift for the currently authenticated driver.")
 	@ApiResponse(responseCode = "201", description = "Shift created successfully")

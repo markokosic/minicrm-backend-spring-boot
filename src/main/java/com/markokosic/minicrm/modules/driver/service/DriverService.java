@@ -32,6 +32,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -121,6 +122,20 @@ public class DriverService {
 	}
 
 	@Transactional(readOnly = true)
+	public DriverResponseDTO getMyDriverProfile(Long userId) {
+		Driver driver = driverRepository.findByUserId(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("domain.driver.not_found"));
+		return driverMapper.toDto(driver, remunerationConfigMapper);
+	}
+
+	@Transactional(readOnly = true)
+	public List<DriverRevenueOptionDTO> getMyRevenueOptions(Long userId) {
+		Driver driver = driverRepository.findByUserId(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("domain.driver.not_found"));
+		return getRevenueOptionsForDriver(driver.getId());
+	}
+
+	@Transactional(readOnly = true)
 	public List<DriverRevenueOptionDTO> getRevenueOptionsForDriver(Long driverId) {
 		Driver driver = driverLookupService.validateDriverExistsOrThrow(driverId);
 		List<DriverRemunerationConfig> activeConfigs = driver.getActiveRemunerationConfigs();
@@ -132,7 +147,7 @@ public class DriverService {
 				.anyMatch(c -> c.getType() == RemunerationModelType.PERCENTAGE_SHARE);
 		if (hasPercentage) {
 			options.add(new DriverRevenueOptionDTO(
-					ShiftEntryCategory.REGULAR, null, "Regular Fare (Taxameter)", null
+					ShiftEntryCategory.REGULAR, null, "Regular Fare (Taxameter)", null, null
 			));
 		}
 
@@ -143,8 +158,13 @@ public class DriverService {
 		if (hasAnyFlatRate) {
 			List<FlatRateType> activeFlatRates = flatRateTypeRepository.findAllByCurrentIsTrueAndStatus(FlatRateTypeStatus.ACTIVE);
 			for (FlatRateType fr : activeFlatRates) {
+				DriverRemunerationConfig config = driver.getRemunerationConfigForEntry(ShiftEntryCategory.FLAT_RATE, fr);
+				BigDecimal driverPayout = null;
+				if (config instanceof com.markokosic.minicrm.modules.driver.model.FlatRateRemunerationConfig frc) {
+					driverPayout = frc.getDriverFlatRatePayoutPerShift();
+				}
 				options.add(new DriverRevenueOptionDTO(
-						ShiftEntryCategory.FLAT_RATE, fr.getId(), fr.getName(), fr.getDefaultPrice()
+						ShiftEntryCategory.FLAT_RATE, fr.getId(), fr.getName(), fr.getDefaultPrice(), driverPayout
 				));
 			}
 		}
@@ -154,7 +174,7 @@ public class DriverService {
 				.anyMatch(c -> c.getType() == RemunerationModelType.WEEKLY_FIXED_RATE);
 		if (hasWeekly) {
 			options.add(new DriverRevenueOptionDTO(
-					ShiftEntryCategory.WEEKLY, null, "Weekly Fixed Fee / Rental", null
+					ShiftEntryCategory.WEEKLY, null, "Weekly Fixed Fee / Rental", null, null
 			));
 		}
 

@@ -44,6 +44,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.markokosic.minicrm.modules.driver.dto.response.DriverRevenueOptionDTO;
+import com.markokosic.minicrm.modules.flatratetype.repository.FlatRateTypeRepository;
+import com.markokosic.minicrm.modules.shift.model.ShiftEntryCategory;
+import java.util.Optional;
+
 @ExtendWith(MockitoExtension.class)
 public class DriverServiceTest {
 
@@ -64,6 +69,9 @@ public class DriverServiceTest {
 
     @Mock
     private DriverRemunerationConfigRepository driverRemunerationConfigRepository;
+
+    @Mock
+    private FlatRateTypeRepository flatRateTypeRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -89,7 +97,7 @@ public class DriverServiceTest {
         driver.setLastName("Mustermann");
 
         FlatRateRemunerationConfig config = new FlatRateRemunerationConfig();
-        config.setFlatRateFee(new BigDecimal("30.00"));
+        config.setDriverFlatRatePayoutPerShift(new BigDecimal("30.00"));
 
         DriverResponseDTO expectedResponse = new DriverResponseDTO(
                 1L, null, "Max", "Mustermann", "max@email.com", "+436601234567",
@@ -402,5 +410,106 @@ public class DriverServiceTest {
                 driverService.deactivateDriverUser(driverId)
         );
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void testGetMyDriverProfile_Success() {
+        Long userId = 5L;
+        Driver driver = new Driver();
+        driver.setId(1L);
+
+        DriverResponseDTO responseDTO = new DriverResponseDTO(
+                1L, userId, "Max", "Mustermann", "max@taxi.com", "+123456",
+                DriverStatus.ACTIVE, List.of(), null, null
+        );
+
+        when(driverRepository.findByUserId(userId)).thenReturn(Optional.of(driver));
+        when(driverMapper.toDto(driver, remunerationConfigMapper)).thenReturn(responseDTO);
+
+        DriverResponseDTO result = driverService.getMyDriverProfile(userId);
+
+        assertNotNull(result);
+        assertEquals("Max", result.firstName());
+        verify(driverRepository, times(1)).findByUserId(userId);
+    }
+
+    @Test
+    void testGetMyDriverProfile_ThrowsNotFound_WhenDriverNotFound() {
+        Long userId = 99L;
+        when(driverRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                driverService.getMyDriverProfile(userId)
+        );
+    }
+
+    @Test
+    void testGetMyRevenueOptions_Success() {
+        Long userId = 5L;
+        Driver driver = new Driver();
+        driver.setId(1L);
+
+        com.markokosic.minicrm.modules.driver.model.PercentageShareRemunerationConfig config =
+                new com.markokosic.minicrm.modules.driver.model.PercentageShareRemunerationConfig();
+        config.setDriver(driver);
+        config.setCurrent(true);
+        config.setDriverRevenueSharePercentage(new BigDecimal("60.00"));
+        driver.setRemunerationConfigs(List.of(config));
+
+        when(driverRepository.findByUserId(userId)).thenReturn(Optional.of(driver));
+        when(driverLookupService.validateDriverExistsOrThrow(1L)).thenReturn(driver);
+
+        List<DriverRevenueOptionDTO> result = driverService.getMyRevenueOptions(userId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(ShiftEntryCategory.REGULAR, result.get(0).entryCategory());
+    }
+
+    @Test
+    void testGetMyRevenueOptions_WithFlatRate_ReturnsDriverFlatRatePayoutPerShift() {
+        Long userId = 5L;
+        Driver driver = new Driver();
+        driver.setId(1L);
+
+        com.markokosic.minicrm.modules.flatratetype.model.FlatRateType flatRateType =
+                new com.markokosic.minicrm.modules.flatratetype.model.FlatRateType();
+        flatRateType.setId(10L);
+        flatRateType.setName("Wien -> Airport");
+        flatRateType.setDefaultPrice(new BigDecimal("36.00"));
+        flatRateType.setFlatRateCode("VIE_AIRPORT");
+
+        com.markokosic.minicrm.modules.driver.model.FlatRateRemunerationConfig config =
+                new com.markokosic.minicrm.modules.driver.model.FlatRateRemunerationConfig();
+        config.setDriver(driver);
+        config.setCurrent(true);
+        config.setFlatRateType(flatRateType);
+        config.setDriverFlatRatePayoutPerShift(new BigDecimal("25.00"));
+        driver.setRemunerationConfigs(List.of(config));
+
+        when(driverRepository.findByUserId(userId)).thenReturn(Optional.of(driver));
+        when(driverLookupService.validateDriverExistsOrThrow(1L)).thenReturn(driver);
+        when(flatRateTypeRepository.findAllByCurrentIsTrueAndStatus(any())).thenReturn(List.of(flatRateType));
+
+        List<DriverRevenueOptionDTO> result = driverService.getMyRevenueOptions(userId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        DriverRevenueOptionDTO option = result.get(0);
+        assertEquals(ShiftEntryCategory.FLAT_RATE, option.entryCategory());
+        assertEquals(10L, option.flatRateTypeId());
+        assertEquals("Wien -> Airport", option.label());
+        assertEquals(new BigDecimal("36.00"), option.defaultPrice());
+        assertEquals(new BigDecimal("25.00"), option.driverFlatRatePayoutPerShift());
+    }
+
+    @Test
+    void testGetMyRevenueOptions_ThrowsNotFound_WhenDriverNotFound() {
+        Long userId = 99L;
+        when(driverRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                driverService.getMyRevenueOptions(userId)
+        );
     }
 }

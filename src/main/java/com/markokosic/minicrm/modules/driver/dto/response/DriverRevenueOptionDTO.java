@@ -8,5 +8,6 @@ public record DriverRevenueOptionDTO(
 		ShiftEntryCategory entryCategory,
 		Long flatRateTypeId,
 		String label,
-		BigDecimal defaultPrice
+		BigDecimal defaultPrice,
+		BigDecimal driverFlatRatePayoutPerShift
 ) {}

@@ -122,6 +122,7 @@ class ShiftServiceTest {
         );
 
         UpdateShiftRequestDTO request = new UpdateShiftRequestDTO(
+                null,
                 new BigDecimal("150.00"),
                 new BigDecimal("300.00"),
                 LocalDateTime.of(2025, 5, 10, 9, 0),
@@ -142,6 +143,38 @@ class ShiftServiceTest {
         assertTrue(shift.getRevenues().stream().anyMatch(e -> Long.valueOf(101L).equals(e.getId()) && e.getRevenue().compareTo(new BigDecimal("200.00")) == 0));
         assertTrue(shift.getRevenues().stream().anyMatch(e -> e.getId() == null && e.getRevenue().compareTo(new BigDecimal("80.00")) == 0));
         assertFalse(shift.getRevenues().stream().anyMatch(e -> Long.valueOf(102L).equals(e.getId())));
+    }
+
+    @Test
+    void getMyShiftById_Success() {
+        Driver driver = new Driver();
+        driver.setId(10L);
+        shift.setDriver(driver);
+
+        when(driverRepository.findByUserId(5L)).thenReturn(Optional.of(driver));
+        when(shiftRepository.findById(50L)).thenReturn(Optional.of(shift));
+        when(shiftMapper.toDto(shift)).thenReturn(mock(com.markokosic.minicrm.modules.shift.dto.response.ShiftResponseDTO.class));
+
+        var result = shiftService.getMyShiftById(5L, 50L);
+
+        assertNotNull(result);
+        verify(driverRepository).findByUserId(5L);
+        verify(shiftRepository).findById(50L);
+    }
+
+    @Test
+    void getMyShiftById_ThrowsNotFound_WhenShiftBelongsToAnotherDriver() {
+        Driver myDriver = new Driver();
+        myDriver.setId(10L);
+        Driver otherDriver = new Driver();
+        otherDriver.setId(99L);
+        shift.setDriver(otherDriver);
+
+        when(driverRepository.findByUserId(5L)).thenReturn(Optional.of(myDriver));
+        when(shiftRepository.findById(50L)).thenReturn(Optional.of(shift));
+
+        assertThrows(com.markokosic.minicrm.exception.ResourceNotFoundException.class,
+                () -> shiftService.getMyShiftById(5L, 50L));
     }
 
     @Test
@@ -190,16 +223,21 @@ class ShiftServiceTest {
     }
 
     @Test
-    void updateMyShift_Success_WhenPending() {
+    void updateMyShift_Success_WhenPending_AndCarUpdated() {
         when(driver.getId()).thenReturn(10L);
         shift.setStatus(ShiftStatus.PENDING);
 
+        Car newCar = new Car();
+        newCar.setId(20L);
+
         when(driverRepository.findByUserId(5L)).thenReturn(Optional.of(driver));
         when(shiftRepository.findById(50L)).thenReturn(Optional.of(shift));
+        when(carRepository.findById(20L)).thenReturn(Optional.of(newCar));
         when(shiftRepository.save(any(Shift.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(shiftMapper.toDto(any())).thenReturn(mock(com.markokosic.minicrm.modules.shift.dto.response.ShiftResponseDTO.class));
 
         UpdateShiftRequestDTO request = new UpdateShiftRequestDTO(
+                20L,
                 new BigDecimal("150.00"), new BigDecimal("300.00"),
                 LocalDateTime.of(2025, 5, 10, 9, 0), LocalDateTime.of(2025, 5, 10, 17, 0),
                 List.of()
@@ -208,6 +246,7 @@ class ShiftServiceTest {
         var result = shiftService.updateMyShift(5L, 50L, request);
 
         assertNotNull(result);
+        assertEquals(20L, shift.getCar().getId());
         verify(shiftRepository).save(shift);
     }
 
@@ -220,6 +259,7 @@ class ShiftServiceTest {
         when(shiftRepository.findById(50L)).thenReturn(Optional.of(shift));
 
         UpdateShiftRequestDTO request = new UpdateShiftRequestDTO(
+                null,
                 new BigDecimal("150.00"), new BigDecimal("300.00"),
                 LocalDateTime.of(2025, 5, 10, 9, 0), LocalDateTime.of(2025, 5, 10, 17, 0),
                 List.of()

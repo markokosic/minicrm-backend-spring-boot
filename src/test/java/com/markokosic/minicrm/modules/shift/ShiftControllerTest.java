@@ -64,6 +64,29 @@ class ShiftControllerTest {
     }
 
     @Test
+    void getMyShiftById_Success_WhenDriverRole() throws Exception {
+        com.markokosic.minicrm.modules.user.User driverUser = new com.markokosic.minicrm.modules.user.User();
+        driverUser.setId(5L);
+        driverUser.setEmail("driver@taxi.com");
+        driverUser.setRoles(com.markokosic.minicrm.modules.role.dto.Roles.DRIVER);
+        com.markokosic.minicrm.modules.auth.model.UserPrincipal principal = new com.markokosic.minicrm.modules.auth.model.UserPrincipal(driverUser);
+
+        ShiftResponseDTO responseDTO = new ShiftResponseDTO(
+                1L, null, null, new BigDecimal("100.00"), new BigDecimal("200.00"),
+                new BigDecimal("100.00"), LocalDateTime.now(), LocalDateTime.now().plusHours(8),
+                ShiftStatus.PENDING, List.of()
+        );
+
+        when(shiftService.getMyShiftById(eq(5L), eq(1L))).thenReturn(responseDTO);
+        when(i18n.getMessage("success.fetched")).thenReturn("Shift fetched");
+
+        mockMvc.perform(get("/api/shifts/my/1").with(user(principal)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.id").value(1L));
+    }
+
+    @Test
     void createMyShift_Success_WhenDriverRole() throws Exception {
         com.markokosic.minicrm.modules.user.User driverUser = new com.markokosic.minicrm.modules.user.User();
         driverUser.setId(5L);
@@ -173,6 +196,7 @@ class ShiftControllerTest {
                 101L, com.markokosic.minicrm.modules.shift.model.ShiftEntryCategory.REGULAR, null, new BigDecimal("150.00"), null, null
         );
         var requestDTO = new com.markokosic.minicrm.modules.shift.dto.request.UpdateShiftRequestDTO(
+                null,
                 new BigDecimal("100.00"), new BigDecimal("250.00"),
                 LocalDateTime.now(), LocalDateTime.now().plusHours(8), List.of(updateReq)
         );

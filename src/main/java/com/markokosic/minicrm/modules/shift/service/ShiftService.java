@@ -38,6 +38,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.markokosic.minicrm.modules.shift.util.ShiftValidationUtils;
+
 @Service
 @RequiredArgsConstructor
 public class ShiftService {
@@ -52,6 +54,13 @@ public class ShiftService {
 
 	@Transactional
 	public ShiftResponseDTO createShift(CreateShiftRequestDTO request) {
+		ShiftValidationUtils.validateShiftParameters(
+				request.odometerStart(),
+				request.odometerEnd(),
+				request.shiftStart(),
+				request.shiftEnd()
+		);
+
 		Driver driver = driverRepository.findById(request.driverId())
 				.orElseThrow(() -> new ResourceNotFoundException("domain.driver.not_found"));
 
@@ -80,6 +89,13 @@ public class ShiftService {
 
 	@Transactional
 	public ShiftResponseDTO updateShift(Long id, UpdateShiftRequestDTO request) {
+		ShiftValidationUtils.validateShiftParameters(
+				request.odometerStart(),
+				request.odometerEnd(),
+				request.shiftStart(),
+				request.shiftEnd()
+		);
+
 		Shift shift = shiftRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("domain.shift.not_found"));
 
@@ -91,6 +107,11 @@ public class ShiftService {
 	}
 
 	private void updateShiftMetadata(Shift shift, UpdateShiftRequestDTO request) {
+		if (request.carId() != null && (shift.getCar() == null || !request.carId().equals(shift.getCar().getId()))) {
+			Car car = carRepository.findById(request.carId())
+					.orElseThrow(() -> new ResourceNotFoundException("domain.car.not_found"));
+			shift.setCar(car);
+		}
 		shift.setOdometerStart(request.odometerStart());
 		shift.setOdometerEnd(request.odometerEnd());
 		shift.setShiftStart(request.shiftStart());
@@ -231,6 +252,21 @@ public class ShiftService {
 		return getAllShifts(driver.getId(), null, null, pageable);
 	}
 
+	@Transactional(readOnly = true)
+	public ShiftResponseDTO getMyShiftById(Long userId, Long shiftId) {
+		Driver driver = driverRepository.findByUserId(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("domain.driver.not_found"));
+
+		Shift shift = shiftRepository.findById(shiftId)
+				.orElseThrow(() -> new ResourceNotFoundException("domain.shift.not_found"));
+
+		if (!shift.getDriver().getId().equals(driver.getId())) {
+			throw new ResourceNotFoundException("domain.shift.not_found");
+		}
+
+		return shiftMapper.toDto(shift);
+	}
+
 	@Transactional
 	public ShiftResponseDTO createMyShift(Long userId, CreateMyShiftRequestDTO request) {
 		Driver driver = driverRepository.findByUserId(userId)
@@ -268,6 +304,13 @@ public class ShiftService {
 
 	@Transactional
 	public ShiftResponseDTO updateMyShift(Long userId, Long shiftId, UpdateShiftRequestDTO request) {
+		ShiftValidationUtils.validateShiftParameters(
+				request.odometerStart(),
+				request.odometerEnd(),
+				request.shiftStart(),
+				request.shiftEnd()
+		);
+
 		Driver driver = driverRepository.findByUserId(userId)
 				.orElseThrow(() -> new ResourceNotFoundException("domain.driver.not_found"));
 

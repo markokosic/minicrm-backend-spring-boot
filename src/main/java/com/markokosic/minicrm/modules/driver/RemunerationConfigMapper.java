@@ -76,7 +76,7 @@ public interface RemunerationConfigMapper {
 	@Mapping(target = "current", ignore = true)
 	@Mapping(target = "validFrom", ignore = true)
 	@Mapping(target = "validUntil", ignore = true)
-	@Mapping(target = "flatRateFee", source = "dto.flatRateFee")
+	@Mapping(target = "driverFlatRatePayoutPerShift", source = "dto.driverFlatRatePayoutPerShift")
 	@Mapping(target = "flatRateType", source = "flatRateType")
 	FlatRateRemunerationConfig toFlatRateEntity(
 			CreateFlatRateRemunerationConfigDTO dto,
@@ -93,5 +93,7 @@ public interface RemunerationConfigMapper {
 	@Mapping(target = "remunerationModelType", source = "type")
 	@Mapping(source = "flatRateType.id", target = "flatRateTypeId")
 	@Mapping(source = "flatRateType.name", target = "flatRateTypeName")
+	@Mapping(source = "flatRateType.flatRateCode", target = "flatRateCode")
+	@Mapping(source = "flatRateType.defaultPrice", target = "defaultPrice")
 	FlatRateRemunerationResponseDTO toFlatRateResponseDto(FlatRateRemunerationConfig entity);
 }

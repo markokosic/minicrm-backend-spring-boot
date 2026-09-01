@@ -21,8 +21,8 @@ import java.util.Objects;
 public class FlatRateRemunerationConfig extends DriverRemunerationConfig {
 
 	@DecimalMin(value = "0.0", message = "{driver.minDriverPayout.negative}")
-	@Column(name="flat_rate_fee", precision = 19, scale = 2)
-	private BigDecimal flatRateFee;
+	@Column(name="driver_flat_rate_payout_per_shift", precision = 19, scale = 2)
+	private BigDecimal driverFlatRatePayoutPerShift;
 
 	@Override
 	public RemunerationModelType getType() {
@@ -35,7 +35,7 @@ public class FlatRateRemunerationConfig extends DriverRemunerationConfig {
 			return false;
 		}
 		Long currentTypeId = getFlatRateType() != null ? getFlatRateType().getId() : null;
-		return areEqual(this.flatRateFee, fDto.flatRateFee()) && Objects.equals(currentTypeId, fDto.flatRateTypeId());
+		return areEqual(this.driverFlatRatePayoutPerShift, fDto.driverFlatRatePayoutPerShift()) && Objects.equals(currentTypeId, fDto.flatRateTypeId());
 	}
 
 	@Override

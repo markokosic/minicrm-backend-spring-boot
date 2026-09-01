@@ -13,6 +13,10 @@ import com.markokosic.minicrm.modules.driver.service.DriverService;
 import com.markokosic.minicrm.modules.remuneration.RemunerationModelType;
 import com.markokosic.minicrm.modules.role.dto.Roles;
 import com.markokosic.minicrm.modules.user.dto.response.CreateUserResponseDTO;
+import com.markokosic.minicrm.modules.auth.model.UserPrincipal;
+import com.markokosic.minicrm.modules.driver.dto.response.DriverRevenueOptionDTO;
+import com.markokosic.minicrm.modules.shift.model.ShiftEntryCategory;
+import com.markokosic.minicrm.modules.user.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,6 +32,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -190,5 +195,50 @@ class DriverControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(driverService, times(1)).deactivateDriverUser(1L);
+    }
+
+    @Test
+    void getMyDriverProfile_Success_WhenDriverRole() throws Exception {
+        User driverUser = new User();
+        driverUser.setId(5L);
+        driverUser.setEmail("driver@taxi.com");
+        driverUser.setRoles(Roles.DRIVER);
+        UserPrincipal principal = new UserPrincipal(driverUser);
+
+        DriverResponseDTO responseDTO = new DriverResponseDTO(
+                1L, 5L, "Max", "Mustermann", "driver@taxi.com", "+12345678",
+                DriverStatus.ACTIVE, List.of(), null, null
+        );
+
+        when(driverService.getMyDriverProfile(5L)).thenReturn(responseDTO);
+        when(i18n.getMessage("success.fetched")).thenReturn("Driver fetched");
+
+        mockMvc.perform(get("/api/drivers/my").with(user(principal)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.firstName").value("Max"));
+    }
+
+    @Test
+    void getMyRevenueOptions_Success_WhenDriverRole() throws Exception {
+        User driverUser = new User();
+        driverUser.setId(5L);
+        driverUser.setEmail("driver@taxi.com");
+        driverUser.setRoles(Roles.DRIVER);
+        UserPrincipal principal = new UserPrincipal(driverUser);
+
+        List<DriverRevenueOptionDTO> options = List.of(
+                new DriverRevenueOptionDTO(ShiftEntryCategory.REGULAR, null, "Regular Fare (Taxameter)", null, null)
+        );
+
+        when(driverService.getMyRevenueOptions(5L)).thenReturn(options);
+        when(i18n.getMessage("success.fetched")).thenReturn("Revenue options fetched");
+
+        mockMvc.perform(get("/api/drivers/my/revenue-options").with(user(principal)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].entryCategory").value("REGULAR"))
+                .andExpect(jsonPath("$.data[0].label").value("Regular Fare (Taxameter)"));
     }
 }

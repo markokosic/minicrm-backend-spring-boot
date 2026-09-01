@@ -9,7 +9,7 @@ public non-sealed class FlatRateRemunerationCalculator implements IRemunerationC
 	@Override
 	public RemunerationSplit calculateRemuneration(BigDecimal revenue, DriverRemunerationConfig config) {
 		FlatRateRemunerationConfig fc = (FlatRateRemunerationConfig) config;
-		BigDecimal driverShare = fc.getFlatRateFee();
+		BigDecimal driverShare = fc.getDriverFlatRatePayoutPerShift();
 		BigDecimal companyShare = revenue.subtract(driverShare);
 		return new RemunerationSplit(companyShare, driverShare);
 	}

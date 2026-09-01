@@ -16,7 +16,7 @@ public class FlatRateRemunerationCalculatorTest {
         // Arrange
         BigDecimal revenue = new BigDecimal("100.00");
         FlatRateRemunerationConfig config = new FlatRateRemunerationConfig();
-        config.setFlatRateFee(new BigDecimal("30.00"));
+        config.setDriverFlatRatePayoutPerShift(new BigDecimal("30.00"));
 
         // Act
         RemunerationSplit split = calculator.calculateRemuneration(revenue, config);
@@ -32,7 +32,7 @@ public class FlatRateRemunerationCalculatorTest {
         // Arrange
         BigDecimal revenue = new BigDecimal("20.00");
         FlatRateRemunerationConfig config = new FlatRateRemunerationConfig();
-        config.setFlatRateFee(new BigDecimal("30.00"));
+        config.setDriverFlatRatePayoutPerShift(new BigDecimal("30.00"));
 
         // Act
         RemunerationSplit split = calculator.calculateRemuneration(revenue, config);
