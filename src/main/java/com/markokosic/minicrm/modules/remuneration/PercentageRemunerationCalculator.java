@@ -12,13 +12,19 @@ public non-sealed class PercentageRemunerationCalculator implements IRemuneratio
 	public RemunerationSplit calculateRemuneration(BigDecimal revenue, DriverRemunerationConfig config) {
 		PercentageShareRemunerationConfig pc = (PercentageShareRemunerationConfig) config;
 
-		//  (Revenue * Percent) / 100
+		BigDecimal factor = pc.getDriverRevenueSharePercentage();
+		if (factor != null && factor.compareTo(BigDecimal.ONE) > 0) {
+			factor = factor.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+		}
+
 		BigDecimal driverShare = revenue
-				.multiply(pc.getDriverRevenueSharePercentage())
-				.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+				.multiply(factor != null ? factor : BigDecimal.ZERO)
+				.setScale(2, RoundingMode.HALF_UP);
 
 		// driver will always receive a payment even on bad days
-		BigDecimal finalDriverShare = driverShare.max(pc.getMinDriverPayout());
+		BigDecimal finalDriverShare = pc.getMinDriverPayout() != null
+				? driverShare.max(pc.getMinDriverPayout())
+				: driverShare;
 
 		BigDecimal companyShare = revenue.subtract(finalDriverShare);
 

@@ -55,4 +55,7 @@ public class ShiftRevenueEntry {
 
 	@Column(name = "price_per_trip", precision = 19, scale = 2)
 	private BigDecimal pricePerTrip;
+
+	@Column(name = "weekly_driver_rent", precision = 19, scale = 2)
+	private BigDecimal weeklyDriverRent;
 }

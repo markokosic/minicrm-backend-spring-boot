@@ -60,8 +60,8 @@ public class Driver {
 	private List<DriverRemunerationConfig> remunerationConfigs = new ArrayList<>();
 
 	private String getConfigKey(DriverRemunerationConfig config) {
-		if (config.getType() == RemunerationModelType.FLAT_RATE) {
-			return config.getType() + "_" + (config.getFlatRateType() != null ? config.getFlatRateType().getFlatRateCode() : "ALL");
+		if (config instanceof FlatRateRemunerationConfig flatConfig) {
+			return config.getType() + "_" + (flatConfig.getFlatRateType() != null ? flatConfig.getFlatRateType().getFlatRateCode() : "ALL");
 		}
 		return config.getType().name();
 	}
@@ -136,7 +136,7 @@ public class Driver {
 	public DriverRemunerationConfig getRemunerationConfigForEntry(ShiftEntryCategory category, FlatRateType flatRateType) {
 		if (category == ShiftEntryCategory.FLAT_RATE && flatRateType != null) {
 			Optional<DriverRemunerationConfig> specificConfig = this.remunerationConfigs.stream()
-					.filter(c -> c.isCurrent() && c.getFlatRateType() != null && flatRateType.getFlatRateCode().equals(c.getFlatRateType().getFlatRateCode()))
+					.filter(c -> c.isCurrent() && c instanceof FlatRateRemunerationConfig fc && fc.getFlatRateType() != null && flatRateType.getFlatRateCode().equals(fc.getFlatRateType().getFlatRateCode()))
 					.findFirst();
 			if (specificConfig.isPresent()) {
 				return specificConfig.get();
@@ -150,7 +150,11 @@ public class Driver {
 		};
 
 		return this.remunerationConfigs.stream()
-				.filter(c -> c.isCurrent() && c.getType() == targetType && c.getFlatRateType() == null)
+				.filter(c -> {
+					if (!c.isCurrent() || c.getType() != targetType) return false;
+					if (c instanceof FlatRateRemunerationConfig fc) return fc.getFlatRateType() == null;
+					return true;
+				})
 				.findFirst()
 				.orElseGet(this::getCurrentRemunerationConfig);
 	}

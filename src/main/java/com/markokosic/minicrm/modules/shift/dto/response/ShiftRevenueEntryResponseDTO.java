@@ -16,5 +16,6 @@ public record ShiftRevenueEntryResponseDTO(
 		BigDecimal companyRemuneration,
 		BigDecimal driverRemuneration,
 		Long tripCount,
-		BigDecimal pricePerTrip
+		BigDecimal pricePerTrip,
+		BigDecimal weeklyDriverRent
 ) {}

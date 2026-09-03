@@ -12,6 +12,7 @@ import com.markokosic.minicrm.modules.driver.dto.response.DriverSelectDTO;
 import com.markokosic.minicrm.modules.driver.model.Driver;
 import com.markokosic.minicrm.modules.driver.model.DriverRemunerationConfig;
 import com.markokosic.minicrm.modules.driver.model.DriverStatus;
+import com.markokosic.minicrm.modules.driver.model.FlatRateRemunerationConfig;
 import com.markokosic.minicrm.modules.driver.repository.DriverRemunerationConfigRepository;
 import com.markokosic.minicrm.modules.driver.repository.DriverRepository;
 import com.markokosic.minicrm.modules.remuneration.RemunerationModelType;
@@ -58,7 +59,12 @@ public class DriverService {
 				.toList();
 
 		boolean hasDuplicates = configs.size() != configs.stream()
-				.map(c -> c.getType() + "_" + (c.getFlatRateType() != null ? c.getFlatRateType().getId() : "ALL"))
+				.map(c -> {
+					if (c instanceof FlatRateRemunerationConfig fc) {
+						return c.getType() + "_" + (fc.getFlatRateType() != null ? fc.getFlatRateType().getId() : "ALL");
+					}
+					return c.getType().name();
+				})
 				.distinct()
 				.count();
 

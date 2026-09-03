@@ -22,6 +22,7 @@ public interface ShiftMapper {
 	@Mapping(target = "shiftStart", source = "dto.shiftStart")
 	@Mapping(target = "shiftEnd", source = "dto.shiftEnd")
 	@Mapping(target = "revenues", ignore = true)
+	@Mapping(target = "settlement", ignore = true)
 	Shift toShiftEntity(
 			CreateShiftRequestDTO dto,
 			Driver driver,

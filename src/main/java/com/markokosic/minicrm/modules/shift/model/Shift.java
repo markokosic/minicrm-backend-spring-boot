@@ -56,8 +56,12 @@ public class Shift {
 	@Column(name = "status", nullable = false)
 	private ShiftStatus status = ShiftStatus.APPROVED;
 
+	@org.hibernate.annotations.BatchSize(size = 25)
 	@OneToMany(mappedBy = "shift", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ShiftRevenueEntry> revenues = new ArrayList<>();
+
+	@OneToOne(mappedBy = "shift", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private ShiftSettlement settlement;
 
 	public void addRevenueEntry(ShiftRevenueEntry entry) {
 		revenues.add(entry);

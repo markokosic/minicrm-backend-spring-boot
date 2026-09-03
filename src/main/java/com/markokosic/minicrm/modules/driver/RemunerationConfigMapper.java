@@ -51,7 +51,6 @@ public interface RemunerationConfigMapper {
 	@Mapping(target = "current", ignore = true)
 	@Mapping(target = "validFrom", ignore = true)
 	@Mapping(target = "validUntil", ignore = true)
-	@Mapping(target = "flatRateType", ignore = true)
 	@Mapping(target = "driverRevenueSharePercentage", source = "driverRevenueSharePercentage")
 	@Mapping(target = "minDriverPayout", source = "minDriverPayout")
 	PercentageShareRemunerationConfig toPercentageShareEntity(
@@ -64,7 +63,6 @@ public interface RemunerationConfigMapper {
 	@Mapping(target = "current", ignore = true)
 	@Mapping(target = "validFrom", ignore = true)
 	@Mapping(target = "validUntil", ignore = true)
-	@Mapping(target = "flatRateType", ignore = true)
 	@Mapping(target = "weeklyFixedCompanySettlement", source = "weeklyFixedCompanySettlement")
 	WeeklyFixedRateRemunerationConfig toWeeklyFixedEntity(
 			CreateWeeklyFixedRemunerationConfigDTO dto,

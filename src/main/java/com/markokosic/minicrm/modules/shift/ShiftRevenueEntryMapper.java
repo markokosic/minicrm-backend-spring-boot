@@ -26,6 +26,7 @@ public interface ShiftRevenueEntryMapper {
 	@Mapping(target = "driverRemuneration", source = "split.driverRemuneration")
 	@Mapping(target = "tripCount", source = "tripCount")
 	@Mapping(target = "pricePerTrip", source = "effectivePricePerTrip")
+	@Mapping(target = "weeklyDriverRent", source = "weeklyDriverRent")
 	ShiftRevenueEntry toEntity(
 			Shift shift,
 			DriverRemunerationConfig config,
@@ -34,6 +35,7 @@ public interface ShiftRevenueEntryMapper {
 			BigDecimal effectiveRevenue,
 			BigDecimal effectivePricePerTrip,
 			Long tripCount,
+			BigDecimal weeklyDriverRent,
 			RemunerationSplit split
 	);
 

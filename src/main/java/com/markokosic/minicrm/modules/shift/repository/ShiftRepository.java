@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 public interface ShiftRepository extends JpaRepository<Shift, Long> {
 
-	@EntityGraph(attributePaths = {"driver", "car", "revenues", "revenues.remunerationConfig", "revenues.flatRateType"})
+	@EntityGraph(attributePaths = {"driver", "car", "settlement", "revenues"})
 	@Query("""
 		SELECT s FROM Shift s
 		WHERE (:driverId IS NULL OR s.driver.id = :driverId)

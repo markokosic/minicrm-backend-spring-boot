@@ -5,9 +5,8 @@ import com.markokosic.minicrm.modules.driver.dto.request.CreateRemunerationReque
 import com.markokosic.minicrm.modules.remuneration.FlatRateRemunerationCalculator;
 import com.markokosic.minicrm.modules.remuneration.RemunerationModelType;
 import com.markokosic.minicrm.modules.remuneration.RemunerationSplit;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import com.markokosic.minicrm.modules.flatratetype.model.FlatRateType;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,8 +16,14 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
+@Table(name = "remuneration_flat_rate_configs")
+@PrimaryKeyJoinColumn(name = "id")
 @DiscriminatorValue("FLAT_RATE")
 public class FlatRateRemunerationConfig extends DriverRemunerationConfig {
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "flat_rate_type_id")
+	private FlatRateType flatRateType;
 
 	@DecimalMin(value = "0.0", message = "{driver.minDriverPayout.negative}")
 	@Column(name="driver_flat_rate_payout_per_shift", precision = 19, scale = 2)

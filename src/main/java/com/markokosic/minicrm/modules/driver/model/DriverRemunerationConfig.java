@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Table(name="driver_remuneration_configs")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "config_type", discriminatorType = DiscriminatorType.STRING)
 public abstract class DriverRemunerationConfig {
 
@@ -40,10 +40,6 @@ public abstract class DriverRemunerationConfig {
 
 	@Column(name = "valid_until")
 	private LocalDate validUntil;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "flat_rate_type_id")
-	private FlatRateType flatRateType;
 
 	public abstract RemunerationModelType getType();
 

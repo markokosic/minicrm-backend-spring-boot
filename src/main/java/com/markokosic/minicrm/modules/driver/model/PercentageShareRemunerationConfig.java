@@ -5,9 +5,7 @@ import com.markokosic.minicrm.modules.driver.dto.request.CreateRemunerationReque
 import com.markokosic.minicrm.modules.remuneration.PercentageRemunerationCalculator;
 import com.markokosic.minicrm.modules.remuneration.RemunerationModelType;
 import com.markokosic.minicrm.modules.remuneration.RemunerationSplit;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Getter;
@@ -18,17 +16,33 @@ import java.math.BigDecimal;
 @Entity
 @Getter
 @Setter
+@Table(name = "remuneration_percentage_configs")
+@PrimaryKeyJoinColumn(name = "id")
 @DiscriminatorValue("PERCENTAGE_SHARE")
 public class PercentageShareRemunerationConfig extends DriverRemunerationConfig {
 
 	@DecimalMin(value = "0.0", inclusive = true, message = "{driver.driverRevenueSharePercentage.invalid}")
 	@DecimalMax(value = "100.0", message = "{driver.driverRevenueSharePercentage.invalid}")
-	@Column(name="driver_revenue_share_percentage", precision = 19, scale = 2)
+	@Column(name="driver_revenue_share_percentage", nullable = false, precision = 5, scale = 4)
 	private BigDecimal driverRevenueSharePercentage;
 
 	@DecimalMin(value = "0.0", message = "{driver.minDriverPayout.negative}")
-	@Column(name="driver_min_payout", precision = 19, scale = 2)
+	@Column(name="min_driver_payout", precision = 19, scale = 2)
 	private BigDecimal minDriverPayout;
+
+	public void setDriverRevenueSharePercentage(BigDecimal driverRevenueSharePercentage) {
+		if (driverRevenueSharePercentage == null) {
+			this.driverRevenueSharePercentage = null;
+			return;
+		}
+		if (driverRevenueSharePercentage.compareTo(BigDecimal.valueOf(100)) > 0) {
+			this.driverRevenueSharePercentage = driverRevenueSharePercentage.divide(BigDecimal.valueOf(10000), 4, java.math.RoundingMode.HALF_UP);
+		} else if (driverRevenueSharePercentage.compareTo(BigDecimal.ONE) > 0) {
+			this.driverRevenueSharePercentage = driverRevenueSharePercentage.divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
+		} else {
+			this.driverRevenueSharePercentage = driverRevenueSharePercentage.setScale(4, java.math.RoundingMode.HALF_UP);
+		}
+	}
 
 	@Override
 	public RemunerationModelType getType() {
@@ -40,7 +54,15 @@ public class PercentageShareRemunerationConfig extends DriverRemunerationConfig 
 		if (!(dto instanceof CreatePercentageShareRemunerationConfigDTO pDto)) {
 			return false;
 		}
-		return areEqual(this.driverRevenueSharePercentage, pDto.driverRevenueSharePercentage())
+		BigDecimal incoming = pDto.driverRevenueSharePercentage();
+		if (incoming != null && incoming.compareTo(BigDecimal.valueOf(100)) > 0) {
+			incoming = incoming.divide(BigDecimal.valueOf(10000), 4, java.math.RoundingMode.HALF_UP);
+		} else if (incoming != null && incoming.compareTo(BigDecimal.ONE) > 0) {
+			incoming = incoming.divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
+		} else if (incoming != null) {
+			incoming = incoming.setScale(4, java.math.RoundingMode.HALF_UP);
+		}
+		return areEqual(this.driverRevenueSharePercentage, incoming)
 				&& areEqual(this.minDriverPayout, pDto.minDriverPayout());
 	}
 
