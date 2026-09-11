@@ -43,7 +43,7 @@ public abstract class DriverRemunerationConfig {
 
 	public abstract RemunerationModelType getType();
 
-	public abstract boolean isIdenticalTo(CreateRemunerationRequestDTO dto);
+	public abstract boolean isIdenticalTo(DriverRemunerationConfig other);
 
 	public abstract RemunerationSplit calculateRemuneration(BigDecimal revenue);
 

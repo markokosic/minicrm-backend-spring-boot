@@ -22,27 +22,13 @@ import java.math.BigDecimal;
 public class PercentageShareRemunerationConfig extends DriverRemunerationConfig {
 
 	@DecimalMin(value = "0.0", inclusive = true, message = "{driver.driverRevenueSharePercentage.invalid}")
-	@DecimalMax(value = "100.0", message = "{driver.driverRevenueSharePercentage.invalid}")
+	@DecimalMax(value = "1.0", message = "{driver.driverRevenueSharePercentage.invalid}")
 	@Column(name="driver_revenue_share_percentage", nullable = false, precision = 5, scale = 4)
 	private BigDecimal driverRevenueSharePercentage;
 
 	@DecimalMin(value = "0.0", message = "{driver.minDriverPayout.negative}")
-	@Column(name="min_driver_payout", precision = 19, scale = 2)
-	private BigDecimal minDriverPayout;
-
-	public void setDriverRevenueSharePercentage(BigDecimal driverRevenueSharePercentage) {
-		if (driverRevenueSharePercentage == null) {
-			this.driverRevenueSharePercentage = null;
-			return;
-		}
-		if (driverRevenueSharePercentage.compareTo(BigDecimal.valueOf(100)) > 0) {
-			this.driverRevenueSharePercentage = driverRevenueSharePercentage.divide(BigDecimal.valueOf(10000), 4, java.math.RoundingMode.HALF_UP);
-		} else if (driverRevenueSharePercentage.compareTo(BigDecimal.ONE) > 0) {
-			this.driverRevenueSharePercentage = driverRevenueSharePercentage.divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
-		} else {
-			this.driverRevenueSharePercentage = driverRevenueSharePercentage.setScale(4, java.math.RoundingMode.HALF_UP);
-		}
-	}
+	@Column(name="min_driver_payout_per_shift", precision = 19, scale = 2)
+	private BigDecimal minDriverPayoutPerShift;
 
 	@Override
 	public RemunerationModelType getType() {
@@ -50,20 +36,13 @@ public class PercentageShareRemunerationConfig extends DriverRemunerationConfig 
 	}
 
 	@Override
-	public boolean isIdenticalTo(CreateRemunerationRequestDTO dto) {
-		if (!(dto instanceof CreatePercentageShareRemunerationConfigDTO pDto)) {
+	public boolean isIdenticalTo(DriverRemunerationConfig other) {
+		if (!(other instanceof PercentageShareRemunerationConfig pOther)) {
 			return false;
 		}
-		BigDecimal incoming = pDto.driverRevenueSharePercentage();
-		if (incoming != null && incoming.compareTo(BigDecimal.valueOf(100)) > 0) {
-			incoming = incoming.divide(BigDecimal.valueOf(10000), 4, java.math.RoundingMode.HALF_UP);
-		} else if (incoming != null && incoming.compareTo(BigDecimal.ONE) > 0) {
-			incoming = incoming.divide(BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP);
-		} else if (incoming != null) {
-			incoming = incoming.setScale(4, java.math.RoundingMode.HALF_UP);
-		}
-		return areEqual(this.driverRevenueSharePercentage, incoming)
-				&& areEqual(this.minDriverPayout, pDto.minDriverPayout());
+		
+		return areEqual(this.driverRevenueSharePercentage, pOther.getDriverRevenueSharePercentage())
+				&& areEqual(this.minDriverPayoutPerShift, pOther.getMinDriverPayoutPerShift());
 	}
 
 

@@ -1,6 +1,5 @@
 package com.markokosic.minicrm.modules.shift.dto.request;
 
-import com.markokosic.minicrm.modules.shift.model.ShiftStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -28,9 +27,8 @@ public record CreateShiftRequestDTO(
 		@NotNull
 		LocalDateTime shiftEnd,
 
-
-		//TODO REMOVE LATER WHEN RBAC IS IMPLEMENTED THAT STATE OF STATUS IS DEFINED BY BACKEND
-		ShiftStatus status,
+		@jakarta.validation.constraints.PositiveOrZero
+		BigDecimal weeklyDriverRent,
 
 		@NotEmpty
 		@Valid

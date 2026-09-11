@@ -19,26 +19,15 @@ public record CreateShiftRevenueEntryRequestDTO(
 		Long tripCount,
 
 		@PositiveOrZero
-		BigDecimal pricePerTrip,
-
-		@PositiveOrZero
-		BigDecimal weeklyDriverRent
+		BigDecimal pricePerTrip
 ) {
 	public BigDecimal getEffectiveRevenue() {
-		if (entryCategory == ShiftEntryCategory.WEEKLY) {
-			if (weeklyDriverRent != null) return weeklyDriverRent;
-			if (revenue != null) return revenue;
-			return BigDecimal.ZERO;
-		}
 		if (revenue != null) {
 			return revenue;
 		}
 		if (tripCount != null && pricePerTrip != null) {
 			return pricePerTrip.multiply(BigDecimal.valueOf(tripCount));
 		}
-		if (weeklyDriverRent != null) {
-			return weeklyDriverRent;
-		}
-		throw new IllegalArgumentException("Either 'revenue' or ('tripCount' and 'pricePerTrip') or 'weeklyDriverRent' must be provided.");
+		throw new IllegalArgumentException("Either 'revenue' or ('tripCount' and 'pricePerTrip') must be provided.");
 	}
 }

@@ -512,4 +512,81 @@ public class DriverServiceTest {
                 driverService.getMyRevenueOptions(userId)
         );
     }
+
+    @Test
+    void testCreateDriver_ThrowsBadRequest_WhenBothPercentageAndWeeklyConfigSupplied() {
+        Driver driver = new Driver();
+        when(driverMapper.toEntity(any())).thenReturn(driver);
+
+        com.markokosic.minicrm.modules.driver.dto.request.CreatePercentageShareRemunerationConfigDTO pctDto =
+                new com.markokosic.minicrm.modules.driver.dto.request.CreatePercentageShareRemunerationConfigDTO(RemunerationModelType.PERCENTAGE_SHARE, new BigDecimal("30.00"), new BigDecimal("0.4000"));
+        com.markokosic.minicrm.modules.driver.dto.request.CreateWeeklyFixedRemunerationConfigDTO weeklyDto =
+                new com.markokosic.minicrm.modules.driver.dto.request.CreateWeeklyFixedRemunerationConfigDTO(RemunerationModelType.WEEKLY_FIXED_RATE, new BigDecimal("400.00"), 7);
+
+        com.markokosic.minicrm.modules.driver.model.PercentageShareRemunerationConfig pctEntity =
+                new com.markokosic.minicrm.modules.driver.model.PercentageShareRemunerationConfig();
+        com.markokosic.minicrm.modules.driver.model.WeeklyFixedRateRemunerationConfig weeklyEntity =
+                new com.markokosic.minicrm.modules.driver.model.WeeklyFixedRateRemunerationConfig();
+
+        when(remunerationConfigMapper.toEntity(pctDto, driver)).thenReturn(pctEntity);
+        when(remunerationConfigMapper.toEntity(weeklyDto, driver)).thenReturn(weeklyEntity);
+
+        CreateDriverRequestDTO request = new CreateDriverRequestDTO(
+                "Max", "Mustermann", "max@example.com", "+436601234567",
+                List.of(pctDto, weeklyDto)
+        );
+
+        assertThrows(BadRequestException.class, () -> driverService.createDriver(request));
+    }
+
+    @Test
+    void testUpdateDriver_ThrowsBadRequest_WhenBothPercentageAndWeeklyConfigSupplied() {
+        Long driverId = 1L;
+        Driver driver = new Driver();
+        driver.setId(driverId);
+        when(driverLookupService.validateDriverExistsOrThrow(driverId)).thenReturn(driver);
+
+        com.markokosic.minicrm.modules.driver.dto.request.CreatePercentageShareRemunerationConfigDTO pctDto =
+                new com.markokosic.minicrm.modules.driver.dto.request.CreatePercentageShareRemunerationConfigDTO(RemunerationModelType.PERCENTAGE_SHARE, new BigDecimal("30.00"), new BigDecimal("0.4000"));
+        com.markokosic.minicrm.modules.driver.dto.request.CreateWeeklyFixedRemunerationConfigDTO weeklyDto =
+                new com.markokosic.minicrm.modules.driver.dto.request.CreateWeeklyFixedRemunerationConfigDTO(RemunerationModelType.WEEKLY_FIXED_RATE, new BigDecimal("400.00"), 7);
+
+        com.markokosic.minicrm.modules.driver.model.PercentageShareRemunerationConfig pctEntity =
+                new com.markokosic.minicrm.modules.driver.model.PercentageShareRemunerationConfig();
+        com.markokosic.minicrm.modules.driver.model.WeeklyFixedRateRemunerationConfig weeklyEntity =
+                new com.markokosic.minicrm.modules.driver.model.WeeklyFixedRateRemunerationConfig();
+
+        when(remunerationConfigMapper.toEntity(pctDto, driver)).thenReturn(pctEntity);
+        when(remunerationConfigMapper.toEntity(weeklyDto, driver)).thenReturn(weeklyEntity);
+
+        UpdateDriverRequestDTO request = new UpdateDriverRequestDTO(
+                "Max", "Mustermann", "max@example.com", "+436601234567",
+                List.of(pctDto, weeklyDto)
+        );
+
+        assertThrows(BadRequestException.class, () -> driverService.updateDriver(driverId, request));
+    }
+
+    @Test
+    void testGetMyRevenueOptions_WithWeeklyFixedRate_IncludesRegularFare() {
+        Long userId = 5L;
+        Driver driver = new Driver();
+        driver.setId(1L);
+
+        com.markokosic.minicrm.modules.driver.model.WeeklyFixedRateRemunerationConfig config =
+                new com.markokosic.minicrm.modules.driver.model.WeeklyFixedRateRemunerationConfig();
+        config.setDriver(driver);
+        config.setCurrent(true);
+        driver.setRemunerationConfigs(List.of(config));
+
+        when(driverRepository.findByUserId(userId)).thenReturn(Optional.of(driver));
+        when(driverLookupService.validateDriverExistsOrThrow(1L)).thenReturn(driver);
+
+        List<DriverRevenueOptionDTO> result = driverService.getMyRevenueOptions(userId);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(o -> o.entryCategory() == ShiftEntryCategory.REGULAR));
+        assertTrue(result.stream().anyMatch(o -> o.entryCategory() == ShiftEntryCategory.WEEKLY));
+    }
 }

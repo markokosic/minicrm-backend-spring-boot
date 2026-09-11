@@ -58,19 +58,7 @@ public class DriverService {
 				.map(dto -> mapToRemunerationEntity(dto, driver))
 				.toList();
 
-		boolean hasDuplicates = configs.size() != configs.stream()
-				.map(c -> {
-					if (c instanceof FlatRateRemunerationConfig fc) {
-						return c.getType() + "_" + (fc.getFlatRateType() != null ? fc.getFlatRateType().getId() : "ALL");
-					}
-					return c.getType().name();
-				})
-				.distinct()
-				.count();
-
-		if (hasDuplicates) {
-			throw new BadRequestException("domain.driver.multiple_configurations");
-		}
+		validateRemunerationConfigs(configs);
 
 		driver.initializeWithRemunerationConfigs(configs);
 
@@ -102,24 +90,13 @@ public class DriverService {
 		driverMapper.updateEntityFromDto(request, driver);
 
 		if (request.remunerationConfigs() != null) {
-			boolean hasDuplicates = request.remunerationConfigs().size() != request.remunerationConfigs().stream()
-					.map(dto -> {
-						if (dto instanceof CreateFlatRateRemunerationConfigDTO flatDto) {
-							return dto.remunerationModelType() + "_" + (flatDto.flatRateTypeId() != null ? flatDto.flatRateTypeId() : "ALL");
-						}
-						return dto.remunerationModelType().name();
-					})
-					.distinct()
-					.count();
+			List<DriverRemunerationConfig> newConfigs = request.remunerationConfigs().stream()
+					.map(dto -> mapToRemunerationEntity(dto, driver))
+					.toList();
 
-			if (hasDuplicates) {
-				throw new BadRequestException("domain.driver.multiple_configurations");
-			}
+			validateRemunerationConfigs(newConfigs);
 
-			driver.syncRemunerationConfigs(
-					request.remunerationConfigs(),
-					dto -> mapToRemunerationEntity(dto, driver)
-			);
+			driver.syncRemunerationConfigs(newConfigs);
 		}
 
 		driverRepository.save(driver);
@@ -149,9 +126,9 @@ public class DriverService {
 		List<DriverRevenueOptionDTO> options = new java.util.ArrayList<>();
 
 		// 1. Regular Trips (Taxameter)
-		boolean hasPercentage = activeConfigs.stream()
-				.anyMatch(c -> c.getType() == RemunerationModelType.PERCENTAGE_SHARE);
-		if (hasPercentage) {
+		boolean hasRegular = activeConfigs.stream()
+				.anyMatch(c -> c.getType() == RemunerationModelType.PERCENTAGE_SHARE || c.getType() == RemunerationModelType.WEEKLY_FIXED_RATE);
+		if (hasRegular || activeConfigs.isEmpty()) {
 			options.add(new DriverRevenueOptionDTO(
 					ShiftEntryCategory.REGULAR, null, "Regular Fare (Taxameter)", null, null
 			));
@@ -204,6 +181,29 @@ public class DriverService {
 		Driver driver = driverLookupService.validateDriverExistsOrThrow(driverId);
 		driver.deactivateConfig(configId);
 		driverRepository.save(driver);
+	}
+
+	private void validateRemunerationConfigs(List<DriverRemunerationConfig> configs) {
+		boolean hasDuplicates = configs.size() != configs.stream()
+				.map(c -> {
+					if (c instanceof FlatRateRemunerationConfig fc) {
+						return c.getType() + "_" + (fc.getFlatRateType() != null ? fc.getFlatRateType().getId() : "ALL");
+					}
+					return c.getType().name();
+				})
+				.distinct()
+				.count();
+
+		boolean hasPercentage = configs.stream().anyMatch(c -> c.getType() == RemunerationModelType.PERCENTAGE_SHARE);
+		boolean hasWeekly = configs.stream().anyMatch(c -> c.getType() == RemunerationModelType.WEEKLY_FIXED_RATE);
+
+		if (hasPercentage && hasWeekly) {
+			throw new BadRequestException("domain.driver.cannot_have_both_percentage_and_weekly");
+		}
+
+		if (hasDuplicates) {
+			throw new BadRequestException("domain.driver.multiple_configurations");
+		}
 	}
 
 	private DriverRemunerationConfig mapToRemunerationEntity(CreateRemunerationRequestDTO dto, Driver driver) {

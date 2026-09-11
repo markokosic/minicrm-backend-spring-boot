@@ -24,12 +24,12 @@ public record CreatePercentageShareRemunerationConfigDTO(
 	@JsonFormat(shape = JsonFormat.Shape.NUMBER)
 	@PositiveOrZero(message = "{driver.dailyMinPayout.invalid}")
 	@Schema(description = "Minimum guaranteed driver payout per shift in EUR", example = "50.00")
-	BigDecimal minDriverPayout,
+	BigDecimal minDriverPayoutPerShift,
 
 	@JsonFormat(shape = JsonFormat.Shape.NUMBER)
 	@DecimalMin(value = "0.0", inclusive = true, message = "{driver.driverRevenueSharePercentage.invalid}")
-	@DecimalMax(value = "100.0", message = "{driver.driverRevenueSharePercentage.invalid}")
-	@Schema(description = "Revenue share factor (e.g. 0.4500 for 45% or 45.0)", example = "0.4500", requiredMode = Schema.RequiredMode.REQUIRED)
+	@DecimalMax(value = "1.0", message = "{driver.driverRevenueSharePercentage.invalid}")
+	@Schema(description = "Revenue share factor (e.g. 0.4500 for 45%)", example = "0.4500", requiredMode = Schema.RequiredMode.REQUIRED)
 	BigDecimal driverRevenueSharePercentage
 
 ) implements CreateRemunerationRequestDTO {

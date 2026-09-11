@@ -35,12 +35,13 @@ public class FlatRateRemunerationConfig extends DriverRemunerationConfig {
 	}
 
 	@Override
-	public boolean isIdenticalTo(CreateRemunerationRequestDTO dto) {
-		if (!(dto instanceof CreateFlatRateRemunerationConfigDTO fDto)) {
+	public boolean isIdenticalTo(DriverRemunerationConfig other) {
+		if (!(other instanceof FlatRateRemunerationConfig fOther)) {
 			return false;
 		}
 		Long currentTypeId = getFlatRateType() != null ? getFlatRateType().getId() : null;
-		return areEqual(this.driverFlatRatePayoutPerShift, fDto.driverFlatRatePayoutPerShift()) && Objects.equals(currentTypeId, fDto.flatRateTypeId());
+		Long otherTypeId = fOther.getFlatRateType() != null ? fOther.getFlatRateType().getId() : null;
+		return areEqual(this.driverFlatRatePayoutPerShift, fOther.driverFlatRatePayoutPerShift) && Objects.equals(currentTypeId, otherTypeId);
 	}
 
 	@Override

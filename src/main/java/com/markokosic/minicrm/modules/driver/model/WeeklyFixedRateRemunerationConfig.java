@@ -39,12 +39,12 @@ public class WeeklyFixedRateRemunerationConfig extends DriverRemunerationConfig 
 	}
 
 	@Override
-	public boolean isIdenticalTo(CreateRemunerationRequestDTO dto) {
-		if (!(dto instanceof CreateWeeklyFixedRemunerationConfigDTO wDto)) {
+	public boolean isIdenticalTo(DriverRemunerationConfig other) {
+		if (!(other instanceof WeeklyFixedRateRemunerationConfig wOther)) {
 			return false;
 		}
-		return areEqual(this.weeklyFixedCompanySettlement, wDto.weeklyFixedCompanySettlement())
-				&& java.util.Objects.equals(this.settlementDay, wDto.settlementDay());
+		return areEqual(this.weeklyFixedCompanySettlement, wOther.weeklyFixedCompanySettlement)
+				&& java.util.Objects.equals(this.settlementDay, wOther.settlementDay);
 	}
 
 

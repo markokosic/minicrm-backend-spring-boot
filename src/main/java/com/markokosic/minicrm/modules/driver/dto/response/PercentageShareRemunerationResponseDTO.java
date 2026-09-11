@@ -15,5 +15,5 @@ public record PercentageShareRemunerationResponseDTO(
 		@Schema(description = "Revenue share factor (e.g. 0.4500 for 45%)", example = "0.4500")
 		BigDecimal driverRevenueSharePercentage,
 		@Schema(description = "Minimum guaranteed driver payout per shift in EUR", example = "50.00")
-		BigDecimal minDriverPayout
+		BigDecimal minDriverPayoutPerShift
 ) implements RemunerationConfigResponseDTO {}
