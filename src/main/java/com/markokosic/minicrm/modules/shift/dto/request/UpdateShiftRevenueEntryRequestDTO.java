@@ -27,9 +27,5 @@ public record UpdateShiftRevenueEntryRequestDTO(
 
 		@PositiveOrZero
 		@Schema(description = "Price per trip", example = "25.00")
-		BigDecimal pricePerTrip,
-
-		@PositiveOrZero
-		@Schema(description = "Weekly rent paid by driver (for WEEKLY category). Mandatory for weekly drivers, but can be 0.", example = "400.00")
-		BigDecimal weeklyDriverRent
+		BigDecimal pricePerTrip
 ) {}

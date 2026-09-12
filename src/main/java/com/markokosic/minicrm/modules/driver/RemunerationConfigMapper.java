@@ -36,6 +36,8 @@ public interface RemunerationConfigMapper {
 	}
 
 	default RemunerationConfigResponseDTO toResponseDto(DriverRemunerationConfig entity) {
+		if (entity == null) return null;
+		entity = (DriverRemunerationConfig) org.hibernate.Hibernate.unproxy(entity);
 		if (entity instanceof PercentageShareRemunerationConfig percentage) {
 			return toPercentageShareResponseDto(percentage);
 		} else if (entity instanceof WeeklyFixedRateRemunerationConfig weekly) {
@@ -52,7 +54,7 @@ public interface RemunerationConfigMapper {
 	@Mapping(target = "validFrom", ignore = true)
 	@Mapping(target = "validUntil", ignore = true)
 	@Mapping(target = "driverRevenueSharePercentage", source = "driverRevenueSharePercentage")
-	@Mapping(target = "minDriverPayout", source = "minDriverPayout")
+	@Mapping(target = "minDriverPayoutPerShift", source = "minDriverPayoutPerShift")
 	PercentageShareRemunerationConfig toPercentageShareEntity(
 			CreatePercentageShareRemunerationConfigDTO dto,
 			@Context Driver driver
