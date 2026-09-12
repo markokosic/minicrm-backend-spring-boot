@@ -85,14 +85,9 @@ public class Driver {
 
 			if (existing != null) {
 				if (!existing.isIdenticalTo(newConfig)) {
-					// Temporal Bug Fix: If the existing config was created TODAY,
-					// deactivating it to YESTERDAY creates an invalid valid_until < valid_from.
-					// Instead, we just replace it (or deactivate it to TODAY).
-					if (existing.getValidFrom().isEqual(today)) {
-						this.remunerationConfigs.remove(existing);
-					} else {
-						existing.deactivate(yesterday);
-					}
+					// We NEVER hard delete an existing config because it might be referenced by a shift!
+					// Instead, we just deactivate it.
+					existing.deactivate(yesterday);
 					newConfig.activate(today);
 					newConfig.setDriver(this);
 					this.remunerationConfigs.add(newConfig);
@@ -104,15 +99,10 @@ public class Driver {
 			}
 		}
 
-		// deactivate any configs that were not in the request - basically delete a remuneration config.
 		currentActiveMap.values().stream()
 				.filter(c -> !keysInRequest.contains(getConfigKey(c)))
 				.forEach(c -> {
-					if (c.getValidFrom().isEqual(today)) {
-						this.remunerationConfigs.remove(c);
-					} else {
-						c.deactivate(yesterday);
-					}
+					c.deactivate(yesterday);
 				});
 	}
 

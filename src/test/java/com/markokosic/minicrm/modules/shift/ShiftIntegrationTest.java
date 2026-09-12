@@ -69,7 +69,7 @@ public class ShiftIntegrationTest {
 
         PercentageShareRemunerationConfig config = new PercentageShareRemunerationConfig();
         config.setDriverRevenueSharePercentage(new BigDecimal("0.4500"));
-        config.setMinDriverPayout(new BigDecimal("50.00"));
+        config.setMinDriverPayoutPerShift(new BigDecimal("50.00"));
         driver.initializeWithRemunerationConfigs(List.of(config));
 
         driver = driverRepository.save(driver);
@@ -109,16 +109,13 @@ public class ShiftIntegrationTest {
         ShiftRevenueEntry entry = new ShiftRevenueEntry();
         entry.setEntryCategory(ShiftEntryCategory.REGULAR);
         entry.setRevenue(new BigDecimal("200.00"));
-        entry.setDriverRemuneration(new BigDecimal("90.00"));
-        entry.setCompanyRemuneration(new BigDecimal("110.00"));
-        entry.setRemunerationConfig(driver.getActiveRemunerationConfigs().get(0));
         shift.addRevenueEntry(entry);
 
         shift = shiftRepository.save(shift);
         assertNotNull(shift.getId());
 
         // Execute findAllFiltered
-        var page = shiftRepository.findAllFiltered(null, null, null, PageRequest.of(0, 10));
+        var page = shiftRepository.findAllFiltered(null, null, null, null, PageRequest.of(0, 10));
         assertNotNull(page);
         assertEquals(1, page.getTotalElements());
 
@@ -129,7 +126,7 @@ public class ShiftIntegrationTest {
         assertEquals(new BigDecimal("200.00"), fetchedShift.getRevenues().get(0).getRevenue());
 
         // Test shiftService.getAllShifts
-        var serviceResult = shiftService.getAllShifts(null, null, null, PageRequest.of(0, 10));
+        var serviceResult = shiftService.getAllShifts(null, null, null, null, PageRequest.of(0, 10));
         assertNotNull(serviceResult);
         assertEquals(1, serviceResult.getTotalElements());
         assertEquals(1, serviceResult.getContent().size());

@@ -33,12 +33,12 @@ public class ShiftSettlement {
 	@JoinColumn(name = "shift_id", nullable = false, unique = true)
 	private Shift shift;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "remuneration_version_id")
-	private DriverRemunerationConfig remunerationConfig;
-
 	@Column(name = "total_revenue", nullable = false, precision = 19, scale = 2)
 	private BigDecimal totalRevenue;
+
+	public BigDecimal getRevenue() {
+		return totalRevenue;
+	}
 
 	@Column(name = "driver_remuneration", nullable = false, precision = 19, scale = 2)
 	private BigDecimal driverRemuneration;

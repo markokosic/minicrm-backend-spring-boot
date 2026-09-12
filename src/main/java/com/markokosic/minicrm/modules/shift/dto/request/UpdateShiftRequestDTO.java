@@ -23,6 +23,9 @@ public record UpdateShiftRequestDTO(
 		@NotNull
 		LocalDateTime shiftEnd,
 
+		@jakarta.validation.constraints.PositiveOrZero
+		BigDecimal weeklyDriverRent,
+
 		@NotEmpty
 		@Valid
 		List<UpdateShiftRevenueEntryRequestDTO> revenues

@@ -6,17 +6,19 @@ import com.markokosic.minicrm.modules.car.model.Car;
 import com.markokosic.minicrm.modules.driver.model.Driver;
 import com.markokosic.minicrm.modules.driver.model.DriverRemunerationConfig;
 import com.markokosic.minicrm.modules.driver.repository.DriverRepository;
-import com.markokosic.minicrm.modules.remuneration.RemunerationService;
-import com.markokosic.minicrm.modules.remuneration.RemunerationSplit;
+import com.markokosic.minicrm.modules.flatratetype.model.FlatRateType;
+import com.markokosic.minicrm.modules.flatratetype.repository.FlatRateTypeRepository;
 import com.markokosic.minicrm.modules.shift.ShiftMapper;
 import com.markokosic.minicrm.modules.shift.ShiftRevenueEntryMapper;
+import com.markokosic.minicrm.modules.shift.dto.request.CreateMyShiftRequestDTO;
+import com.markokosic.minicrm.modules.shift.dto.request.CreateShiftRevenueEntryRequestDTO;
 import com.markokosic.minicrm.modules.shift.dto.request.UpdateShiftRequestDTO;
 import com.markokosic.minicrm.modules.shift.dto.request.UpdateShiftRevenueEntryRequestDTO;
+import com.markokosic.minicrm.modules.shift.dto.response.ShiftResponseDTO;
 import com.markokosic.minicrm.modules.shift.model.Shift;
 import com.markokosic.minicrm.modules.shift.model.ShiftEntryCategory;
 import com.markokosic.minicrm.modules.shift.model.ShiftRevenueEntry;
 import com.markokosic.minicrm.modules.shift.model.ShiftStatus;
-import com.markokosic.minicrm.modules.flatratetype.repository.FlatRateTypeRepository;
 import com.markokosic.minicrm.modules.shift.repository.ShiftRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +49,7 @@ class ShiftServiceTest {
     @Mock
     private ShiftRepository shiftRepository;
     @Mock
-    private RemunerationService remunerationService;
+    private ShiftSettlementCalculator shiftSettlementCalculator;
     @Mock
     private ShiftMapper shiftMapper;
     @Mock
@@ -80,34 +82,32 @@ class ShiftServiceTest {
         shift.setShiftStart(LocalDateTime.of(2025, 5, 10, 8, 0));
         shift.setShiftEnd(LocalDateTime.of(2025, 5, 10, 16, 0));
         shift.setRevenues(new ArrayList<>());
+        
+        lenient().when(config.getType()).thenReturn(com.markokosic.minicrm.modules.remuneration.RemunerationModelType.PERCENTAGE_SHARE);
+        shift.getAppliedRemunerationConfigs().add(config);
 
         entry1 = new ShiftRevenueEntry();
         entry1.setId(101L);
         entry1.setEntryCategory(ShiftEntryCategory.REGULAR);
         entry1.setRevenue(new BigDecimal("150.00"));
-        entry1.setRemunerationConfig(config);
         shift.addRevenueEntry(entry1);
 
         entry2 = new ShiftRevenueEntry();
         entry2.setId(102L);
         entry2.setEntryCategory(ShiftEntryCategory.FLAT_RATE);
         entry2.setRevenue(new BigDecimal("50.00"));
-        entry2.setRemunerationConfig(config);
         shift.addRevenueEntry(entry2);
     }
 
     @Test
     void updateShift_withUpdate_Add_and_Delete() {
         when(shiftRepository.findById(50L)).thenReturn(Optional.of(shift));
-        when(driver.getRemunerationConfigForEntry(eq(ShiftEntryCategory.REGULAR), any())).thenReturn(config);
-        when(remunerationService.calculateRemunerationSplit(any(), any()))
-                .thenReturn(new RemunerationSplit(new BigDecimal("60.00"), new BigDecimal("140.00")));
         when(shiftRepository.save(any(Shift.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ShiftRevenueEntry newlyCreatedEntry = new ShiftRevenueEntry();
         newlyCreatedEntry.setEntryCategory(ShiftEntryCategory.REGULAR);
         newlyCreatedEntry.setRevenue(new BigDecimal("80.00"));
-        when(shiftRevenueEntryMapper.toEntity(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(shiftRevenueEntryMapper.toEntity(any(), any(), any(), any(), any(), any()))
                 .thenReturn(newlyCreatedEntry);
 
         // Request:
@@ -115,10 +115,10 @@ class ShiftServiceTest {
         // - entry 102 omitted (should be deleted)
         // - new entry added (id = null) with 80.00
         UpdateShiftRevenueEntryRequestDTO updateReq1 = new UpdateShiftRevenueEntryRequestDTO(
-                101L, ShiftEntryCategory.REGULAR, null, new BigDecimal("200.00"), null, null, null
+                101L, ShiftEntryCategory.REGULAR, null, new BigDecimal("200.00"), null, null
         );
         UpdateShiftRevenueEntryRequestDTO newReq = new UpdateShiftRevenueEntryRequestDTO(
-                null, ShiftEntryCategory.REGULAR, null, new BigDecimal("80.00"), null, null, null
+                null, ShiftEntryCategory.REGULAR, null, new BigDecimal("80.00"), null, null
         );
 
         UpdateShiftRequestDTO request = new UpdateShiftRequestDTO(
@@ -127,6 +127,7 @@ class ShiftServiceTest {
                 new BigDecimal("300.00"),
                 LocalDateTime.of(2025, 5, 10, 9, 0),
                 LocalDateTime.of(2025, 5, 10, 17, 0),
+                null,
                 List.of(updateReq1, newReq)
         );
 
@@ -143,6 +144,7 @@ class ShiftServiceTest {
         assertTrue(shift.getRevenues().stream().anyMatch(e -> Long.valueOf(101L).equals(e.getId()) && e.getRevenue().compareTo(new BigDecimal("200.00")) == 0));
         assertTrue(shift.getRevenues().stream().anyMatch(e -> e.getId() == null && e.getRevenue().compareTo(new BigDecimal("80.00")) == 0));
         assertFalse(shift.getRevenues().stream().anyMatch(e -> Long.valueOf(102L).equals(e.getId())));
+        verify(shiftSettlementCalculator).calculate(eq(shift), isNull());
     }
 
     @Test
@@ -153,7 +155,7 @@ class ShiftServiceTest {
 
         when(driverRepository.findByUserId(5L)).thenReturn(Optional.of(driver));
         when(shiftRepository.findById(50L)).thenReturn(Optional.of(shift));
-        when(shiftMapper.toDto(shift)).thenReturn(mock(com.markokosic.minicrm.modules.shift.dto.response.ShiftResponseDTO.class));
+        when(shiftMapper.toDto(shift)).thenReturn(mock(ShiftResponseDTO.class));
 
         var result = shiftService.getMyShiftById(5L, 50L);
 
@@ -183,13 +185,13 @@ class ShiftServiceTest {
         driver.setId(10L);
 
         when(driverRepository.findByUserId(5L)).thenReturn(Optional.of(driver));
-        when(shiftRepository.findAllFiltered(eq(10L), isNull(), isNull(), any())).thenReturn(org.springframework.data.domain.Page.empty());
+        when(shiftRepository.findAllFiltered(eq(10L), isNull(), isNull(), isNull(), any())).thenReturn(org.springframework.data.domain.Page.empty());
 
         var result = shiftService.getMyShifts(5L, org.springframework.data.domain.PageRequest.of(0, 10));
 
         assertNotNull(result);
         verify(driverRepository).findByUserId(5L);
-        verify(shiftRepository).findAllFiltered(eq(10L), isNull(), isNull(), any());
+        verify(shiftRepository).findAllFiltered(eq(10L), isNull(), isNull(), isNull(), any());
     }
 
     @Test
@@ -197,21 +199,20 @@ class ShiftServiceTest {
         when(driver.getId()).thenReturn(10L);
         when(driverRepository.findByUserId(5L)).thenReturn(Optional.of(driver));
         when(driverRepository.findById(10L)).thenReturn(Optional.of(driver));
+        when(driver.getActiveRemunerationConfigs()).thenReturn(List.of(config));
         when(carRepository.findById(10L)).thenReturn(Optional.of(car));
-        when(driver.getRemunerationConfigForEntry(eq(ShiftEntryCategory.REGULAR), any())).thenReturn(config);
-        when(remunerationService.calculateRemunerationSplit(any(), any()))
-                .thenReturn(new RemunerationSplit(new BigDecimal("60.00"), new BigDecimal("90.00")));
-        when(shiftRevenueEntryMapper.toEntity(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(entry1);
+        when(shiftRevenueEntryMapper.toEntity(any(), any(), any(), any(), any(), any())).thenReturn(entry1);
         when(shiftMapper.toShiftEntity(any(), eq(driver), eq(car), eq(ShiftStatus.PENDING))).thenReturn(shift);
         when(shiftRepository.save(any())).thenReturn(shift);
-        when(shiftMapper.toDto(any())).thenReturn(mock(com.markokosic.minicrm.modules.shift.dto.response.ShiftResponseDTO.class));
+        when(shiftMapper.toDto(any())).thenReturn(mock(ShiftResponseDTO.class));
 
-        var revenueEntry = new com.markokosic.minicrm.modules.shift.dto.request.CreateShiftRevenueEntryRequestDTO(
-                ShiftEntryCategory.REGULAR, null, new BigDecimal("150.00"), null, null, null
+        var revenueEntry = new CreateShiftRevenueEntryRequestDTO(
+                ShiftEntryCategory.REGULAR, null, new BigDecimal("150.00"), null, null
         );
-        var request = new com.markokosic.minicrm.modules.shift.dto.request.CreateMyShiftRequestDTO(
+        var request = new CreateMyShiftRequestDTO(
                 10L, new BigDecimal("100.00"), new BigDecimal("200.00"),
                 LocalDateTime.of(2025, 5, 10, 8, 0), LocalDateTime.of(2025, 5, 10, 16, 0),
+                null,
                 List.of(revenueEntry)
         );
 
@@ -219,6 +220,7 @@ class ShiftServiceTest {
 
         assertNotNull(result);
         verify(driverRepository).findByUserId(5L);
+        verify(shiftSettlementCalculator).calculate(eq(shift), isNull());
         verify(shiftRepository).save(any());
     }
 
@@ -234,12 +236,13 @@ class ShiftServiceTest {
         when(shiftRepository.findById(50L)).thenReturn(Optional.of(shift));
         when(carRepository.findById(20L)).thenReturn(Optional.of(newCar));
         when(shiftRepository.save(any(Shift.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(shiftMapper.toDto(any())).thenReturn(mock(com.markokosic.minicrm.modules.shift.dto.response.ShiftResponseDTO.class));
+        when(shiftMapper.toDto(any())).thenReturn(mock(ShiftResponseDTO.class));
 
         UpdateShiftRequestDTO request = new UpdateShiftRequestDTO(
                 20L,
                 new BigDecimal("150.00"), new BigDecimal("300.00"),
                 LocalDateTime.of(2025, 5, 10, 9, 0), LocalDateTime.of(2025, 5, 10, 17, 0),
+                null,
                 List.of()
         );
 
@@ -247,6 +250,7 @@ class ShiftServiceTest {
 
         assertNotNull(result);
         assertEquals(20L, shift.getCar().getId());
+        verify(shiftSettlementCalculator).calculate(eq(shift), isNull());
         verify(shiftRepository).save(shift);
     }
 
@@ -262,6 +266,7 @@ class ShiftServiceTest {
                 null,
                 new BigDecimal("150.00"), new BigDecimal("300.00"),
                 LocalDateTime.of(2025, 5, 10, 9, 0), LocalDateTime.of(2025, 5, 10, 17, 0),
+                null,
                 List.of()
         );
 
@@ -293,45 +298,21 @@ class ShiftServiceTest {
     }
 
     @Test
-    void approveShift_Success_CreatesSettlement() {
+    void approveShift_Success_CalculatesSettlement() {
         when(shiftRepository.findById(50L)).thenReturn(Optional.of(shift));
-        when(shiftMapper.toDto(shift)).thenReturn(mock(com.markokosic.minicrm.modules.shift.dto.response.ShiftResponseDTO.class));
-
-        entry1.setRevenue(new BigDecimal("100.00"));
-        entry1.setDriverRemuneration(new BigDecimal("40.00"));
-        entry1.setCompanyRemuneration(new BigDecimal("60.00"));
-
-        entry2.setRevenue(new BigDecimal("50.00"));
-        entry2.setDriverRemuneration(new BigDecimal("25.00"));
-        entry2.setCompanyRemuneration(new BigDecimal("25.00"));
+        when(shiftMapper.toDto(shift)).thenReturn(mock(ShiftResponseDTO.class));
 
         var result = shiftService.approveShift(50L);
 
         assertNotNull(result);
         assertEquals(ShiftStatus.APPROVED, shift.getStatus());
-        assertNotNull(shift.getSettlement());
-        assertEquals(new BigDecimal("150.00"), shift.getSettlement().getTotalRevenue());
-        assertEquals(new BigDecimal("65.00"), shift.getSettlement().getDriverRemuneration());
-        assertEquals(new BigDecimal("85.00"), shift.getSettlement().getCompanyRemuneration());
+        verify(shiftSettlementCalculator).calculate(eq(shift));
     }
 
     @Test
-    void updateShift_withWeeklyRent_SetsCompanyRemunerationAndZeroDriverRemuneration() {
+    void updateShift_withWeeklyRent_CallsCalculatorWithRent() {
         when(shiftRepository.findById(50L)).thenReturn(Optional.of(shift));
         when(shiftRepository.save(any(Shift.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        ShiftRevenueEntry weeklyEntry = new ShiftRevenueEntry();
-        weeklyEntry.setId(103L);
-        weeklyEntry.setEntryCategory(ShiftEntryCategory.WEEKLY);
-        weeklyEntry.setRevenue(BigDecimal.ZERO);
-        weeklyEntry.setWeeklyDriverRent(BigDecimal.ZERO);
-        weeklyEntry.setCompanyRemuneration(BigDecimal.ZERO);
-        weeklyEntry.setDriverRemuneration(BigDecimal.ZERO);
-        shift.addRevenueEntry(weeklyEntry);
-
-        UpdateShiftRevenueEntryRequestDTO weeklyReq = new UpdateShiftRevenueEntryRequestDTO(
-                103L, ShiftEntryCategory.WEEKLY, null, null, null, null, new BigDecimal("400.00")
-        );
 
         UpdateShiftRequestDTO request = new UpdateShiftRequestDTO(
                 null,
@@ -339,32 +320,26 @@ class ShiftServiceTest {
                 new BigDecimal("200.00"),
                 LocalDateTime.of(2025, 5, 10, 8, 0),
                 LocalDateTime.of(2025, 5, 10, 16, 0),
-                List.of(weeklyReq)
+                new BigDecimal("400.00"),
+                List.of()
         );
 
         shiftService.updateShift(50L, request);
 
-        assertEquals(1, shift.getRevenues().size());
-        ShiftRevenueEntry updatedWeekly = shift.getRevenues().get(0);
-        assertEquals(new BigDecimal("400.00"), updatedWeekly.getWeeklyDriverRent());
-        assertEquals(new BigDecimal("400.00"), updatedWeekly.getRevenue());
-        assertEquals(new BigDecimal("400.00"), updatedWeekly.getCompanyRemuneration());
-        assertEquals(BigDecimal.ZERO, updatedWeekly.getDriverRemuneration());
+        verify(shiftSettlementCalculator).calculate(eq(shift), eq(new BigDecimal("400.00")));
     }
 
     @Test
     void updateShift_withFlatRateConnectedDefaultPrice_EnforcesDefaultPrice() {
         when(shiftRepository.findById(50L)).thenReturn(Optional.of(shift));
         when(shiftRepository.save(any(Shift.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(remunerationService.calculateRemunerationSplit(any(), any()))
-                .thenReturn(new RemunerationSplit(new BigDecimal("10.00"), new BigDecimal("30.00")));
 
-        com.markokosic.minicrm.modules.flatratetype.model.FlatRateType flatRateType = new com.markokosic.minicrm.modules.flatratetype.model.FlatRateType();
+        FlatRateType flatRateType = new FlatRateType();
         flatRateType.setDefaultPrice(new BigDecimal("40.00"));
         entry2.setFlatRateType(flatRateType);
 
         UpdateShiftRevenueEntryRequestDTO flatRateReq = new UpdateShiftRevenueEntryRequestDTO(
-                102L, ShiftEntryCategory.FLAT_RATE, null, null, 2L, new BigDecimal("999.00"), null
+                102L, ShiftEntryCategory.FLAT_RATE, null, null, 2L, new BigDecimal("999.00")
         );
 
         UpdateShiftRequestDTO request = new UpdateShiftRequestDTO(
@@ -373,6 +348,7 @@ class ShiftServiceTest {
                 new BigDecimal("200.00"),
                 LocalDateTime.of(2025, 5, 10, 8, 0),
                 LocalDateTime.of(2025, 5, 10, 16, 0),
+                null,
                 List.of(flatRateReq)
         );
 
@@ -382,19 +358,18 @@ class ShiftServiceTest {
         ShiftRevenueEntry updatedFlat = shift.getRevenues().get(0);
         assertEquals(new BigDecimal("40.00"), updatedFlat.getPricePerTrip());
         assertEquals(new BigDecimal("80.00"), updatedFlat.getRevenue());
+        verify(shiftSettlementCalculator).calculate(eq(shift), isNull());
     }
 
     @Test
     void updateShift_withFlatRateCustomPrice_UsesRequestedPrice() {
         when(shiftRepository.findById(50L)).thenReturn(Optional.of(shift));
         when(shiftRepository.save(any(Shift.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(remunerationService.calculateRemunerationSplit(any(), any()))
-                .thenReturn(new RemunerationSplit(new BigDecimal("20.00"), new BigDecimal("30.00")));
 
         entry2.setFlatRateType(null); // Custom flat rate without connected FlatRateType
 
         UpdateShiftRevenueEntryRequestDTO flatRateReq = new UpdateShiftRevenueEntryRequestDTO(
-                102L, ShiftEntryCategory.FLAT_RATE, null, null, 2L, new BigDecimal("25.00"), null
+                102L, ShiftEntryCategory.FLAT_RATE, null, null, 2L, new BigDecimal("25.00")
         );
 
         UpdateShiftRequestDTO request = new UpdateShiftRequestDTO(
@@ -403,6 +378,7 @@ class ShiftServiceTest {
                 new BigDecimal("200.00"),
                 LocalDateTime.of(2025, 5, 10, 8, 0),
                 LocalDateTime.of(2025, 5, 10, 16, 0),
+                null,
                 List.of(flatRateReq)
         );
 
@@ -412,5 +388,6 @@ class ShiftServiceTest {
         ShiftRevenueEntry updatedFlat = shift.getRevenues().get(0);
         assertEquals(new BigDecimal("25.00"), updatedFlat.getPricePerTrip());
         assertEquals(new BigDecimal("50.00"), updatedFlat.getRevenue());
+        verify(shiftSettlementCalculator).calculate(eq(shift), isNull());
     }
 }

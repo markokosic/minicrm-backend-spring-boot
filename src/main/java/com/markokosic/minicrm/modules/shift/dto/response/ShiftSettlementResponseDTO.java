@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
+import com.markokosic.minicrm.modules.driver.dto.response.RemunerationConfigResponseDTO;
 import java.time.LocalDateTime;
 
 @Schema(description = "Shift settlement snapshot containing totals for revenue, driver remuneration, and company share")

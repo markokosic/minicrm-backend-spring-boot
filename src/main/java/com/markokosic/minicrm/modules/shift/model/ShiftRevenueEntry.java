@@ -30,10 +30,6 @@ public class ShiftRevenueEntry {
 	private Shift shift;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "remuneration_version_id", nullable = false)
-	private DriverRemunerationConfig remunerationConfig;
-
-	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "flat_rate_type_id")
 	private FlatRateType flatRateType;
 
@@ -44,18 +40,9 @@ public class ShiftRevenueEntry {
 	@Column(name = "revenue", nullable = false, precision = 19, scale = 2)
 	private BigDecimal revenue;
 
-	@Column(name = "company_remuneration", nullable = false, precision = 19, scale = 2)
-	private BigDecimal companyRemuneration;
-
-	@Column(name = "driver_remuneration", nullable = false, precision = 19, scale = 2)
-	private BigDecimal driverRemuneration;
-
 	@Column(name = "trip_count")
 	private Long tripCount;
 
 	@Column(name = "price_per_trip", precision = 19, scale = 2)
 	private BigDecimal pricePerTrip;
-
-	@Column(name = "weekly_driver_rent", precision = 19, scale = 2)
-	private BigDecimal weeklyDriverRent;
 }

@@ -71,11 +71,7 @@ class ShiftControllerTest {
         driverUser.setRoles(com.markokosic.minicrm.modules.role.dto.Roles.DRIVER);
         com.markokosic.minicrm.modules.auth.model.UserPrincipal principal = new com.markokosic.minicrm.modules.auth.model.UserPrincipal(driverUser);
 
-        ShiftResponseDTO responseDTO = new ShiftResponseDTO(
-                1L, null, null, new BigDecimal("100.00"), new BigDecimal("200.00"),
-                new BigDecimal("100.00"), LocalDateTime.now(), LocalDateTime.now().plusHours(8),
-                ShiftStatus.PENDING, null, List.of()
-        );
+        ShiftResponseDTO responseDTO = new ShiftResponseDTO(1L, null, null, new java.math.BigDecimal("100.00"), new java.math.BigDecimal("200.00"), new java.math.BigDecimal("100.00"), java.time.LocalDateTime.now(), java.time.LocalDateTime.now().plusHours(8), com.markokosic.minicrm.modules.shift.model.ShiftStatus.PENDING, null, null, java.util.List.of(), null);
 
         when(shiftService.getMyShiftById(eq(5L), eq(1L))).thenReturn(responseDTO);
         when(i18n.getMessage("success.fetched")).thenReturn("Shift fetched");
@@ -96,18 +92,14 @@ class ShiftControllerTest {
 
         var revenueEntry = new com.markokosic.minicrm.modules.shift.dto.request.CreateShiftRevenueEntryRequestDTO(
                 com.markokosic.minicrm.modules.shift.model.ShiftEntryCategory.REGULAR,
-                null, new BigDecimal("100.00"), null, null, null
+                null, new BigDecimal("100.00"), null, null
         );
         var requestDTO = new com.markokosic.minicrm.modules.shift.dto.request.CreateMyShiftRequestDTO(
                 1L, new BigDecimal("100.00"), new BigDecimal("200.00"),
-                LocalDateTime.now(), LocalDateTime.now().plusHours(8), List.of(revenueEntry)
+                LocalDateTime.now(), LocalDateTime.now().plusHours(8), null, List.of(revenueEntry)
         );
 
-        ShiftResponseDTO responseDTO = new ShiftResponseDTO(
-                1L, null, null, new BigDecimal("100.00"), new BigDecimal("200.00"),
-                new BigDecimal("100.00"), LocalDateTime.now(), LocalDateTime.now().plusHours(8),
-                ShiftStatus.PENDING, null, List.of()
-        );
+        ShiftResponseDTO responseDTO = new ShiftResponseDTO(1L, null, null, new java.math.BigDecimal("100.00"), new java.math.BigDecimal("200.00"), new java.math.BigDecimal("100.00"), java.time.LocalDateTime.now(), java.time.LocalDateTime.now().plusHours(8), com.markokosic.minicrm.modules.shift.model.ShiftStatus.PENDING, null, null, java.util.List.of(), null);
 
         when(shiftService.createMyShift(eq(5L), any())).thenReturn(responseDTO);
         when(i18n.getMessage("success.added")).thenReturn("Shift added");
@@ -133,11 +125,11 @@ class ShiftControllerTest {
     void createShift_Forbidden_WhenDriverRole() throws Exception {
         var revenueEntry = new com.markokosic.minicrm.modules.shift.dto.request.CreateShiftRevenueEntryRequestDTO(
                 com.markokosic.minicrm.modules.shift.model.ShiftEntryCategory.REGULAR,
-                null, new BigDecimal("100.00"), null, null, null
+                null, new BigDecimal("100.00"), null, null
         );
         CreateShiftRequestDTO requestDTO = new CreateShiftRequestDTO(
                 1L, 1L, new BigDecimal("100.00"), new BigDecimal("200.00"),
-                LocalDateTime.now(), LocalDateTime.now().plusHours(8), ShiftStatus.APPROVED, List.of(revenueEntry)
+                LocalDateTime.now(), LocalDateTime.now().plusHours(8), null, List.of(revenueEntry)
         );
 
         mockMvc.perform(post("/api/shifts")
@@ -151,7 +143,7 @@ class ShiftControllerTest {
     void getAllShifts_Success_WhenAdminRole() throws Exception {
         PageResponseDTO<ShiftResponseDTO> pageResponse = new PageResponseDTO<>(List.of(), 1, 10, 0L, 0, true, true);
 
-        when(shiftService.getAllShifts(any(), any(), any(), any())).thenReturn(pageResponse);
+        when(shiftService.getAllShifts(any(), any(), any(), any(), any())).thenReturn(pageResponse);
         when(i18n.getMessage("success.fetched")).thenReturn("Shifts fetched");
 
         mockMvc.perform(get("/api/shifts"))
@@ -162,11 +154,7 @@ class ShiftControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void approveShift_Success_WhenAdminRole() throws Exception {
-        ShiftResponseDTO responseDTO = new ShiftResponseDTO(
-                1L, null, null, new BigDecimal("100.00"), new BigDecimal("200.00"),
-                new BigDecimal("100.00"), LocalDateTime.now(), LocalDateTime.now().plusHours(8),
-                ShiftStatus.APPROVED, null, List.of()
-        );
+        ShiftResponseDTO responseDTO = new ShiftResponseDTO(1L, null, null, new java.math.BigDecimal("100.00"), new java.math.BigDecimal("200.00"), new java.math.BigDecimal("100.00"), java.time.LocalDateTime.now(), java.time.LocalDateTime.now().plusHours(8), com.markokosic.minicrm.modules.shift.model.ShiftStatus.APPROVED, null, null, java.util.List.of(), null);
 
         when(shiftService.approveShift(1L)).thenReturn(responseDTO);
         when(i18n.getMessage("success.updated")).thenReturn("Shift updated");
@@ -193,19 +181,15 @@ class ShiftControllerTest {
         com.markokosic.minicrm.modules.auth.model.UserPrincipal principal = new com.markokosic.minicrm.modules.auth.model.UserPrincipal(driverUser);
 
         var updateReq = new com.markokosic.minicrm.modules.shift.dto.request.UpdateShiftRevenueEntryRequestDTO(
-                101L, com.markokosic.minicrm.modules.shift.model.ShiftEntryCategory.REGULAR, null, new BigDecimal("150.00"), null, null, null
+                101L, com.markokosic.minicrm.modules.shift.model.ShiftEntryCategory.REGULAR, null, new BigDecimal("150.00"), null, null
         );
         var requestDTO = new com.markokosic.minicrm.modules.shift.dto.request.UpdateShiftRequestDTO(
                 null,
                 new BigDecimal("100.00"), new BigDecimal("250.00"),
-                LocalDateTime.now(), LocalDateTime.now().plusHours(8), List.of(updateReq)
+                LocalDateTime.now(), LocalDateTime.now().plusHours(8), null, List.of(updateReq)
         );
 
-        ShiftResponseDTO responseDTO = new ShiftResponseDTO(
-                1L, null, null, new BigDecimal("100.00"), new BigDecimal("250.00"),
-                new BigDecimal("150.00"), LocalDateTime.now(), LocalDateTime.now().plusHours(8),
-                ShiftStatus.PENDING, null, List.of()
-        );
+        ShiftResponseDTO responseDTO = new ShiftResponseDTO(1L, null, null, new java.math.BigDecimal("100.00"), new java.math.BigDecimal("200.00"), new java.math.BigDecimal("100.00"), java.time.LocalDateTime.now(), java.time.LocalDateTime.now().plusHours(8), com.markokosic.minicrm.modules.shift.model.ShiftStatus.PENDING, null, null, java.util.List.of(), null);
 
         when(shiftService.updateMyShift(eq(5L), eq(1L), any())).thenReturn(responseDTO);
         when(i18n.getMessage("success.updated")).thenReturn("Shift updated");
@@ -222,19 +206,15 @@ class ShiftControllerTest {
     @WithMockUser(roles = "ADMIN")
     void updateShift_Success_WhenAdminRole() throws Exception {
         var updateReq = new com.markokosic.minicrm.modules.shift.dto.request.UpdateShiftRevenueEntryRequestDTO(
-                101L, com.markokosic.minicrm.modules.shift.model.ShiftEntryCategory.REGULAR, null, new BigDecimal("150.00"), null, null, null
+                101L, com.markokosic.minicrm.modules.shift.model.ShiftEntryCategory.REGULAR, null, new BigDecimal("150.00"), null, null
         );
         var requestDTO = new com.markokosic.minicrm.modules.shift.dto.request.UpdateShiftRequestDTO(
                 1L,
                 new BigDecimal("100.00"), new BigDecimal("250.00"),
-                LocalDateTime.now(), LocalDateTime.now().plusHours(8), List.of(updateReq)
+                LocalDateTime.now(), LocalDateTime.now().plusHours(8), null, List.of(updateReq)
         );
 
-        ShiftResponseDTO responseDTO = new ShiftResponseDTO(
-                1L, null, null, new BigDecimal("100.00"), new BigDecimal("250.00"),
-                new BigDecimal("150.00"), LocalDateTime.now(), LocalDateTime.now().plusHours(8),
-                ShiftStatus.APPROVED, null, List.of()
-        );
+        ShiftResponseDTO responseDTO = new ShiftResponseDTO(1L, null, null, new java.math.BigDecimal("100.00"), new java.math.BigDecimal("200.00"), new java.math.BigDecimal("100.00"), java.time.LocalDateTime.now(), java.time.LocalDateTime.now().plusHours(8), com.markokosic.minicrm.modules.shift.model.ShiftStatus.PENDING, null, null, java.util.List.of(), null);
 
         when(shiftService.updateShift(eq(1L), any())).thenReturn(responseDTO);
         when(i18n.getMessage("success.updated")).thenReturn("Shift updated");

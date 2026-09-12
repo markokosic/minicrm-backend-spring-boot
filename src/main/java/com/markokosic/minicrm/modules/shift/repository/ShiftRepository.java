@@ -18,12 +18,14 @@ public interface ShiftRepository extends JpaRepository<Shift, Long> {
 		WHERE (:driverId IS NULL OR s.driver.id = :driverId)
 		AND (cast(:dateFrom as timestamp) IS NULL OR s.shiftStart >= :dateFrom)
 		AND (cast(:dateTo as timestamp) IS NULL OR s.shiftEnd <= :dateTo)
+		AND (:status IS NULL OR s.status = :status)
 		ORDER BY s.shiftStart DESC
 	""")
 	Page<Shift> findAllFiltered(
 			@Param("driverId") Long driverId,
 			@Param("dateFrom") LocalDateTime dateFrom,
 			@Param("dateTo") LocalDateTime dateTo,
+			@Param("status") com.markokosic.minicrm.modules.shift.model.ShiftStatus status,
 			Pageable pageable
 	);
 }

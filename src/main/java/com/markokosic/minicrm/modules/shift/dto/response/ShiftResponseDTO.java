@@ -8,6 +8,7 @@ import com.markokosic.minicrm.modules.shift.model.ShiftStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.markokosic.minicrm.modules.driver.dto.response.RemunerationConfigResponseDTO;
 
 public record ShiftResponseDTO(
 		Long id,
@@ -21,6 +22,8 @@ public record ShiftResponseDTO(
 		@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
 		LocalDateTime shiftEnd,
 		ShiftStatus status,
+		BigDecimal weeklyDriverRent,
 		ShiftSettlementResponseDTO settlement,
-		List<ShiftRevenueEntryResponseDTO> revenues
+		List<ShiftRevenueEntryResponseDTO> revenues,
+		List<RemunerationConfigResponseDTO> appliedRemunerationConfigs
 ) {}

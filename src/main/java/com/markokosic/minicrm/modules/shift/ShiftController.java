@@ -7,6 +7,7 @@ import com.markokosic.minicrm.modules.shift.dto.request.CreateMyShiftRequestDTO;
 import com.markokosic.minicrm.modules.shift.dto.request.CreateShiftRequestDTO;
 import com.markokosic.minicrm.modules.shift.dto.request.UpdateShiftRequestDTO;
 import com.markokosic.minicrm.modules.shift.dto.response.ShiftResponseDTO;
+import com.markokosic.minicrm.modules.shift.model.ShiftStatus;
 import com.markokosic.minicrm.modules.shift.service.ShiftService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -119,15 +120,16 @@ public class ShiftController {
 	}
 
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "Get all shifts", description = "Fetches a paginated list of shifts filtered by driver or date range.")
+	@Operation(summary = "Get all shifts", description = "Fetches a paginated list of shifts filtered by driver, status or date range.")
 	@PreAuthorize("hasAnyRole(T(com.markokosic.minicrm.modules.role.dto.Roles).ADMIN.name(), T(com.markokosic.minicrm.modules.role.dto.Roles).OWNER.name())")
 	public ResponseEntity<ApiResponseDTO<PageResponseDTO<ShiftResponseDTO>>> getAllShifts(
 			@RequestParam(required = false) Long driverId,
+			@RequestParam(required = false) ShiftStatus status,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateFrom,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTo,
 			@ParameterObject Pageable pageable
 	) {
-		PageResponseDTO<ShiftResponseDTO> shifts = shiftService.getAllShifts(driverId, dateFrom, dateTo, pageable);
+		PageResponseDTO<ShiftResponseDTO> shifts = shiftService.getAllShifts(driverId, status, dateFrom, dateTo, pageable);
 		return ResponseEntity.ok(new ApiResponseDTO<>(true, shifts, i18n.getMessage("success.fetched")));
 	}
 

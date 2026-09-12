@@ -8,8 +8,6 @@ import com.markokosic.minicrm.modules.car.model.Car;
 import com.markokosic.minicrm.modules.driver.model.Driver;
 import com.markokosic.minicrm.modules.driver.model.DriverRemunerationConfig;
 import com.markokosic.minicrm.modules.driver.repository.DriverRepository;
-import com.markokosic.minicrm.modules.remuneration.RemunerationService;
-import com.markokosic.minicrm.modules.remuneration.RemunerationSplit;
 import com.markokosic.minicrm.modules.shift.ShiftMapper;
 import com.markokosic.minicrm.modules.shift.ShiftRevenueEntryMapper;
 import com.markokosic.minicrm.modules.shift.dto.request.CreateMyShiftRequestDTO;
@@ -49,12 +47,16 @@ public class ShiftService {
 	private final CarRepository carRepository;
 	private final FlatRateTypeRepository flatRateTypeRepository;
 	private final ShiftRepository shiftRepository;
-	private final RemunerationService remunerationService;
+	private final ShiftSettlementCalculator shiftSettlementCalculator;
 	private final ShiftMapper shiftMapper;
 	private final ShiftRevenueEntryMapper shiftRevenueEntryMapper;
 
 	@Transactional
 	public ShiftResponseDTO createShift(CreateShiftRequestDTO request) {
+		return createShiftInternal(request, ShiftStatus.APPROVED);
+	}
+
+	private ShiftResponseDTO createShiftInternal(CreateShiftRequestDTO request, ShiftStatus status) {
 		ShiftValidationUtils.validateShiftParameters(
 				request.odometerStart(),
 				request.odometerEnd(),
@@ -68,8 +70,8 @@ public class ShiftService {
 		Car car = carRepository.findById(request.carId())
 				.orElseThrow(() -> new ResourceNotFoundException("domain.car.not_found"));
 
-		ShiftStatus status = request.status() != null ? request.status() : ShiftStatus.APPROVED;
 		Shift shift = shiftMapper.toShiftEntity(request, driver, car, status);
+		shift.setAppliedRemunerationConfigs(new java.util.ArrayList<>(driver.getActiveRemunerationConfigs()));
 
 		for (CreateShiftRevenueEntryRequestDTO revenueReq : request.revenues()) {
 			ShiftRevenueEntry entry = buildNewRevenueEntry(
@@ -79,14 +81,12 @@ public class ShiftService {
 					revenueReq.flatRateTypeId(),
 					revenueReq.revenue(),
 					revenueReq.tripCount(),
-					revenueReq.pricePerTrip(),
-					revenueReq.weeklyDriverRent()
+					revenueReq.pricePerTrip()
 			);
 			shift.addRevenueEntry(entry);
 		}
 
-		ensureWeeklyRentEntryIfApplicable(shift, driver);
-		updateShiftSettlement(shift);
+		shiftSettlementCalculator.calculate(shift, request.weeklyDriverRent());
 		Shift saved = shiftRepository.save(shift);
 		return shiftMapper.toDto(saved);
 	}
@@ -105,8 +105,7 @@ public class ShiftService {
 
 		updateShiftMetadata(shift, request);
 		syncRevenueEntries(shift, request.revenues());
-		ensureWeeklyRentEntryIfApplicable(shift, shift.getDriver());
-		updateShiftSettlement(shift);
+		shiftSettlementCalculator.calculate(shift, request.weeklyDriverRent());
 
 		Shift saved = shiftRepository.save(shift);
 		return shiftMapper.toDto(saved);
@@ -122,6 +121,9 @@ public class ShiftService {
 		shift.setOdometerEnd(request.odometerEnd());
 		shift.setShiftStart(request.shiftStart());
 		shift.setShiftEnd(request.shiftEnd());
+		if (request.weeklyDriverRent() != null) {
+			shift.setWeeklyDriverRent(request.weeklyDriverRent());
+		}
 	}
 
 	private void syncRevenueEntries(Shift shift, List<UpdateShiftRevenueEntryRequestDTO> revenueRequests) {
@@ -154,27 +156,12 @@ public class ShiftService {
 				.findFirst()
 				.orElseThrow(() -> new ResourceNotFoundException("domain.shift_revenue_entry.not_found"));
 
-		if (entry.getEntryCategory() == ShiftEntryCategory.WEEKLY) {
-			BigDecimal rent = request.weeklyDriverRent() != null ? request.weeklyDriverRent() : request.revenue();
-			if (rent == null) {
-				rent = BigDecimal.ZERO;
-			}
-			entry.setWeeklyDriverRent(rent);
-			entry.setRevenue(rent);
-			entry.setCompanyRemuneration(rent);
-			entry.setDriverRemuneration(BigDecimal.ZERO);
-			return;
-		}
-
 		BigDecimal effectivePricePerTrip = calculateEffectivePricePerTrip(request.pricePerTrip(), entry.getFlatRateType());
-		BigDecimal effectiveRevenue = calculateEffectiveRevenue(request.revenue(), request.tripCount(), effectivePricePerTrip, request.weeklyDriverRent());
-		RemunerationSplit split = remunerationService.calculateRemunerationSplit(effectiveRevenue, entry.getRemunerationConfig());
+		BigDecimal effectiveRevenue = calculateEffectiveRevenue(request.revenue(), request.tripCount(), effectivePricePerTrip);
 
 		entry.setRevenue(effectiveRevenue);
 		entry.setPricePerTrip(effectivePricePerTrip);
 		entry.setTripCount(request.tripCount());
-		entry.setCompanyRemuneration(split.companyRemuneration());
-		entry.setDriverRemuneration(split.driverRemuneration());
 	}
 
 	private void addNewRevenueEntry(Shift shift, UpdateShiftRevenueEntryRequestDTO request) {
@@ -186,8 +173,7 @@ public class ShiftService {
 				request.flatRateTypeId(),
 				request.revenue(),
 				request.tripCount(),
-				request.pricePerTrip(),
-				request.weeklyDriverRent()
+				request.pricePerTrip()
 		);
 		shift.addRevenueEntry(newEntry);
 	}
@@ -199,78 +185,29 @@ public class ShiftService {
 			Long flatRateTypeId,
 			BigDecimal requestedRevenue,
 			Long tripCount,
-			BigDecimal requestedPricePerTrip,
-			BigDecimal requestedWeeklyDriverRent
+			BigDecimal requestedPricePerTrip
 	) {
 		FlatRateType flatRateType = null;
 		if (flatRateTypeId != null) {
 			flatRateType = flatRateTypeRepository.findById(flatRateTypeId)
 					.orElseThrow(() -> new ResourceNotFoundException("domain.flat_rate_type.not_found"));
 		}
-
-		DriverRemunerationConfig config = driver.getRemunerationConfigForEntry(category, flatRateType);
+		DriverRemunerationConfig config = shift.getAppliedConfigForEntry(category, flatRateType);
 		if (config == null) {
 			throw new IllegalStateException("No valid remuneration config found for driver " + driver.getId() + " and category " + category);
 		}
 
-		if (category == ShiftEntryCategory.WEEKLY) {
-			BigDecimal rent = requestedWeeklyDriverRent != null ? requestedWeeklyDriverRent : requestedRevenue;
-			if (rent == null) {
-				rent = BigDecimal.ZERO;
-			}
-			return shiftRevenueEntryMapper.toEntity(
-					shift,
-					config,
-					null,
-					ShiftEntryCategory.WEEKLY,
-					rent,
-					null,
-					null,
-					rent,
-					new RemunerationSplit(rent, BigDecimal.ZERO)
-			);
-		}
-
 		BigDecimal effectivePricePerTrip = calculateEffectivePricePerTrip(requestedPricePerTrip, flatRateType);
-		BigDecimal effectiveRevenue = calculateEffectiveRevenue(requestedRevenue, tripCount, effectivePricePerTrip, requestedWeeklyDriverRent);
-		RemunerationSplit split = remunerationService.calculateRemunerationSplit(effectiveRevenue, config);
+		BigDecimal effectiveRevenue = calculateEffectiveRevenue(requestedRevenue, tripCount, effectivePricePerTrip);
 
 		return shiftRevenueEntryMapper.toEntity(
 				shift,
-				config,
 				flatRateType,
 				category,
 				effectiveRevenue,
 				effectivePricePerTrip,
-				tripCount,
-				null,
-				split
+				tripCount
 		);
-	}
-
-	private void ensureWeeklyRentEntryIfApplicable(Shift shift, Driver driver) {
-		if (driver == null) {
-			return;
-		}
-		boolean hasWeeklyConfig = driver.getActiveRemunerationConfigs().stream()
-				.anyMatch(c -> c.getType() == com.markokosic.minicrm.modules.remuneration.RemunerationModelType.WEEKLY_FIXED_RATE);
-		if (hasWeeklyConfig) {
-			boolean hasWeeklyEntry = shift.getRevenues() != null && shift.getRevenues().stream()
-					.anyMatch(e -> e.getEntryCategory() == ShiftEntryCategory.WEEKLY);
-			if (!hasWeeklyEntry) {
-				ShiftRevenueEntry weeklyEntry = buildNewRevenueEntry(
-						shift,
-						driver,
-						ShiftEntryCategory.WEEKLY,
-						null,
-						BigDecimal.ZERO,
-						null,
-						null,
-						BigDecimal.ZERO
-				);
-				shift.addRevenueEntry(weeklyEntry);
-			}
-		}
 	}
 
 	private BigDecimal calculateEffectivePricePerTrip(BigDecimal requestedPricePerTrip, FlatRateType flatRateType) {
@@ -280,20 +217,18 @@ public class ShiftService {
 		return requestedPricePerTrip;
 	}
 
-	private BigDecimal calculateEffectiveRevenue(BigDecimal requestedRevenue, Long tripCount, BigDecimal effectivePricePerTrip, BigDecimal requestedWeeklyDriverRent) {
+	private BigDecimal calculateEffectiveRevenue(BigDecimal requestedRevenue, Long tripCount, BigDecimal effectivePricePerTrip) {
 		if (requestedRevenue != null) {
 			return requestedRevenue;
 		} else if (tripCount != null && effectivePricePerTrip != null) {
 			return effectivePricePerTrip.multiply(BigDecimal.valueOf(tripCount));
-		} else if (requestedWeeklyDriverRent != null) {
-			return requestedWeeklyDriverRent;
 		}
-		throw new IllegalArgumentException("Either 'revenue' or ('tripCount' and 'pricePerTrip') or 'weeklyDriverRent' must be provided.");
+		throw new IllegalArgumentException("Either 'revenue' or ('tripCount' and 'pricePerTrip') must be provided.");
 	}
 
 	@Transactional(readOnly = true)
-	public PageResponseDTO<ShiftResponseDTO> getAllShifts(Long driverId, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable) {
-		Page<ShiftResponseDTO> page = shiftRepository.findAllFiltered(driverId, dateFrom, dateTo, pageable).map(shiftMapper::toDto);
+	public PageResponseDTO<ShiftResponseDTO> getAllShifts(Long driverId, ShiftStatus status, LocalDateTime dateFrom, LocalDateTime dateTo, Pageable pageable) {
+		Page<ShiftResponseDTO> page = shiftRepository.findAllFiltered(driverId, dateFrom, dateTo, status, pageable).map(shiftMapper::toDto);
 		return PageResponseDTO.from(page);
 	}
 
@@ -312,10 +247,10 @@ public class ShiftService {
 	}
 
 	@Transactional(readOnly = true)
-	public PageResponseDTO<ShiftResponseDTO> 	getMyShifts(Long userId, Pageable pageable) {
+	public PageResponseDTO<ShiftResponseDTO> getMyShifts(Long userId, Pageable pageable) {
 		Driver driver = driverRepository.findByUserId(userId)
 				.orElseThrow(() -> new ResourceNotFoundException("domain.driver.not_found"));
-		return getAllShifts(driver.getId(), null, null, pageable);
+		return getAllShifts(driver.getId(), null, null, null, pageable);
 	}
 
 	@Transactional(readOnly = true)
@@ -345,11 +280,11 @@ public class ShiftService {
 				request.odometerEnd(),
 				request.shiftStart(),
 				request.shiftEnd(),
-				ShiftStatus.PENDING,
+				request.weeklyDriverRent(),
 				request.revenues()
 		);
 
-		return createShift(internalRequest);
+		return createShiftInternal(internalRequest, ShiftStatus.PENDING);
 	}
 
 	@Transactional
@@ -357,7 +292,7 @@ public class ShiftService {
 		Shift shift = shiftRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("domain.shift.not_found"));
 		shift.setStatus(ShiftStatus.APPROVED);
-		updateShiftSettlement(shift);
+		shiftSettlementCalculator.calculate(shift);
 		return shiftMapper.toDto(shift);
 	}
 
@@ -394,7 +329,7 @@ public class ShiftService {
 
 		updateShiftMetadata(shift, request);
 		syncRevenueEntries(shift, request.revenues());
-		updateShiftSettlement(shift);
+		shiftSettlementCalculator.calculate(shift, request.weeklyDriverRent());
 
 		Shift saved = shiftRepository.save(shift);
 		return shiftMapper.toDto(saved);
@@ -417,53 +352,5 @@ public class ShiftService {
 		}
 
 		shiftRepository.delete(shift);
-	}
-
-	private void updateShiftSettlement(Shift shift) {
-		BigDecimal totalRev = BigDecimal.ZERO;
-		BigDecimal totalDriver = BigDecimal.ZERO;
-		BigDecimal totalCompany = BigDecimal.ZERO;
-		DriverRemunerationConfig primaryConfig = null;
-
-		if (shift.getRevenues() != null) {
-			for (ShiftRevenueEntry entry : shift.getRevenues()) {
-				if (entry.getRevenue() != null) {
-					totalRev = totalRev.add(entry.getRevenue());
-				}
-				if (entry.getDriverRemuneration() != null) {
-					totalDriver = totalDriver.add(entry.getDriverRemuneration());
-				}
-				if (entry.getCompanyRemuneration() != null) {
-					totalCompany = totalCompany.add(entry.getCompanyRemuneration());
-				}
-				if (primaryConfig == null && entry.getRemunerationConfig() != null) {
-					primaryConfig = entry.getRemunerationConfig();
-				}
-			}
-		}
-
-		if (primaryConfig == null && shift.getDriver() != null) {
-			primaryConfig = shift.getDriver().getCurrentRemunerationConfig();
-		}
-
-		ShiftSettlement settlement = shift.getSettlement();
-		if (settlement == null) {
-			settlement = ShiftSettlement.builder()
-					.shift(shift)
-					.tenantId(shift.getTenantId())
-					.remunerationConfig(primaryConfig)
-					.totalRevenue(totalRev)
-					.driverRemuneration(totalDriver)
-					.companyRemuneration(totalCompany)
-					.settledAt(LocalDateTime.now())
-					.build();
-			shift.setSettlement(settlement);
-		} else {
-			settlement.setRemunerationConfig(primaryConfig);
-			settlement.setTotalRevenue(totalRev);
-			settlement.setDriverRemuneration(totalDriver);
-			settlement.setCompanyRemuneration(totalCompany);
-			settlement.setSettledAt(LocalDateTime.now());
-		}
 	}
 }
